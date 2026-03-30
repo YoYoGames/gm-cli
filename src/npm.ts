@@ -1,4 +1,5 @@
 import type { Context } from "./context";
+import type { Log } from "./log";
 
 const REGISTRY = "https://gmpm.gamemaker.io";
 
@@ -8,10 +9,12 @@ export function npmInstall(
     prefix,
     packageName,
     verbose,
+    log,
   }: {
     prefix: string;
     packageName: string;
     verbose?: boolean;
+    log: Log;
   },
 ): Promise<void> {
   const args = [
@@ -28,10 +31,17 @@ export function npmInstall(
   ];
 
   return new Promise<void>((resolve, reject) => {
-    // TODO: Do we really care about streaming the output? Could just wait until it's completed
     const child = ctx.child_process.spawn("npm", args, {
-      stdio: "inherit",
+      stdio: ["inherit", "pipe", "pipe"],
     });
+
+    const onData = (data: Buffer) => {
+      for (const line of data.toString().split("\n")) {
+        if (line) log.message(line);
+      }
+    };
+    child.stdout?.on("data", onData);
+    child.stderr?.on("data", onData);
 
     child.on("error", (err) => reject(err));
 

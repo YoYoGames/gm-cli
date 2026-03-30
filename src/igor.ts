@@ -1,5 +1,6 @@
 import path from "path";
 import type { Context } from "./context";
+import type { Log } from "./log";
 
 const IGOR_ZIPS: Record<string, Record<string, string>> = {
   win32: {
@@ -26,6 +27,7 @@ const IGOR_PLATFORM_DIRS: Record<string, string> = {
 export async function downloadIgor(
   ctx: Context,
   destDir: string,
+  log: Log,
 ): Promise<string> {
   const platform = process.platform;
   const arch = process.arch;
@@ -65,12 +67,15 @@ export async function downloadIgor(
   const buffer = Buffer.from(await response.arrayBuffer());
   await ctx.fs.writeFile(zipPath, buffer);
 
-  ctx.child_process.execSync(
+  const unzipOutput = ctx.child_process.execSync(
     `unzip -o ${JSON.stringify(zipPath)} -d ${JSON.stringify(destDir)}`,
     {
-      stdio: "inherit",
+      encoding: "utf-8",
     },
   );
+  for (const line of unzipOutput.split("\n")) {
+    if (line) log.message(line);
+  }
 
   await ctx.fs.unlink(zipPath);
 
@@ -249,22 +254,32 @@ export function installRuntime(
     igorPath,
     runtimeDir,
     licenseFile,
+    log,
   }: {
     igorPath: string;
     runtimeDir: string;
     licenseFile: string;
+    log: Log;
   },
 ): Promise<void> {
   const args = ["Runtime", "Install", "-lf", licenseFile, "-rp", runtimeDir];
 
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn(igorPath, args, {
-      stdio: "inherit",
+      stdio: ["inherit", "pipe", "pipe"],
       env:
         process.platform === "darwin"
           ? { ...process.env, COMPlus_ZapDisable: "1" }
           : undefined,
     });
+
+    const onData = (data: Buffer) => {
+      for (const line of data.toString().split("\n")) {
+        if (line) log.message(line);
+      }
+    };
+    child.stdout?.on("data", onData);
+    child.stderr?.on("data", onData);
 
     child.on("error", (err) => reject(err));
 
@@ -289,6 +304,7 @@ export function igorRun(
     prefabsDir,
     projectPath,
     projectToolPath,
+    log,
   }: {
     igorPath: string;
     licenseFile: string;
@@ -298,6 +314,7 @@ export function igorRun(
     cacheDir: string;
     projectPath: string;
     projectToolPath: string;
+    log: Log;
   },
 ): Promise<void> {
   const outputFile = path.join(cacheDir, "output", "outputFile");
@@ -324,12 +341,20 @@ export function igorRun(
 
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn(igorPath, args, {
-      stdio: "inherit",
+      stdio: ["inherit", "pipe", "pipe"],
       env:
         process.platform === "darwin"
           ? { ...process.env, COMPlus_ZapDisable: "1" }
           : undefined,
     });
+
+    const onData = (data: Buffer) => {
+      for (const line of data.toString().split("\n")) {
+        if (line) log.message(line);
+      }
+    };
+    child.stdout?.on("data", onData);
+    child.stderr?.on("data", onData);
 
     const onSignal = () => {
       stopProcesses(ctx);

@@ -1,4 +1,5 @@
 import type { Context } from "./context";
+import type { Log } from "./log";
 import { npmInstall } from "./npm";
 
 const PLATFORM_NAMES: Record<string, Record<string, string>> = {
@@ -37,6 +38,7 @@ function getPackageName(): string {
 export async function downloadProjectTool(
   ctx: Context,
   destDir: string,
+  log: Log,
 ): Promise<string> {
   const packageName = getPackageName();
   const exeName =
@@ -56,6 +58,7 @@ export async function downloadProjectTool(
   await npmInstall(ctx, {
     prefix: destDir,
     packageName,
+    log,
   });
 
   if (process.platform !== "win32") {

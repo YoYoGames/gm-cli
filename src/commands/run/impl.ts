@@ -1,3 +1,4 @@
+import { taskLog } from "@clack/prompts";
 import type { Context } from "../../context";
 import { findProjectFile } from "../../project";
 import {
@@ -109,20 +110,48 @@ export default async function (
   const runtimeDir = this.path.join(cacheDir, "runtime");
 
   const projectToolDir = this.path.join(cacheDir, "project-tool");
-  const [igorPath, projectToolPath] = await Promise.all([
-    downloadIgor(this, igorDir),
-    downloadProjectTool(this, projectToolDir),
-  ]);
+
+  // FIXME: we should support disabling this when NO_COLOR or similar is set. Better for LLM use too
+  const igorLog = taskLog({ title: "Downloading Igor", retainLog: true });
+  let igorPath: string;
+  try {
+    igorPath = await downloadIgor(this, igorDir, igorLog);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    igorLog.error(`Failed to download Igor: ${message}`);
+    this.process.exit(1);
+  }
+  igorLog.success("Igor downloaded");
+
+  const projectToolLog = taskLog({ title: "Downloading ProjectTool", retainLog: true });
+  let projectToolPath: string;
+  try {
+    projectToolPath = await downloadProjectTool(this, projectToolDir, projectToolLog);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    projectToolLog.error(`Failed to download ProjectTool: ${message}`);
+    this.process.exit(1);
+  }
+  projectToolLog.success("ProjectTool downloaded");
 
   let ranInstallation = false;
   try {
     await this.fs.access(runtimeDir);
   } catch {
-    await installRuntime(this, {
-      igorPath,
-      runtimeDir,
-      licenseFile: LICENSE_FILE,
-    });
+    const runtimeLog = taskLog({ title: "Installing runtime", retainLog: true });
+    try {
+      await installRuntime(this, {
+        igorPath,
+        runtimeDir,
+        licenseFile: LICENSE_FILE,
+        log: runtimeLog,
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      runtimeLog.error(`Failed to install runtime: ${message}`);
+      this.process.exit(1);
+    }
+    runtimeLog.success("Runtime installed");
     ranInstallation = true;
   }
 
@@ -134,14 +163,23 @@ export default async function (
   const buildCacheDir = this.path.join(cacheDir, "build");
   await this.fs.mkdir(buildCacheDir, { recursive: true });
 
-  await igorRun(this, {
-    igorPath,
-    runtimeDir: runtimeLocation,
-    target,
-    cacheDir: buildCacheDir,
-    prefabsDir: PREFABS_DIR,
-    licenseFile: LICENSE_FILE,
-    projectPath,
-    projectToolPath,
-  });
+  const buildLog = taskLog({ title: `Building & running for ${target}`, retainLog: true });
+  try {
+    await igorRun(this, {
+      igorPath,
+      runtimeDir: runtimeLocation,
+      target,
+      cacheDir: buildCacheDir,
+      prefabsDir: PREFABS_DIR,
+      licenseFile: LICENSE_FILE,
+      projectPath,
+      projectToolPath,
+      log: buildLog,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    buildLog.error(`Build failed: ${message}`);
+    this.process.exit(1);
+  }
+  buildLog.success("Done");
 }
