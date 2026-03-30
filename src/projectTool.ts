@@ -37,8 +37,7 @@ function getPackageName(): string {
 
 export async function downloadProjectTool(
   ctx: Context,
-  destDir: string,
-  log: Log,
+  { destDir, log, verbose }: { destDir: string; log: Log; verbose: boolean },
 ): Promise<string> {
   const packageName = getPackageName();
   const exeName =
@@ -58,6 +57,7 @@ export async function downloadProjectTool(
   await npmInstall(ctx, {
     prefix: destDir,
     packageName,
+    verbose,
     log,
   });
 

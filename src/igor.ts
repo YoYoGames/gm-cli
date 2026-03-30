@@ -26,8 +26,7 @@ const IGOR_PLATFORM_DIRS: Record<string, string> = {
 
 export async function downloadIgor(
   ctx: Context,
-  destDir: string,
-  log: Log,
+  { destDir, log }: { destDir: string; log: Log },
 ): Promise<string> {
   const platform = process.platform;
   const arch = process.arch;
@@ -304,6 +303,7 @@ export function igorRun(
     prefabsDir,
     projectPath,
     projectToolPath,
+    verbose,
     log,
   }: {
     igorPath: string;
@@ -314,6 +314,7 @@ export function igorRun(
     cacheDir: string;
     projectPath: string;
     projectToolPath: string;
+    verbose: boolean;
     log: Log;
   },
 ): Promise<void> {
@@ -331,7 +332,7 @@ export function igorRun(
     licenseFile, // FIXME: should not be needed but asset compiler requires it
     "-prefabs",
     prefabsDir,
-    "-v",
+    ...(verbose ? ["-v"] : []),
     "-projectool",
     projectToolPath,
     "--",

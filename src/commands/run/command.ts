@@ -22,6 +22,11 @@ export const runCommand = buildCommand({
         brief: "The platform target to run",
         optional: true,
       },
+      verbose: {
+        kind: "boolean",
+        brief: "Verbose output",
+        optional: true,
+      },
     },
   },
   docs: {

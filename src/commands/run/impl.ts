@@ -90,6 +90,7 @@ async function chmodRecursive(ctx: Context, dir: string) {
 
 interface RunCommandFlags {
   target?: IgorTarget;
+  verbose?: boolean;
 }
 
 const LICENSE_FILE = "/Users/eli/dev/gm-cli/gm/test.plist";
@@ -113,7 +114,7 @@ export default async function (
   const igorLog = this.makeLogger("Downloading Igor");
   let igorPath: string;
   try {
-    igorPath = await downloadIgor(this, igorDir, igorLog);
+    igorPath = await downloadIgor(this, { destDir: igorDir, log: igorLog });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     igorLog.error(`Failed to download Igor: ${message}`);
@@ -124,7 +125,11 @@ export default async function (
   const projectToolLog = this.makeLogger("Downloading ProjectTool");
   let projectToolPath: string;
   try {
-    projectToolPath = await downloadProjectTool(this, projectToolDir, projectToolLog);
+    projectToolPath = await downloadProjectTool(this, {
+      destDir: projectToolDir,
+      log: projectToolLog,
+      verbose: flags.verbose ?? false,
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     projectToolLog.error(`Failed to download ProjectTool: ${message}`);
@@ -172,6 +177,7 @@ export default async function (
       licenseFile: LICENSE_FILE,
       projectPath,
       projectToolPath,
+      verbose: flags.verbose ?? false,
       log: buildLog,
     });
   } catch (e) {
