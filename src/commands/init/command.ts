@@ -7,6 +7,34 @@ export const initCommand = buildCommand({
       kind: "tuple",
       parameters: [],
     },
+    flags: {
+      interactive: {
+        kind: "boolean",
+        brief: "Run interactive wizard",
+        default: true,
+      },
+      name: {
+        kind: "parsed",
+        parse: String,
+        brief: "Project name (required if --no-interactive)",
+        optional: true,
+      },
+      template: {
+        kind: "parsed",
+        parse: String,
+        brief: "Template ID or partial name match (required if --no-interactive)",
+        optional: true,
+      },
+      claude: {
+        kind: "boolean",
+        brief: "Create CLAUDE.md file",
+        default: true,
+      },
+    },
+    aliases: {
+      n: "name",
+      t: "template",
+    },
   },
   docs: {
     brief: "Initialize a new project",
