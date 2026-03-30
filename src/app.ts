@@ -3,6 +3,7 @@ import { name, version, description } from "../package.json";
 import { initCommand } from "./commands/init/command";
 import { buildProjectCommand } from "./commands/build/command";
 import { runCommand } from "./commands/run/command";
+import { editCommand } from "./commands/edit/command";
 import { KnownError } from "./error";
 
 const routes = buildRouteMap({
@@ -10,6 +11,7 @@ const routes = buildRouteMap({
     init: initCommand,
     build: buildProjectCommand,
     run: runCommand,
+    edit: editCommand,
   },
   docs: {
     brief: description,

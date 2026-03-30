@@ -1,25 +1,58 @@
 import type { Context } from "./context";
 import type { Log } from "./log";
 
-const REGISTRY = "https://gmpm.gamemaker.io";
+const PLATFORM_SUFFIXES: Record<string, Record<string, string>> = {
+  win32: {
+    x64: "win-x64",
+  },
+  linux: {
+    x64: "linux-x64",
+    arm64: "linux-arm64",
+  },
+  darwin: {
+    x64: "osx-x64",
+    arm64: "osx-arm64",
+  },
+};
+
+export function getPlatformSuffix(): string {
+  const platform = process.platform;
+  const arch = process.arch;
+
+  const platformNames = PLATFORM_SUFFIXES[platform];
+  if (!platformNames) {
+    throw new Error(`Unsupported platform: ${platform}`);
+  }
+
+  const suffix = platformNames[arch];
+  if (!suffix) {
+    throw new Error(`Unsupported architecture for ${platform}: ${arch}`);
+  }
+
+  return suffix;
+}
+
+export const REGISTRY = "https://gmpm.gamemaker.io";
+export const PRIVATE_REGISTRY = "https://gmpm-private.gamemaker.io";
 
 export function npmInstall(
   ctx: Context,
+  log: Log,
   {
     prefix,
     packageName,
+    registry,
     verbose,
-    log,
   }: {
     prefix: string;
     packageName: string;
+    registry: string;
     verbose?: boolean;
-    log: Log;
   },
 ): Promise<void> {
   const args = [
     "--registry",
-    REGISTRY,
+    registry,
     "--no-save",
     ...(verbose ? ["--verbose"] : []),
     "--no-package-lock",

@@ -1,17 +1,25 @@
 import type { Context } from "./context";
 import type { Log } from "./log";
-import { npmInstall, getPlatformSuffix, REGISTRY } from "./npm";
+import { npmInstall, getPlatformSuffix, PRIVATE_REGISTRY } from "./npm";
 
-export async function downloadProjectTool(
+export async function downloadResourceTool(
   ctx: Context,
   { destDir, log, verbose }: { destDir: string; log: Log; verbose: boolean },
 ): Promise<string> {
-  const packageName = `@gm-tools/project-tool-${getPlatformSuffix()}`;
+  const packageName = `@gm-tools/resource-tool-${getPlatformSuffix()}`;
   const exeName =
-    process.platform === "win32" ? "ProjectTool.exe" : "ProjectTool";
+    process.platform === "win32" ? "ResourceTool.exe" : "ResourceTool";
   const toolPath =
     process.platform === "darwin"
-      ? ctx.path.join(destDir, "lib", "node_modules", packageName, "Contents", "MacOS", exeName)
+      ? ctx.path.join(
+          destDir,
+          "lib",
+          "node_modules",
+          packageName,
+          "Contents",
+          "MacOS",
+          exeName,
+        )
       : ctx.path.join(destDir, "lib", "node_modules", packageName, exeName);
 
   try {
@@ -24,7 +32,7 @@ export async function downloadProjectTool(
   await npmInstall(ctx, log, {
     prefix: destDir,
     packageName,
-    registry: REGISTRY,
+    registry: PRIVATE_REGISTRY,
     verbose,
   });
 
