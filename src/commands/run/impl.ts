@@ -1,4 +1,3 @@
-import { taskLog } from "@clack/prompts";
 import type { Context } from "../../context";
 import { findProjectFile } from "../../project";
 import {
@@ -111,8 +110,7 @@ export default async function (
 
   const projectToolDir = this.path.join(cacheDir, "project-tool");
 
-  // FIXME: we should support disabling this when NO_COLOR or similar is set. Better for LLM use too
-  const igorLog = taskLog({ title: "Downloading Igor", retainLog: true });
+  const igorLog = this.makeLogger("Downloading Igor");
   let igorPath: string;
   try {
     igorPath = await downloadIgor(this, igorDir, igorLog);
@@ -123,7 +121,7 @@ export default async function (
   }
   igorLog.success("Igor downloaded");
 
-  const projectToolLog = taskLog({ title: "Downloading ProjectTool", retainLog: true });
+  const projectToolLog = this.makeLogger("Downloading ProjectTool");
   let projectToolPath: string;
   try {
     projectToolPath = await downloadProjectTool(this, projectToolDir, projectToolLog);
@@ -138,7 +136,7 @@ export default async function (
   try {
     await this.fs.access(runtimeDir);
   } catch {
-    const runtimeLog = taskLog({ title: "Installing runtime", retainLog: true });
+    const runtimeLog = this.makeLogger("Installing runtime");
     try {
       await installRuntime(this, {
         igorPath,
@@ -163,7 +161,7 @@ export default async function (
   const buildCacheDir = this.path.join(cacheDir, "build");
   await this.fs.mkdir(buildCacheDir, { recursive: true });
 
-  const buildLog = taskLog({ title: `Building & running for ${target}`, retainLog: true });
+  const buildLog = this.makeLogger(`Building & running for ${target}`);
   try {
     await igorRun(this, {
       igorPath,
