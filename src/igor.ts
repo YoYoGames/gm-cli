@@ -1,6 +1,7 @@
 import path from "path";
 import type { Context } from "./context";
 import type { Log } from "./log";
+import { KnownError } from "./error";
 
 const IGOR_ZIPS: Record<string, Record<string, string>> = {
   win32: {
@@ -55,7 +56,7 @@ export async function downloadIgor(
     headers: { "User-Agent": "gm-cli" },
   });
   if (!response.ok) {
-    throw new Error(
+    throw new KnownError(
       `Failed to download Igor: ${response.status} ${response.statusText}`,
     );
   }

@@ -1,3 +1,4 @@
+import { KnownError } from "../../error";
 import type { Template } from "./types";
 
 interface TemplateDto {
@@ -27,7 +28,7 @@ export async function getTemplates(): Promise<Template[]> {
     "https://api.gamemaker.io/api/gamemaker/project-templates",
   );
   if (!response.ok) {
-    throw new Error(`Failed to fetch templates: ${response.statusText}`);
+    throw new KnownError(`Failed to fetch templates: ${response.statusText}`);
   }
   const json: TemplateResponse = (await response.json()) as TemplateResponse; // FIXME: run zod here instead of asserting.
   return json.data

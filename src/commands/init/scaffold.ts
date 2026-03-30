@@ -3,6 +3,7 @@ import path from "path";
 import { execSync } from "child_process";
 import { gitignore, gitattributes, claudemd } from "./base-files";
 import type { Template, ProjectConfig } from "./types";
+import { KnownError } from "../../error";
 
 export async function scaffoldProject(
   template: Template,
@@ -10,7 +11,7 @@ export async function scaffoldProject(
 ) {
   const response = await fetch(template.downloadUrl);
   if (!response.ok) {
-    throw new Error(`Failed to download template: ${response.statusText}`);
+    throw new KnownError(`Failed to download template: ${response.statusText}`);
   }
 
   const buffer = await response.arrayBuffer();
