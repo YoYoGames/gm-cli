@@ -27,7 +27,7 @@ export const app = buildApplication(routes, {
         ...text_en,
         exceptionWhileRunningCommand(exc: unknown, _ansiColor: boolean) {
           if (exc instanceof KnownError) {
-            return `Command failed, ${exc.message}`;
+            return `Command failed: ${exc.message}`;
           }
           const detail =
             exc instanceof Error ? (exc.stack ?? exc.message) : String(exc);
