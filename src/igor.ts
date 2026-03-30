@@ -315,7 +315,7 @@ export function igorRun(
     "-prefabs",
     prefabsDir,
     "-v",
-    "/projecttool",
+    "-projectool",
     projectToolPath,
     "--",
     target,

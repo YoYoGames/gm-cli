@@ -11,12 +11,14 @@ import {
 import { downloadProjectTool } from "../../projectTool";
 
 async function installationFixup(ctx: Context, runtimeLocation: string) {
-  if (process.platform !== "darwin") {
+  if (process.platform === "win32") {
     return;
   }
   const binDir = ctx.path.join(runtimeLocation, "bin");
   await chmodRecursive(ctx, binDir);
-  await extractDmgs(ctx, runtimeLocation);
+  if (process.platform === "darwin") {
+    await extractDmgs(ctx, runtimeLocation);
+  }
 }
 
 // FIXME: Igor should do this...
