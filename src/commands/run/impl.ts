@@ -9,6 +9,7 @@ import {
   type IgorTarget,
 } from "../../igor";
 import { downloadProjectTool } from "../../projectTool";
+import { KnownError } from "../../error";
 
 async function installationFixup(ctx: Context, runtimeLocation: string) {
   if (process.platform === "win32") {
@@ -116,9 +117,8 @@ export default async function (
   try {
     igorPath = await downloadIgor(this, { destDir: igorDir, log: igorLog });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    igorLog.error(`Failed to download Igor: ${message}`);
-    this.process.exit(1);
+    igorLog.error("Failed to download Igor");
+    throw new KnownError(e);
   }
   igorLog.success("Igor downloaded");
 
@@ -131,9 +131,8 @@ export default async function (
       verbose: flags.verbose ?? false,
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    projectToolLog.error(`Failed to download ProjectTool: ${message}`);
-    this.process.exit(1);
+    projectToolLog.error("Failed to download ProjectTool");
+    throw new KnownError(e);
   }
   projectToolLog.success("ProjectTool downloaded");
 
@@ -150,9 +149,8 @@ export default async function (
         log: runtimeLog,
       });
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      runtimeLog.error(`Failed to install runtime: ${message}`);
-      this.process.exit(1);
+      runtimeLog.error("Failed to install runtime");
+      throw new KnownError(e);
     }
     runtimeLog.success("Runtime installed");
     ranInstallation = true;
@@ -181,9 +179,8 @@ export default async function (
       log: buildLog,
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    buildLog.error(`Build failed: ${message}`);
-    this.process.exit(1);
+    buildLog.error("Build failed");
+    throw new KnownError(e);
   }
   buildLog.success("Done");
 }
