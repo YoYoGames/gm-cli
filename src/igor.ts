@@ -248,6 +248,52 @@ function stopProcesses(ctx: Context): void {
   }
 }
 
+export function fetchLicense(
+  ctx: Context,
+  {
+    igorPath,
+    accessKey,
+    outputFile,
+    log,
+  }: {
+    igorPath: string;
+    accessKey: string;
+    outputFile: string;
+    log: Log;
+  },
+): Promise<void> {
+  const args = ["Runtime", "FetchLicense", `-ak=${accessKey}`, `-of=${outputFile}`];
+
+  return new Promise<void>((resolve, reject) => {
+    const child = ctx.child_process.spawn(igorPath, args, {
+      stdio: ["inherit", "pipe", "pipe"],
+      env:
+        process.platform === "darwin"
+          ? { ...process.env, COMPlus_ZapDisable: "1" }
+          : undefined,
+    });
+
+    const onData = (data: Buffer) => {
+      for (const line of data.toString().split("\n")) {
+        if (line) log.message(line);
+      }
+    };
+    child.stdout?.on("data", onData);
+    child.stderr?.on("data", onData);
+
+    child.on("error", (err) => reject(err));
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Igor Runtime FetchLicense exited with code ${code}`));
+      }
+    });
+  });
+}
+
+// FIXME: should also run Runtime Verify [-folder=.] ?
 export function installRuntime(
   ctx: Context,
   {
@@ -374,7 +420,7 @@ export function igorRun(
     child.on("close", (code) => {
       process.removeListener("SIGINT", onSignal);
       process.removeListener("SIGTERM", onSignal);
-      if (code === 0) {
+      if (code === 0 || code === null) {
         resolve();
       } else {
         reject(new Error(`Igor exited with code ${code}`));

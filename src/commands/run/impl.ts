@@ -92,9 +92,39 @@ async function chmodRecursive(ctx: Context, dir: string) {
 interface RunCommandFlags {
   target?: IgorTarget;
   verbose?: boolean;
+  license?: string;
+  accessKey?: string;
 }
 
-const LICENSE_FILE = "/Users/eli/dev/gm-cli/gm/test.plist";
+const LICENSE_FILENAME = "licence.plist";
+
+async function getLicenseOrThrow(
+  ctx: Context,
+  flags: RunCommandFlags,
+): Promise<string> {
+  if (flags.license !== undefined) {
+    return flags.license;
+  }
+
+  const envLicense = ctx.process.env["GAMEMAKER_LICENSE"];
+  if (envLicense !== undefined) {
+    return envLicense;
+  }
+
+  const cwd = ctx.process.cwd();
+  const cachedLicense = ctx.path.join(cwd, ".gmcache", LICENSE_FILENAME);
+  try {
+    await ctx.fs.access(cachedLicense);
+    return cachedLicense;
+  } catch {
+    // not found
+  }
+
+  throw new KnownError(
+    "You must provide a license. Specify a .plist file with `--license=...` or the GAMEMAKER_LICENSE env variable.\nAlternatively, use `gm login <access-key>`. You can issue an access key at https://gamemaker.io/en/account/access-keys",
+  );
+}
+
 const PREFABS_DIR = "/Users/Shared/GameMakerStudio2-Beta/Prefabs";
 
 export default async function (
@@ -138,14 +168,16 @@ export default async function (
 
   let ranInstallation = false;
   try {
+    // FIXME: maybe use Runtime ListInstalled [-directory] as a check instead
     await this.fs.access(runtimeDir);
   } catch {
     const runtimeLog = this.makeLogger("Installing runtime");
+
     try {
       await installRuntime(this, {
         igorPath,
         runtimeDir,
-        licenseFile: LICENSE_FILE,
+        licenseFile: await getLicenseOrThrow(this, flags),
         log: runtimeLog,
       });
     } catch (e) {
@@ -172,7 +204,7 @@ export default async function (
       target,
       cacheDir: buildCacheDir,
       prefabsDir: PREFABS_DIR,
-      licenseFile: LICENSE_FILE,
+      licenseFile: await getLicenseOrThrow(this, flags),
       projectPath,
       projectToolPath,
       verbose: flags.verbose ?? false,

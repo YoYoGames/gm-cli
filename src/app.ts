@@ -4,6 +4,7 @@ import { initCommand } from "./commands/init/command";
 import { buildProjectCommand } from "./commands/build/command";
 import { runCommand } from "./commands/run/command";
 import { editCommand } from "./commands/edit/command";
+import { loginCommand } from "./commands/login/command";
 import { KnownError } from "./error";
 
 const routes = buildRouteMap({
@@ -12,6 +13,7 @@ const routes = buildRouteMap({
     build: buildProjectCommand,
     run: runCommand,
     edit: editCommand,
+    login: loginCommand,
   },
   docs: {
     brief: description,
@@ -29,7 +31,7 @@ export const app = buildApplication(routes, {
         ...text_en,
         exceptionWhileRunningCommand(exc: unknown, _ansiColor: boolean) {
           if (exc instanceof KnownError) {
-            return `Command failed: ${exc.message}`;
+            return `Command failed:\n${exc.message}`;
           }
           const detail =
             exc instanceof Error ? (exc.stack ?? exc.message) : String(exc);

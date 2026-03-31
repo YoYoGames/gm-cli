@@ -27,6 +27,18 @@ export const runCommand = buildCommand({
         brief: "Verbose output",
         optional: true,
       },
+      license: {
+        kind: "parsed",
+        parse: String,
+        brief: "License .plist file",
+        optional: true,
+      },
+      accessKey: {
+        kind: "parsed",
+        parse: String,
+        brief: "Access key",
+        optional: true,
+      },
     },
   },
   docs: {
