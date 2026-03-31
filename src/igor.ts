@@ -248,22 +248,22 @@ function stopProcesses(ctx: Context): void {
   }
 }
 
-export function fetchLicense(
+function spawnIgor(
   ctx: Context,
   {
     igorPath,
-    accessKey,
-    outputFile,
+    args,
+    label,
     log,
+    onSignal,
   }: {
     igorPath: string;
-    accessKey: string;
-    outputFile: string;
+    args: string[];
+    label: string;
     log: Log;
+    onSignal?: () => void;
   },
 ): Promise<void> {
-  const args = ["Runtime", "FetchLicense", `-ak=${accessKey}`, `-of=${outputFile}`];
-
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn(igorPath, args, {
       stdio: ["inherit", "pipe", "pipe"],
@@ -281,15 +281,52 @@ export function fetchLicense(
     child.stdout?.on("data", onData);
     child.stderr?.on("data", onData);
 
-    child.on("error", (err) => reject(err));
+    if (onSignal) {
+      process.on("SIGINT", onSignal);
+      process.on("SIGTERM", onSignal);
+    }
+
+    child.on("error", (err) => {
+      if (onSignal) {
+        process.removeListener("SIGINT", onSignal);
+        process.removeListener("SIGTERM", onSignal);
+      }
+      reject(err);
+    });
 
     child.on("close", (code) => {
-      if (code === 0) {
+      if (onSignal) {
+        process.removeListener("SIGINT", onSignal);
+        process.removeListener("SIGTERM", onSignal);
+      }
+      if (code === 0 || code === null) {
         resolve();
       } else {
-        reject(new Error(`Igor Runtime FetchLicense exited with code ${code}`));
+        reject(new Error(`${label} exited with code ${code}`));
       }
     });
+  });
+}
+
+export function fetchLicense(
+  ctx: Context,
+  {
+    igorPath,
+    accessKey,
+    outputFile,
+    log,
+  }: {
+    igorPath: string;
+    accessKey: string;
+    outputFile: string;
+    log: Log;
+  },
+): Promise<void> {
+  return spawnIgor(ctx, {
+    igorPath,
+    args: ["Runtime", "FetchLicense", `-ak=${accessKey}`, `-of=${outputFile}`],
+    label: "Igor Runtime FetchLicense",
+    log,
   });
 }
 
@@ -308,34 +345,11 @@ export function installRuntime(
     log: Log;
   },
 ): Promise<void> {
-  const args = ["Runtime", "Install", "-lf", licenseFile, "-rp", runtimeDir];
-
-  return new Promise<void>((resolve, reject) => {
-    const child = ctx.child_process.spawn(igorPath, args, {
-      stdio: ["inherit", "pipe", "pipe"],
-      env:
-        process.platform === "darwin"
-          ? { ...process.env, COMPlus_ZapDisable: "1" }
-          : undefined,
-    });
-
-    const onData = (data: Buffer) => {
-      for (const line of data.toString().split("\n")) {
-        if (line) log.message(line);
-      }
-    };
-    child.stdout?.on("data", onData);
-    child.stderr?.on("data", onData);
-
-    child.on("error", (err) => reject(err));
-
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Igor Runtime Install exited with code ${code}`));
-      }
-    });
+  return spawnIgor(ctx, {
+    igorPath,
+    args: ["Runtime", "Install", "-lf", licenseFile, "-rp", runtimeDir],
+    label: "Igor Runtime Install",
+    log,
   });
 }
 
@@ -387,44 +401,11 @@ export function igorRun(
     "Run",
   ];
 
-  return new Promise<void>((resolve, reject) => {
-    const child = ctx.child_process.spawn(igorPath, args, {
-      stdio: ["inherit", "pipe", "pipe"],
-      env:
-        process.platform === "darwin"
-          ? { ...process.env, COMPlus_ZapDisable: "1" }
-          : undefined,
-    });
-
-    const onData = (data: Buffer) => {
-      for (const line of data.toString().split("\n")) {
-        if (line) log.message(line);
-      }
-    };
-    child.stdout?.on("data", onData);
-    child.stderr?.on("data", onData);
-
-    const onSignal = () => {
-      stopProcesses(ctx);
-    };
-
-    process.on("SIGINT", onSignal);
-    process.on("SIGTERM", onSignal);
-
-    child.on("error", (err) => {
-      process.removeListener("SIGINT", onSignal);
-      process.removeListener("SIGTERM", onSignal);
-      reject(err);
-    });
-
-    child.on("close", (code) => {
-      process.removeListener("SIGINT", onSignal);
-      process.removeListener("SIGTERM", onSignal);
-      if (code === 0 || code === null) {
-        resolve();
-      } else {
-        reject(new Error(`Igor exited with code ${code}`));
-      }
-    });
+  return spawnIgor(ctx, {
+    igorPath,
+    args,
+    label: "Igor",
+    log,
+    onSignal: () => stopProcesses(ctx),
   });
 }
