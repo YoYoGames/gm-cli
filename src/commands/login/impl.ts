@@ -6,7 +6,7 @@ export const LICENSE_FILENAME = "licence.plist";
 
 export default async function (
   this: Context,
-  _flags: {},
+  flags: { print?: boolean },
   accessKey: string,
 ): Promise<void> {
   const cwd = this.process.cwd();
@@ -23,7 +23,9 @@ export default async function (
   }
   igorLog.success("Igor downloaded");
 
-  const licenseFile = this.path.join(cacheDir, LICENSE_FILENAME);
+  const licenseFile = flags.print
+    ? this.path.join(this.os.tmpdir(), `gm-licence-${this.process.pid}.plist`)
+    : this.path.join(cacheDir, LICENSE_FILENAME);
   const fetchLog = this.makeLogger("Fetching license");
   try {
     await fetchLicense(this, {
@@ -36,5 +38,11 @@ export default async function (
     fetchLog.error("Failed to fetch license");
     throw new KnownError(e);
   }
-  fetchLog.success(`License saved to "${licenseFile}"`);
+  if (flags.print) {
+    const content = await this.fs.readFile(licenseFile, "utf-8");
+    this.process.stdout.write("\n" + content + "\n");
+    await this.fs.rm(licenseFile);
+  } else {
+    fetchLog.success(`License saved to "${licenseFile}"`);
+  }
 }

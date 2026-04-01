@@ -13,7 +13,13 @@ export const loginCommand = buildCommand({
         },
       ],
     },
-    flags: {},
+    flags: {
+      print: {
+        kind: "boolean",
+        brief: "Print the license to stdout instead of saving to a file",
+        optional: true,
+      },
+    },
   },
   docs: {
     brief: "Log in with an access key",
