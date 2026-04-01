@@ -35,6 +35,51 @@ export function getPlatformSuffix(): string {
 export const REGISTRY = "https://gmpm.gamemaker.io";
 export const PRIVATE_REGISTRY = "https://gmpm-private.gamemaker.io";
 
+export function npmExec(
+  ctx: Context,
+  {
+    packageName,
+    command,
+    registry,
+    args,
+  }: {
+    registry: string;
+    packageName: string;
+    command: string;
+    args: string[];
+  },
+): Promise<void> {
+  // npm exec --package=<pkg>[@<version>] -- <cmd> [args...]
+  const fullArgs = [
+    // To prevent security and user-experience problems from mistyping package names,
+    // npx prompts before installing anything. Suppress this prompt with the -y or --yes option.
+    "--yes",
+    "--package",
+    packageName,
+    "--registry",
+    registry,
+    "exec",
+    "--",
+    command,
+    ...args,
+  ];
+
+  return new Promise<void>((resolve, reject) => {
+    const child = ctx.child_process.spawn("npm", fullArgs, {
+      stdio: "inherit",
+    });
+
+    child.on("error", reject);
+    child.on("exit", (code) => {
+      if (code !== 0) {
+        reject(new Error(`npm exec failed with code ${code}`));
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 export function npmInstall(
   ctx: Context,
   log: Log,

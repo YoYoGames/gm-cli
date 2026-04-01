@@ -15,11 +15,6 @@ export const editCommand = buildCommand({
       ],
     },
     flags: {
-      verbose: {
-        kind: "boolean",
-        brief: "Verbose output",
-        optional: true,
-      },
       mcp: {
         kind: "boolean",
         brief: "Run in Model Context Protocol mode",
