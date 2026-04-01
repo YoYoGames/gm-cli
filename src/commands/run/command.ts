@@ -33,12 +33,6 @@ export const runCommand = buildCommand({
         brief: "License .plist file",
         optional: true,
       },
-      accessKey: {
-        kind: "parsed",
-        parse: String,
-        brief: "Access key",
-        optional: true,
-      },
     },
   },
   docs: {

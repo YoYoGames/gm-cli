@@ -93,7 +93,6 @@ interface RunCommandFlags {
   target?: IgorTarget;
   verbose?: boolean;
   license?: string;
-  accessKey?: string;
 }
 
 const LICENSE_FILENAME = "licence.plist";
