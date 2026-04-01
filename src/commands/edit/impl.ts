@@ -1,10 +1,9 @@
 import type { Context } from "../../context";
 import { findProjectFile } from "../../project";
-import { downloadResourceTool } from "../../resourceTool";
 import { KnownError } from "../../error";
+import { getPlatformSuffix, npmExec, PRIVATE_REGISTRY } from "../../npm";
 
 interface EditCommandFlags {
-  verbose?: boolean;
   mcp?: boolean;
 }
 
@@ -15,31 +14,19 @@ export default async function (
 ): Promise<void> {
   const cwd = this.process.cwd();
   const projectPath = project ?? (await findProjectFile(this, cwd));
+  // FIXME: get the project-tool path too
 
-  const cacheDir = this.path.join(cwd, ".gmcache");
-  const resourceToolDir = this.path.join(cacheDir, "resource-tool");
-
-  let resourceToolPath: string;
+  const packageName = `@gm-tools/resource-tool-${getPlatformSuffix()}@latest`;
   try {
-    resourceToolPath = await downloadResourceTool(this, {
-      destDir: resourceToolDir,
-      log: { message() {}, error() {}, success() {} },
-      verbose: flags.verbose ?? false,
+    await npmExec(this, {
+      packageName,
+      // FIXME: include path to project tool
+      args: [flags.mcp ? "mcp" : "cli", `projectpath="${projectPath}"`],
+      registry: PRIVATE_REGISTRY,
+      extraEnvVars:
+        process.platform === "darwin" ? { COMPlus_ZapDisable: "1" } : undefined,
     });
   } catch (e) {
     throw new KnownError(e);
   }
-
-  this.child_process.execFileSync(
-    resourceToolPath,
-    // FIXME: include path to project tool
-    [flags.mcp ? "mcp" : "cli", ...[`projectpath="${projectPath}"`]],
-    {
-      stdio: "inherit",
-      env:
-        process.platform === "darwin"
-          ? { ...process.env, COMPlus_ZapDisable: "1" }
-          : undefined,
-    },
-  );
 }
