@@ -27,6 +27,12 @@ export const runCommand = buildCommand({
         brief: "Verbose output",
         optional: true,
       },
+      prefabs: {
+        kind: "parsed",
+        brief: "Prefabs directory",
+        parse: String,
+        optional: true,
+      },
       license: {
         kind: "parsed",
         parse: String,

@@ -94,6 +94,7 @@ interface RunCommandFlags {
   target?: IgorTarget;
   verbose?: boolean;
   license?: string;
+  prefabs?: string;
 }
 
 async function getLicenseOrThrow(
@@ -123,7 +124,20 @@ async function getLicenseOrThrow(
   );
 }
 
-const PREFABS_DIR = "/Users/Shared/GameMakerStudio2-Beta/Prefabs";
+function getPrefabsDirOrThrow(ctx: Context, flags: RunCommandFlags): string {
+  if (flags.prefabs) {
+    return flags.prefabs;
+  }
+
+  const envPrefabs = ctx.process.env["GAMEMAKER_PREFABS"];
+  if (envPrefabs !== undefined) {
+    return envPrefabs;
+  }
+
+  throw new KnownError(
+    "A prefabs directory is required to build. Specify a path with `--prefabs=...` or the GAMEMAKER_PREFABS env variable.\n\nTODO: This should not be required for the user to provide, gm-cli should use the default location.\nBut for now, just do export GAMEMAKER_PREFABS=/Users/Shared/GameMakerStudio2/Prefabs",
+  );
+}
 
 export default async function (
   this: Context,
@@ -201,7 +215,7 @@ export default async function (
       runtimeDir: runtimeLocation,
       target,
       cacheDir: buildCacheDir,
-      prefabsDir: PREFABS_DIR,
+      prefabsDir: getPrefabsDirOrThrow(this, flags),
       licenseFile: await getLicenseOrThrow(this, flags),
       projectPath,
       projectToolPath,
