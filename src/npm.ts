@@ -99,7 +99,6 @@ export function npmInstall(
 
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn("npm", args, {
-      shell: true,
       stdio: ["inherit", "pipe", "pipe"],
     });
 
