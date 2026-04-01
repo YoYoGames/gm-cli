@@ -2,7 +2,7 @@ import type { Context } from "../../context";
 import { downloadIgor, fetchLicense } from "../../igor";
 import { KnownError } from "../../error";
 
-const LICENSE_FILENAME = "licence.plist";
+export const LICENSE_FILENAME = "licence.plist";
 
 export default async function (
   this: Context,

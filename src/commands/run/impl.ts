@@ -10,6 +10,7 @@ import {
 } from "../../igor";
 import { downloadProjectTool } from "../../projectTool";
 import { KnownError } from "../../error";
+import { LICENSE_FILENAME } from "../login/impl";
 
 async function installationFixup(ctx: Context, runtimeLocation: string) {
   if (process.platform === "win32") {
@@ -94,8 +95,6 @@ interface RunCommandFlags {
   verbose?: boolean;
   license?: string;
 }
-
-const LICENSE_FILENAME = "licence.plist";
 
 async function getLicenseOrThrow(
   ctx: Context,
