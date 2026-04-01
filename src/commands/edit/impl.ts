@@ -21,7 +21,7 @@ export default async function (
     await npmExec(this, {
       packageName,
       // FIXME: include path to project tool
-      args: [flags.mcp ? "mcp" : "cli", `projectpath="${projectPath}"`],
+      args: [flags.mcp ? "mcp" : "cli", `projectpath=${projectPath}`],
       registry: PRIVATE_REGISTRY,
       extraEnvVars:
         process.platform === "darwin" ? { COMPlus_ZapDisable: "1" } : undefined,

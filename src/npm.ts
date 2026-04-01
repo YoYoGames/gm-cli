@@ -50,20 +50,11 @@ export function npmExec(
   },
 ): Promise<void> {
   // npm exec --package=<pkg>[@<version>] -- <cmd> [args...]
-  const fullArgs = [
-    "exec",
-    "--yes",
-    "--registry",
-    registry,
-    "--",
-    // To prevent security and user-experience problems from mistyping package names,
-    // npx prompts before installing anything. Suppress this prompt with the -y or --yes option.
-    packageName,
-    ...args,
-  ];
+  const fullArgs = ["--yes", "--registry", registry, packageName, ...args];
+  console.log("npx", fullArgs.join(" "));
 
   return new Promise<void>((resolve, reject) => {
-    const child = ctx.child_process.spawn("npm", fullArgs, {
+    const child = ctx.child_process.spawn("npx", fullArgs, {
       stdio: "inherit",
       env: { ...process.env, ...extraEnvVars },
     });
@@ -109,6 +100,7 @@ export function npmInstall(
 
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn("npm", args, {
+      shell: true,
       stdio: ["inherit", "pipe", "pipe"],
     });
 
