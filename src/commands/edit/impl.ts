@@ -14,7 +14,6 @@ export default async function (
   project?: string,
 ): Promise<void> {
   const cwd = this.process.cwd();
-  // TODO: handle project path
   const projectPath = project ?? (await findProjectFile(this, cwd));
 
   const cacheDir = this.path.join(cwd, ".gmcache");
@@ -31,7 +30,16 @@ export default async function (
     throw new KnownError(e);
   }
 
-  this.child_process.execFileSync(resourceToolPath, [flags.mcp ? "mcp" : "cli"], {
-    stdio: "inherit",
-  });
+  this.child_process.execFileSync(
+    resourceToolPath,
+    // FIXME: include path to project tool
+    [flags.mcp ? "mcp" : "cli", ...[`projectpath="${projectPath}"`]],
+    {
+      stdio: "inherit",
+      env:
+        process.platform === "darwin"
+          ? { ...process.env, COMPlus_ZapDisable: "1" }
+          : undefined,
+    },
+  );
 }
