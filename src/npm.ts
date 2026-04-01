@@ -51,7 +51,6 @@ export function npmExec(
 ): Promise<void> {
   // npm exec --package=<pkg>[@<version>] -- <cmd> [args...]
   const fullArgs = ["--yes", "--registry", registry, packageName, ...args];
-  console.log("npx", fullArgs.join(" "));
 
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn("npx", fullArgs, {
