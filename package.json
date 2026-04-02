@@ -32,16 +32,19 @@
     "minify": true
   },
   "devDependencies": {
+    "@clack/prompts": "^1.1.0",
+    "@stricli/core": "^1.2.6",
     "@types/node": "24.x",
     "tsup": "^6.7.0",
-    "typescript": "5.6.x",
-    "@clack/prompts": "^1.1.0",
-    "@stricli/core": "^1.2.6"
+    "typescript": "5.6.x"
   },
   "inlinedDependencies": {
     "@clack/core": "1.1.0",
     "@clack/prompts": "1.1.0",
     "sisteransi": "1.0.5",
     "@stricli/core": "^1.2.6"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }

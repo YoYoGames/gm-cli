@@ -16,7 +16,7 @@ export default async function (
   const igorLog = this.makeLogger("Downloading Igor");
   let igorPath: string;
   try {
-    igorPath = await downloadIgor(this, { destDir: igorDir, log: igorLog });
+    igorPath = await downloadIgor(this, igorLog, { destDir: igorDir });
   } catch (e) {
     igorLog.error("Failed to download Igor");
     throw new KnownError(e);
@@ -28,11 +28,10 @@ export default async function (
     : this.path.join(cacheDir, LICENSE_FILENAME);
   const fetchLog = this.makeLogger("Fetching license");
   try {
-    await fetchLicense(this, {
+    await fetchLicense(this, igorLog, {
       igorPath,
       accessKey,
       outputFile: licenseFile,
-      log: fetchLog,
     });
   } catch (e) {
     fetchLog.error("Failed to fetch license");

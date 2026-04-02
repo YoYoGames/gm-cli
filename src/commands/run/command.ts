@@ -1,5 +1,5 @@
 import { buildCommand } from "@stricli/core";
-import { IGOR_TARGETS } from "../../igor";
+import { TARGETS, TargetSchema } from "../../igor";
 
 export const runCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -17,8 +17,15 @@ export const runCommand = buildCommand({
     },
     flags: {
       target: {
-        kind: "enum",
-        values: IGOR_TARGETS,
+        kind: "parsed",
+        parse: (s) => {
+          const parsed = TargetSchema.safeParse(s);
+          if (parsed.success) {
+            return parsed.data;
+          } else {
+            throw new Error(`Valid targets: ${TARGETS.join(", ")}`);
+          }
+        },
         brief: "The platform target to run",
         optional: true,
       },

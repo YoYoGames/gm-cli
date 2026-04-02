@@ -6,7 +6,7 @@ import {
   downloadIgor,
   findRuntimeLocation,
   installRuntime,
-  type IgorTarget,
+  type Target,
 } from "../../igor";
 import { downloadProjectTool } from "../../projectTool";
 import { KnownError } from "../../error";
@@ -91,7 +91,7 @@ async function chmodRecursive(ctx: Context, dir: string) {
 }
 
 interface RunCommandFlags {
-  target?: IgorTarget;
+  target?: Target;
   verbose?: boolean;
   license?: string;
   prefabs?: string;
@@ -157,7 +157,7 @@ export default async function (
   const igorLog = this.makeLogger("Downloading Igor");
   let igorPath: string;
   try {
-    igorPath = await downloadIgor(this, { destDir: igorDir, log: igorLog });
+    igorPath = await downloadIgor(this, igorLog, { destDir: igorDir });
   } catch (e) {
     igorLog.error("Failed to download Igor");
     throw new KnownError(e);
@@ -186,11 +186,10 @@ export default async function (
     const runtimeLog = this.makeLogger("Installing runtime");
 
     try {
-      await installRuntime(this, {
+      await installRuntime(this, runtimeLog, {
         igorPath,
         runtimeDir,
         licenseFile: await getLicenseOrThrow(this, flags),
-        log: runtimeLog,
       });
     } catch (e) {
       runtimeLog.error("Failed to install runtime");
@@ -210,7 +209,7 @@ export default async function (
 
   const buildLog = this.makeLogger(`Building & running for ${target}`);
   try {
-    await igorRun(this, {
+    await igorRun(this, buildLog, {
       igorPath,
       runtimeDir: runtimeLocation,
       target,
@@ -220,7 +219,6 @@ export default async function (
       projectPath,
       projectToolPath,
       verbose: flags.verbose ?? false,
-      log: buildLog,
     });
   } catch (e) {
     buildLog.error("Build failed");
