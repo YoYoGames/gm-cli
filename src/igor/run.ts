@@ -1,7 +1,7 @@
 import path from "path";
 import type { Context } from "../context";
 import type { Log } from "../log";
-import type { Target } from "./target";
+import type { Module, Target } from "./target";
 import { stopProcesses } from "./kill-process";
 
 export async function findRuntimeLocation(
@@ -100,10 +100,12 @@ export function installRuntime(
   ctx: Context,
   log: Log,
   {
+    modules,
     igorPath,
     runtimeDir,
     licenseFile,
   }: {
+    modules?: Module[];
     igorPath: string;
     runtimeDir: string;
     licenseFile: string;
@@ -111,7 +113,15 @@ export function installRuntime(
 ): Promise<void> {
   return spawnIgor(ctx, log, {
     igorPath,
-    args: ["Runtime", "Install", "-lf", licenseFile, "-rp", runtimeDir],
+    args: [
+      "Runtime",
+      "Install",
+      "-lf",
+      licenseFile,
+      "-rp",
+      runtimeDir,
+      ...(modules ? ["-m", modules.join(",")] : []),
+    ],
     label: "Igor Runtime Install",
   });
 }

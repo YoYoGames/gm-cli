@@ -1,12 +1,16 @@
-import type { Context } from "../../context";
+import { exists, type Context } from "../../context";
+import type { Log } from "../../log";
 import { findProjectFile } from "../../project";
 import {
   igorRun,
-  defaultTarget,
+  targetForPlatform,
   downloadIgor,
   findRuntimeLocation,
   installRuntime,
   type Target,
+  type Module,
+  getInstalledRuntimeModules,
+  baseModuleForPlatform,
 } from "../../igor";
 import { downloadProjectTool } from "../../projectTool";
 import { KnownError } from "../../error";
@@ -62,12 +66,8 @@ async function extractDmgs(ctx: Context, runtimeLocation: string) {
         if (entry.endsWith(".app")) {
           const src = ctx.path.join(mountPoint, entry);
           const dest = ctx.path.join(macDir, entry);
-          // Check if already extracted
-          try {
-            await ctx.fs.access(dest);
+          if (await exists(ctx, dest)) {
             continue;
-          } catch {
-            // Not yet extracted, copy it
           }
           await exec("cp", ["-R", src, dest]);
         }
@@ -88,6 +88,64 @@ async function chmodRecursive(ctx: Context, dir: string) {
       await ctx.fs.chmod(fullPath, 0o755);
     }
   }
+}
+
+async function installRuntimeIfNeeded(
+  ctx: Context,
+  log: Log,
+  {
+    flags,
+    igorPath,
+    runtimeDir,
+    target,
+  }: {
+    flags: RunCommandFlags;
+    igorPath: string;
+    runtimeDir: string;
+    target: Target;
+  },
+): Promise<string> {
+  let runtimeLocation: string | undefined;
+  try {
+    runtimeLocation = await findRuntimeLocation(ctx, runtimeDir);
+  } catch {
+    // Runtime not found
+  }
+
+  // FIXME: if this fails, we should delete the runtime dir and try again
+  const installedModules = runtimeLocation
+    ? await getInstalledRuntimeModules(ctx, runtimeLocation)
+    : [];
+
+  const neededModules: Module[] = [];
+  if (!installedModules.some((m) => m.startsWith("base"))) {
+    neededModules.push(baseModuleForPlatform(ctx));
+  }
+  if (!installedModules.includes(target)) {
+    neededModules.push(target);
+  }
+
+  if (neededModules.length === 0) {
+    log.success("Runtime found");
+    return runtimeLocation!;
+  }
+
+  try {
+    await installRuntime(ctx, log, {
+      igorPath,
+      runtimeDir,
+      modules: neededModules,
+      licenseFile: await getLicenseOrThrow(ctx, flags),
+    });
+  } catch (e) {
+    log.error("Failed to install runtime");
+    throw new KnownError(e);
+  }
+  log.success("Runtime installed");
+
+  runtimeLocation = await findRuntimeLocation(ctx, runtimeDir);
+  await installationFixup(ctx, runtimeLocation);
+  return runtimeLocation;
 }
 
 interface RunCommandFlags {
@@ -112,11 +170,8 @@ async function getLicenseOrThrow(
 
   const cwd = ctx.process.cwd();
   const cachedLicense = ctx.path.join(cwd, ".gmcache", LICENSE_FILENAME);
-  try {
-    await ctx.fs.access(cachedLicense);
+  if (await exists(ctx, cachedLicense)) {
     return cachedLicense;
-  } catch {
-    // not found
   }
 
   throw new KnownError(
@@ -145,7 +200,7 @@ export default async function (
   project?: string,
 ): Promise<void> {
   const cwd = this.process.cwd();
-  const target = flags.target ?? defaultTarget(this.process.platform);
+  const target = flags.target ?? targetForPlatform(this.process.platform);
   const projectPath = project ?? (await findProjectFile(this, cwd));
 
   const cacheDir = this.path.join(cwd, ".gmcache");
@@ -154,7 +209,7 @@ export default async function (
 
   const projectToolDir = this.path.join(cacheDir, "project-tool");
 
-  const igorLog = this.makeLogger("Downloading Igor");
+  const igorLog = this.makeTaskLogger("Downloading Igor");
   let igorPath: string;
   try {
     igorPath = await downloadIgor(this, igorLog, { destDir: igorDir });
@@ -164,7 +219,7 @@ export default async function (
   }
   igorLog.success("Igor downloaded");
 
-  const projectToolLog = this.makeLogger("Downloading ProjectTool");
+  const projectToolLog = this.makeTaskLogger("Downloading ProjectTool");
   let projectToolPath: string;
   try {
     projectToolPath = await downloadProjectTool(this, {
@@ -178,36 +233,18 @@ export default async function (
   }
   projectToolLog.success("ProjectTool downloaded");
 
-  let ranInstallation = false;
-  try {
-    // FIXME: maybe use Runtime ListInstalled [-directory] as a check instead
-    await this.fs.access(runtimeDir);
-  } catch {
-    const runtimeLog = this.makeLogger("Installing runtime");
-
-    try {
-      await installRuntime(this, runtimeLog, {
-        igorPath,
-        runtimeDir,
-        licenseFile: await getLicenseOrThrow(this, flags),
-      });
-    } catch (e) {
-      runtimeLog.error("Failed to install runtime");
-      throw new KnownError(e);
-    }
-    runtimeLog.success("Runtime installed");
-    ranInstallation = true;
-  }
-
-  const runtimeLocation = await findRuntimeLocation(this, runtimeDir);
-  if (ranInstallation) {
-    await installationFixup(this, runtimeLocation);
-  }
+  const runtimeLog = this.makeTaskLogger("Installing runtime");
+  const runtimeLocation = await installRuntimeIfNeeded(this, runtimeLog, {
+    flags,
+    igorPath,
+    runtimeDir,
+    target,
+  });
 
   const buildCacheDir = this.path.join(cacheDir, "build");
   await this.fs.mkdir(buildCacheDir, { recursive: true });
 
-  const buildLog = this.makeLogger(`Building & running for ${target}`);
+  const buildLog = this.makeTaskLogger(`Building & running for ${target}`);
   try {
     await igorRun(this, buildLog, {
       igorPath,

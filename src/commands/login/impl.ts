@@ -13,7 +13,7 @@ export default async function (
   const cacheDir = this.path.join(cwd, ".gmcache");
   const igorDir = this.path.join(cacheDir, "igor");
 
-  const igorLog = this.makeLogger("Downloading Igor");
+  const igorLog = this.makeTaskLogger("Downloading Igor");
   let igorPath: string;
   try {
     igorPath = await downloadIgor(this, igorLog, { destDir: igorDir });
@@ -26,7 +26,7 @@ export default async function (
   const licenseFile = flags.print
     ? this.path.join(this.os.tmpdir(), `gm-licence-${this.process.pid}.plist`)
     : this.path.join(cacheDir, LICENSE_FILENAME);
-  const fetchLog = this.makeLogger("Fetching license");
+  const fetchLog = this.makeTaskLogger("Fetching license");
   try {
     await fetchLicense(this, igorLog, {
       igorPath,

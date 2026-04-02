@@ -1,10 +1,10 @@
 import type { CommandContext } from "@stricli/core";
-import { taskLog } from "@clack/prompts";
 import child_process from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { Log } from "./log";
+import type { Log, TaskLogger } from "./log";
+import { fancyTaskLogger, plainTaskLogger } from "./log";
 
 export interface Context extends CommandContext {
   readonly process: NodeJS.Process;
@@ -12,17 +12,26 @@ export interface Context extends CommandContext {
   readonly os: typeof os;
   readonly fs: typeof fs;
   readonly path: typeof path;
-  readonly makeLogger: (title: string) => Log;
+  readonly makeTaskLogger: TaskLogger;
+}
+
+export async function exists(ctx: Context, path: string): Promise<boolean> {
+  try {
+    await ctx.fs.access(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function buildContext(process: NodeJS.Process): Context {
+  const noColor = "NO_COLOR" in process.env;
   return {
     process,
     child_process,
     os,
     fs,
     path,
-    // FIXME: we should support disabling this when NO_COLOR or similar is set. Better for LLM use too
-    makeLogger: (title: string) => taskLog({ title, retainLog: true }),
+    makeTaskLogger: noColor ? plainTaskLogger() : fancyTaskLogger(),
   };
 }
