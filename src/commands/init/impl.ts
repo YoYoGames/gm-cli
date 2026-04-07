@@ -1,5 +1,6 @@
 import * as p from "@clack/prompts";
 import type { Context } from "../../context";
+import { KnownError } from "../../error";
 import { getTemplates } from "./get-templates";
 import { runInteractive } from "./prompts";
 import { scaffoldProject } from "./scaffold";
@@ -23,30 +24,20 @@ export default async function (
 
   if (!flags.interactive) {
     if (!flags.name) {
-      this.process.stderr.write(
-        "Error: --name is required in non-interactive mode\n",
-      );
-      this.process.exit(1);
+      throw new KnownError("--name is required in non-interactive mode");
     }
     if (!flags.template) {
-      this.process.stderr.write(
-        "Error: --template is required in non-interactive mode\n",
-      );
-      this.process.exit(1);
+      throw new KnownError("--template is required in non-interactive mode");
     }
 
     const validationError = validateProjectName(flags.name);
     if (validationError) {
-      this.process.stderr.write(`Error: ${validationError}\n`);
-      this.process.exit(1);
+      throw new KnownError(validationError);
     }
 
     const matchedTemplate = findTemplate(templates, flags.template);
     if (!matchedTemplate) {
-      this.process.stderr.write(
-        `Error: Template "${flags.template}" not found\n`,
-      );
-      this.process.exit(1);
+      throw new KnownError(`Template "${flags.template}" not found`);
     }
 
     config = {
@@ -55,7 +46,7 @@ export default async function (
       createClaude: flags.claude,
     };
 
-    console.log("Creating project...");
+    this.process.stdout.write("Creating project...\n");
   } else {
     config = await runInteractive(
       { name: flags.name, claude: flags.claude },
@@ -74,13 +65,13 @@ export default async function (
   try {
     s.message("Extracting template");
     s.message("Creating base files");
-    const projectDir = await scaffoldProject(selectedTemplate, config);
+    const projectDir = await scaffoldProject(this, selectedTemplate, config);
     s.stop(`Template extracted to ${projectDir}`);
 
     if (flags.interactive) {
       p.outro(`Project created!`);
     } else {
-      console.log(`Project created at ${projectDir}`);
+      this.process.stdout.write(`Project created at ${projectDir}\n`);
     }
   } catch (error) {
     s.stop("Failed");

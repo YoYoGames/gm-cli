@@ -11,7 +11,7 @@ export async function runInteractive(
   argv: ArgvOptions,
   templates: Template[],
 ): Promise<ProjectConfig> {
-  p.intro(`create-gm`);
+  p.intro(`Create a GameMaker project`);
 
   const answers = await p.group(
     {
