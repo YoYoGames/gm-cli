@@ -1,7 +1,7 @@
 import { buildApplication, buildRouteMap, text_en } from "@stricli/core";
 import { name, version, description } from "../package.json";
 import { initCommand } from "./commands/init/command";
-import { buildProjectCommand } from "./commands/build/command";
+import { compileProjectCommand } from "./commands/compile/command";
 import { runCommand } from "./commands/run/command";
 import { editCommand } from "./commands/edit/command";
 import { loginCommand } from "./commands/login/command";
@@ -10,7 +10,7 @@ import { KnownError } from "./error";
 const routes = buildRouteMap({
   routes: {
     init: initCommand,
-    build: buildProjectCommand,
+    compile: compileProjectCommand,
     run: runCommand,
     edit: editCommand,
     login: loginCommand,

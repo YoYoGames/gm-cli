@@ -54,7 +54,7 @@ function getPrefabsDirOrThrow(ctx: Context, flags: RunCommandFlags): string {
   }
 
   throw new KnownError(
-    "A prefabs directory is required to build. Specify a path with `--prefabs=...` or the GAMEMAKER_PREFABS env variable.\n\nTODO: This should not be required for the user to provide, gm-cli should use the default location.\nBut for now, just do export GAMEMAKER_PREFABS=/Users/Shared/GameMakerStudio2/Prefabs",
+    "A prefabs directory is required to compile. Specify a path with `--prefabs=...` or the GAMEMAKER_PREFABS env variable.\n\nTODO: This should not be required for the user to provide, gm-cli should use the default location.\nBut for now, just do export GAMEMAKER_PREFABS=/Users/Shared/GameMakerStudio2/Prefabs",
   );
 }
 
@@ -103,9 +103,9 @@ export default async function (
 
   const buildCacheDir = await cache.getSubDirPath(this, "build");
 
-  const buildLog = this.makeTaskLogger(`Building & running for ${target}`);
+  const runLog = this.makeTaskLogger(`Compiling & running for ${target}`);
   try {
-    await igorRun(this, buildLog, {
+    await igorRun(this, runLog, {
       igorPath,
       runtimeDir: runtimeLocation,
       target,
@@ -117,8 +117,8 @@ export default async function (
       verbose: flags.verbose ?? false,
     });
   } catch (e) {
-    buildLog.error("Build failed");
+    runLog.error("Compilation failed");
     throw new KnownError(e);
   }
-  buildLog.success("Done");
+  runLog.success("Done");
 }
