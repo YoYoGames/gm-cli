@@ -20,6 +20,15 @@ export const editCommand = buildCommand({
         brief: "Run in Model Context Protocol mode",
         optional: true,
       },
+      command: {
+        kind: "parsed",
+        brief: "Run a one-shot command",
+        parse: String,
+        optional: true,
+      },
+    },
+    aliases: {
+      C: "command",
     },
   },
   docs: {
