@@ -3,7 +3,7 @@ import { exists, type Context } from "../context";
 import type { Log } from "../log";
 import { KnownError } from "../error";
 import type { Module, Target } from "./target";
-import { baseModuleForPlatform, getInstalledRuntimeModules } from "./target";
+import { getInstalledRuntimeModules } from "./target";
 import { findRuntimeLocation, installRuntime } from "./run";
 
 async function installationFixup(ctx: Context, runtimeLocation: string) {
@@ -108,15 +108,7 @@ export async function installRuntimeIfNeeded(
     ? await getInstalledRuntimeModules(ctx, runtimeLocation)
     : [];
 
-  const neededModules: Module[] = [];
-  if (!installedModules.some((m) => m.startsWith("base"))) {
-    neededModules.push(baseModuleForPlatform(ctx));
-  }
-  if (!installedModules.includes(target)) {
-    neededModules.push(target);
-  }
-
-  if (neededModules.length === 0) {
+  if (installedModules.includes(target)) {
     log.success("Runtime found");
     return runtimeLocation!;
   }
@@ -125,7 +117,7 @@ export async function installRuntimeIfNeeded(
     await installRuntime(ctx, log, {
       igorPath,
       runtimeDir,
-      modules: neededModules,
+      modules: [target],
       licenseFile,
     });
   } catch (e) {

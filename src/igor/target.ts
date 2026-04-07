@@ -43,22 +43,6 @@ export function targetForPlatform(platform: NodeJS.Platform): Target {
   }
 }
 
-export function baseModuleForPlatform(
-  ctx: Context,
-): `base-module-${string}-${string}` {
-  const moduleArch = ctx.process.arch === "arm64" ? "arm" : "x86";
-  switch (ctx.process.platform) {
-    case "linux":
-      return `base-module-linux-${moduleArch}`;
-    case "darwin":
-      return `base-module-osx-${moduleArch}`;
-    case "win32":
-      return `base-module-windows-x64`;
-    default:
-      throw new Error(`No base module for platform: ${ctx.process.platform}`);
-  }
-}
-
 /**
  * Modules are more or less just the targets + the base module for your host platform
  */
