@@ -10,11 +10,12 @@ export type ResourceToolMode =
 export interface ResourceToolArgs {
   run: ResourceToolMode;
   projectPath?: string;
+  ignoreStdio?: boolean;
 }
 
 export async function callResourceTool(
   ctx: Context,
-  { run, projectPath }: ResourceToolArgs,
+  { run, projectPath, ignoreStdio }: ResourceToolArgs,
 ): Promise<void> {
   const command = run.mode === "command" ? run.command.split(" ") : [run.mode];
 
@@ -31,6 +32,7 @@ export async function callResourceTool(
       registry: PRIVATE_REGISTRY,
       extraEnvVars:
         process.platform === "darwin" ? { COMPlus_ZapDisable: "1" } : undefined,
+      ignoreStdio,
     });
   } catch (e) {
     throw new KnownError(e);

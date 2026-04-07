@@ -10,8 +10,8 @@ export function findTemplate(
   templates: Template[],
   query: string,
 ): Template | undefined {
-  return templates.find(
-    (t) =>
-      t.id === query || t.title.toLowerCase().includes(query.toLowerCase()),
+  return (
+    templates.find((t) => t.id === query) ??
+    templates.find((t) => t.title.toLowerCase().includes(query.toLowerCase()))
   );
 }

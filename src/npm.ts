@@ -42,19 +42,20 @@ export function npmExec(
     registry,
     args,
     extraEnvVars,
+    ignoreStdio,
   }: {
     registry: string;
     packageName: string;
     args: string[];
     extraEnvVars?: Record<string, string>;
+    ignoreStdio?: boolean;
   },
 ): Promise<void> {
-  // npm exec --package=<pkg>[@<version>] -- <cmd> [args...]
   const fullArgs = ["--yes", "--registry", registry, packageName, ...args];
 
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn("npx", fullArgs, {
-      stdio: "inherit",
+      stdio: ignoreStdio ? "ignore" : "inherit",
       env: { ...process.env, ...extraEnvVars },
     });
 

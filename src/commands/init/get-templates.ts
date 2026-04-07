@@ -31,12 +31,13 @@ export async function getTemplates(): Promise<Template[]> {
     throw new KnownError(`Failed to fetch templates: ${response.statusText}`);
   }
   const json: TemplateResponse = (await response.json()) as TemplateResponse; // FIXME: run zod here instead of asserting.
-  return json.data
+  const downloaded = json.data
     .map(({ id, attributes }) => {
       if (!attributes.gml_code_download_url) {
         return null;
       }
       return {
+        kind: "download" as const,
         description: attributes.info_description,
         downloadUrl: attributes.gml_code_download_url,
         id,
@@ -45,4 +46,15 @@ export async function getTemplates(): Promise<Template[]> {
       };
     })
     .filter((v) => !!v);
+
+  return [
+    ...downloaded,
+    {
+      kind: "blank" as const,
+      id: "blank",
+      title: "Blank Game",
+      description: "An empty project",
+      type: "Game" as const,
+    },
+  ];
 }

@@ -1,6 +1,8 @@
 import * as p from "@clack/prompts";
 import type { Context } from "../../context";
 import { KnownError } from "../../error";
+import { callResourceTool } from "../../resourceTool";
+import { gitignore, gitattributes, claudemd } from "./base-files";
 import { getTemplates } from "./get-templates";
 import { runInteractive } from "./prompts";
 import { scaffoldProject } from "./scaffold";
@@ -60,18 +62,51 @@ export default async function (
   }
 
   const s = p.spinner();
-  s.start("Downloading template");
 
   try {
-    s.message("Extracting template");
+    let projectDir: string;
+
+    if (selectedTemplate.kind === "blank") {
+      s.start("Creating blank project");
+      projectDir = this.path.join(this.process.cwd(), config.projectName);
+      await this.fs.mkdir(projectDir, { recursive: true });
+      await callResourceTool(this, {
+        ignoreStdio: true,
+        run: {
+          mode: "command",
+          // TODO: is this properly escaped?
+          command: `resource project create name=${config.projectName} path=${projectDir}`,
+        },
+      });
+    } else {
+      s.start("Downloading template");
+      s.message("Extracting template");
+      projectDir = await scaffoldProject(
+        this,
+        selectedTemplate,
+        config.projectName,
+      );
+    }
+
     s.message("Creating base files");
-    const projectDir = await scaffoldProject(this, selectedTemplate, config);
-    s.stop(`Template extracted to ${projectDir}`);
+    await this.fs.writeFile(
+      this.path.join(projectDir, ".gitignore"),
+      gitignore,
+    );
+    await this.fs.writeFile(
+      this.path.join(projectDir, ".gitattributes"),
+      gitattributes,
+    );
+    if (config.createClaude) {
+      await this.fs.writeFile(
+        this.path.join(projectDir, "CLAUDE.md"),
+        claudemd,
+      );
+    }
+    s.stop(`Project created at ${projectDir}`);
 
     if (flags.interactive) {
       p.outro(`Project created!`);
-    } else {
-      this.process.stdout.write(`Project created at ${projectDir}\n`);
     }
   } catch (error) {
     s.stop("Failed");
