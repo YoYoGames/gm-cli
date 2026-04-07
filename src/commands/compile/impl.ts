@@ -1,12 +1,14 @@
 import type { Context } from "../../context";
-
-interface CompileCommandFlags {
-  // ...
-}
+import { igorCompile } from "../../igor";
+import { commonCompileSetup, type BuildFlags } from "../../common-compile-setup";
 
 export default async function (
   this: Context,
-  flags: CompileCommandFlags,
+  flags: BuildFlags,
+  project?: string,
 ): Promise<void> {
-  console.warn("TODO: Implement this");
+  await commonCompileSetup(this, flags, project, {
+    label: (target) => `Compiling for ${target}`,
+    invoke: igorCompile,
+  });
 }

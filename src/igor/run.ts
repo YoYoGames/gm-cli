@@ -126,56 +126,66 @@ export function installRuntime(
   });
 }
 
-export function igorRun(
-  ctx: Context,
-  log: Log,
-  {
-    igorPath,
-    runtimeDir,
-    target,
-    cacheDir,
-    licenseFile,
-    prefabsDir,
-    projectPath,
-    projectToolPath,
-    verbose,
-  }: {
-    igorPath: string;
-    licenseFile: string;
-    prefabsDir: string;
-    runtimeDir: string;
-    target: Target;
-    cacheDir: string;
-    projectPath: string;
-    projectToolPath: string;
-    verbose: boolean;
-  },
-): Promise<void> {
-  const outputFile = path.join(cacheDir, "output", "outputFile");
-  const args = [
+export interface IgorBuildOptions {
+  igorPath: string;
+  licenseFile: string;
+  prefabsDir: string;
+  runtimeDir: string;
+  target: Target;
+  cacheDir: string;
+  projectPath: string;
+  projectToolPath: string;
+  verbose: boolean;
+}
+
+function igorBuildArgs(
+  options: IgorBuildOptions,
+  action: "Run" | "Compile",
+): string[] {
+  const outputFile = path.join(options.cacheDir, "output", "outputFile");
+  return [
     "-rp",
-    runtimeDir,
+    options.runtimeDir,
     "-cache",
-    cacheDir,
+    options.cacheDir,
     "-project",
-    projectPath,
+    options.projectPath,
     "-of",
     outputFile,
     "-lf",
-    licenseFile, // FIXME: should not be needed but asset compiler requires it
+    options.licenseFile, // FIXME: should not be needed but asset compiler requires it
     "-prefabs",
-    prefabsDir,
-    ...(verbose ? ["-v"] : []),
+    options.prefabsDir,
+    ...(options.verbose ? ["-v"] : []),
     "-projectool",
-    projectToolPath,
+    options.projectToolPath,
     "--",
-    target,
-    "Run",
+    options.target,
+    action,
   ];
+}
 
+export function igorRun(
+  ctx: Context,
+  log: Log,
+  options: IgorBuildOptions,
+): Promise<void> {
   return spawnIgor(ctx, log, {
-    igorPath,
-    args,
+    igorPath: options.igorPath,
+    args: igorBuildArgs(options, "Run"),
+    label: "Igor",
+    onSignal: () => stopProcesses(ctx),
+  });
+}
+
+export function igorCompile(
+  ctx: Context,
+  log: Log,
+  options: IgorBuildOptions,
+): Promise<void> {
+  return spawnIgor(ctx, log, {
+    igorPath: options.igorPath,
+    args: igorBuildArgs(options, "Compile"),
     label: "Igor",
     onSignal: () => stopProcesses(ctx),
   });
