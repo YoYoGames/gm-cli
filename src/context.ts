@@ -3,6 +3,7 @@ import child_process from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { KnownError } from "./error";
 import type { Log, TaskLogger } from "./log";
 import { fancyTaskLogger, plainTaskLogger } from "./log";
 
@@ -22,6 +23,17 @@ export async function exists(ctx: Context, path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export function getPrefabsDirOrThrow(ctx: Context): string {
+  const envPrefabs = ctx.process.env["GAMEMAKER_PREFABS"];
+  if (envPrefabs !== undefined) {
+    return envPrefabs;
+  }
+
+  throw new KnownError(
+    "A prefabs directory is required. Specify a path with `--prefabs=...` or the GAMEMAKER_PREFABS env variable.\n\nTODO: This should not be required for the user to provide, gm-cli should use the default location.\nBut for now, just do export GAMEMAKER_PREFABS=/Users/Shared/GameMakerStudio2/Prefabs",
+  );
 }
 
 export function buildContext(process: NodeJS.Process): Context {

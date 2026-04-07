@@ -1,11 +1,14 @@
-import type { Context } from "../../context";
+import { Cache } from "../../cache";
+import { type Context, getPrefabsDirOrThrow } from "../../context";
 import { findProjectFile } from "../../project";
 import { KnownError } from "../../error";
+import { downloadProjectTool } from "../../projectTool";
 import { callResourceTool, type ResourceToolMode } from "../../resourceTool";
 
 interface EditCommandFlags {
   mcp?: boolean;
   command?: string;
+  prefabs?: string;
 }
 
 export default async function (
@@ -20,12 +23,19 @@ export default async function (
   const cwd = this.process.cwd();
   const projectPath = project ?? (await findProjectFile(this, cwd));
 
+  const cache = await Cache.getOrInit(this);
+  const projectToolPath = await downloadProjectTool(this, {
+    cache,
+    log: { error() {}, message() {}, success() {} },
+    verbose: false,
+  });
+
   const run: ResourceToolMode = flags.command
     ? { mode: "command", command: flags.command }
     : flags.mcp
       ? { mode: "mcp" }
       : { mode: "cli" };
 
-  // FIXME: include path to project tool
-  await callResourceTool(this, { run, projectPath });
+  const prefabsFolder = flags.prefabs ?? getPrefabsDirOrThrow(this);
+  await callResourceTool(this, { run, projectPath, projectToolPath, prefabsFolder });
 }

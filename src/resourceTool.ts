@@ -10,19 +10,47 @@ export type ResourceToolMode =
 export interface ResourceToolArgs {
   run: ResourceToolMode;
   projectPath?: string;
+  projectToolPath?: string;
+  prefabsFolder?: string;
   ignoreStdio?: boolean;
+}
+
+function splitCommand(input: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (const ch of input) {
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === " " && !inQuotes) {
+      if (current) args.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  if (current) args.push(current);
+  return args;
 }
 
 export async function callResourceTool(
   ctx: Context,
-  { run, projectPath, ignoreStdio }: ResourceToolArgs,
+  {
+    run,
+    projectPath,
+    projectToolPath,
+    prefabsFolder,
+    ignoreStdio,
+  }: ResourceToolArgs,
 ): Promise<void> {
-  const command = run.mode === "command" ? run.command.split(" ") : [run.mode];
+  const command =
+    run.mode === "command" ? splitCommand(run.command) : [run.mode];
 
   const args = [
     ...command,
-    // FIXME: include the project tool
     ...(projectPath ? [`projectpath=${projectPath}`] : []),
+    ...(projectToolPath ? [`projecttool=${projectToolPath}`] : []),
+    ...(prefabsFolder ? [`prefabsfolder=${prefabsFolder}`] : []),
   ];
   const packageName = `@gm-tools/resource-tool-${getPlatformSuffix()}@latest`;
   try {

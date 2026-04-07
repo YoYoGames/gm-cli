@@ -1,11 +1,13 @@
 import type { Template } from "./types";
+import { Cache } from "../../cache";
 import type { Context } from "../../context";
 import { KnownError } from "../../error";
+import { downloadProjectTool } from "../../projectTool";
 
 export async function scaffoldProject(
   ctx: Context,
   template: Template & { kind: "download" },
-  projectName: string,
+  project: { name: string; dir: string },
 ) {
   const response = await fetch(template.downloadUrl);
   if (!response.ok) {
@@ -14,15 +16,26 @@ export async function scaffoldProject(
 
   const buffer = await response.arrayBuffer();
 
-  const projectDir = ctx.path.join(ctx.process.cwd(), projectName);
-  const zipPath = ctx.path.join(ctx.process.cwd(), `${projectName}.zip`);
+  const archivePath = project.dir + ".zip";
+  await ctx.fs.writeFile(archivePath, Buffer.from(buffer));
 
-  await ctx.fs.writeFile(zipPath, Buffer.from(buffer));
-  await ctx.fs.mkdir(projectDir, { recursive: true });
+  const cache = await Cache.getOrInit(
+    ctx,
+    ctx.path.join(project.dir, ".gmcache"),
+  );
+  const projectToolPath = await downloadProjectTool(ctx, {
+    cache,
+    log: { message() {}, error() {}, success() {} },
+    verbose: false,
+  });
 
-  // FIXME: use a cross platform util instead of just spawning here
-  ctx.child_process.execSync(`unzip -q "${zipPath}" -d "${projectDir}"`);
-  await ctx.fs.unlink(zipPath);
+  const destinationYyp = ctx.path.join(project.dir, `${project.name}.yyp`);
+  ctx.child_process.execFileSync(projectToolPath, [
+    "PROJECT",
+    "SAVE",
+    `SOURCE=${archivePath}`,
+    `DESTINATION=${destinationYyp}`,
+  ]);
 
-  return projectDir;
+  await ctx.fs.unlink(archivePath);
 }

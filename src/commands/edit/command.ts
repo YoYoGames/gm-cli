@@ -26,6 +26,12 @@ export const editCommand = buildCommand({
         parse: String,
         optional: true,
       },
+      prefabs: {
+        kind: "parsed",
+        brief: "Prefabs directory",
+        parse: String,
+        optional: true,
+      },
     },
     aliases: {
       C: "command",

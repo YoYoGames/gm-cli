@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import type { Context } from "../../context";
+import { type Context, exists } from "../../context";
 import { KnownError } from "../../error";
 import { callResourceTool } from "../../resourceTool";
 import { gitignore, gitattributes, claudemd } from "./base-files";
@@ -56,6 +56,11 @@ export default async function (
     );
   }
 
+  const projectDir = this.path.join(this.process.cwd(), config.projectName);
+  if (await exists(this, projectDir)) {
+    throw new KnownError(`Directory "${config.projectName}" already exists`);
+  }
+
   const selectedTemplate = findTemplate(templates, config.template);
   if (!selectedTemplate) {
     throw new Error(`Template "${config.template}" not found`);
@@ -64,28 +69,23 @@ export default async function (
   const s = p.spinner();
 
   try {
-    let projectDir: string;
-
     if (selectedTemplate.kind === "blank") {
       s.start("Creating blank project");
-      projectDir = this.path.join(this.process.cwd(), config.projectName);
       await this.fs.mkdir(projectDir, { recursive: true });
       await callResourceTool(this, {
         ignoreStdio: true,
         run: {
           mode: "command",
-          // TODO: is this properly escaped?
-          command: `resource project create name=${config.projectName} path=${projectDir}`,
+          command: `resource project create name="${config.projectName}" path="${projectDir}"`,
         },
       });
     } else {
       s.start("Downloading template");
       s.message("Extracting template");
-      projectDir = await scaffoldProject(
-        this,
-        selectedTemplate,
-        config.projectName,
-      );
+      await scaffoldProject(this, selectedTemplate, {
+        name: config.projectName,
+        dir: projectDir,
+      });
     }
 
     s.message("Creating base files");
