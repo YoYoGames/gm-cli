@@ -1,3 +1,4 @@
+import { Cache } from "../../cache";
 import type { Context } from "../../context";
 import { downloadIgor, fetchLicense } from "../../igor";
 import { KnownError } from "../../error";
@@ -9,14 +10,12 @@ export default async function (
   flags: { print?: boolean },
   accessKey: string,
 ): Promise<void> {
-  const cwd = this.process.cwd();
-  const cacheDir = this.path.join(cwd, ".gmcache");
-  const igorDir = this.path.join(cacheDir, "igor");
+  const cache = await Cache.getOrInit(this);
 
   const igorLog = this.makeTaskLogger("Downloading Igor");
   let igorPath: string;
   try {
-    igorPath = await downloadIgor(this, igorLog, { destDir: igorDir });
+    igorPath = await downloadIgor(this, igorLog, cache);
   } catch (e) {
     igorLog.error("Failed to download Igor");
     throw new KnownError(e);
@@ -25,7 +24,7 @@ export default async function (
 
   const licenseFile = flags.print
     ? this.path.join(this.os.tmpdir(), `gm-licence-${this.process.pid}.plist`)
-    : this.path.join(cacheDir, LICENSE_FILENAME);
+    : this.path.join(cache.dirPath, LICENSE_FILENAME);
   const fetchLog = this.makeTaskLogger("Fetching license");
   try {
     await fetchLicense(this, igorLog, {

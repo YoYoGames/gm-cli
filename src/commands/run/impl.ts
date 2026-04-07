@@ -10,6 +10,7 @@ import { downloadProjectTool } from "../../projectTool";
 import { KnownError } from "../../error";
 import { LICENSE_FILENAME } from "../login/impl";
 import { findProjectFile } from "../../project";
+import { Cache } from "../../cache";
 
 interface RunCommandFlags {
   target?: Target;
@@ -21,6 +22,7 @@ interface RunCommandFlags {
 async function getLicenseOrThrow(
   ctx: Context,
   flags: RunCommandFlags,
+  cache: Cache,
 ): Promise<string> {
   if (flags.license !== undefined) {
     return flags.license;
@@ -31,8 +33,7 @@ async function getLicenseOrThrow(
     return envLicense;
   }
 
-  const cwd = ctx.process.cwd();
-  const cachedLicense = ctx.path.join(cwd, ".gmcache", LICENSE_FILENAME);
+  const cachedLicense = ctx.path.join(cache.dirPath, LICENSE_FILENAME);
   if (await exists(ctx, cachedLicense)) {
     return cachedLicense;
   }
@@ -66,16 +67,12 @@ export default async function (
   const target = flags.target ?? targetForPlatform(this.process.platform);
   const projectPath = project ?? (await findProjectFile(this, cwd));
 
-  const cacheDir = this.path.join(cwd, ".gmcache");
-  const igorDir = this.path.join(cacheDir, "igor");
-  const runtimeDir = this.path.join(cacheDir, "runtime");
-
-  const projectToolDir = this.path.join(cacheDir, "project-tool");
+  const cache = await Cache.getOrInit(this);
 
   const igorLog = this.makeTaskLogger("Downloading Igor");
   let igorPath: string;
   try {
-    igorPath = await downloadIgor(this, igorLog, { destDir: igorDir });
+    igorPath = await downloadIgor(this, igorLog, cache);
   } catch (e) {
     igorLog.error("Failed to download Igor");
     throw new KnownError(e);
@@ -86,7 +83,7 @@ export default async function (
   let projectToolPath: string;
   try {
     projectToolPath = await downloadProjectTool(this, {
-      destDir: projectToolDir,
+      cache,
       log: projectToolLog,
       verbose: flags.verbose ?? false,
     });
@@ -98,14 +95,13 @@ export default async function (
 
   const runtimeLog = this.makeTaskLogger("Installing runtime");
   const runtimeLocation = await installRuntimeIfNeeded(this, runtimeLog, {
-    licenseFile: await getLicenseOrThrow(this, flags),
+    licenseFile: await getLicenseOrThrow(this, flags, cache),
     igorPath,
-    runtimeDir,
+    cache,
     target,
   });
 
-  const buildCacheDir = this.path.join(cacheDir, "build");
-  await this.fs.mkdir(buildCacheDir, { recursive: true });
+  const buildCacheDir = await cache.getSubDirPath(this, "build");
 
   const buildLog = this.makeTaskLogger(`Building & running for ${target}`);
   try {
@@ -115,7 +111,7 @@ export default async function (
       target,
       cacheDir: buildCacheDir,
       prefabsDir: getPrefabsDirOrThrow(this, flags),
-      licenseFile: await getLicenseOrThrow(this, flags),
+      licenseFile: await getLicenseOrThrow(this, flags, cache),
       projectPath,
       projectToolPath,
       verbose: flags.verbose ?? false,

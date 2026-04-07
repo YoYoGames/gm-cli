@@ -1,11 +1,13 @@
+import type { Cache } from "./cache";
 import type { Context } from "./context";
 import type { Log } from "./log";
 import { npmInstall, getPlatformSuffix, REGISTRY } from "./npm";
 
 export async function downloadProjectTool(
   ctx: Context,
-  { destDir, log, verbose }: { destDir: string; log: Log; verbose: boolean },
+  { cache, log, verbose }: { cache: Cache; log: Log; verbose: boolean },
 ): Promise<string> {
+  const destDir = await cache.getSubDirPath(ctx, "project-tool");
   const packageName = `@gm-tools/project-tool-${getPlatformSuffix()}`;
   const exeName =
     process.platform === "win32" ? "ProjectTool.exe" : "ProjectTool";

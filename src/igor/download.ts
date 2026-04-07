@@ -1,3 +1,4 @@
+import type { Cache } from "../cache";
 import type { Context } from "../context";
 import { KnownError } from "../error";
 import type { Log } from "../log";
@@ -27,8 +28,9 @@ const IGOR_PLATFORM_DIRS: Record<string, string> = {
 export async function downloadIgor(
   ctx: Context,
   log: Log,
-  { destDir }: { destDir: string },
+  cache: Cache,
 ): Promise<string> {
+  const destDir = await cache.getSubDirPath(ctx, "igor");
   const platform = process.platform;
   const arch = process.arch;
   const platformDir = IGOR_PLATFORM_DIRS[platform] ?? platform;

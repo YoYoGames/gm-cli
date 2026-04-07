@@ -1,3 +1,4 @@
+import type { Cache } from "../cache";
 import { exists, type Context } from "../context";
 import type { Log } from "../log";
 import { KnownError } from "../error";
@@ -85,15 +86,16 @@ export async function installRuntimeIfNeeded(
   {
     licenseFile,
     igorPath,
-    runtimeDir,
+    cache,
     target,
   }: {
     licenseFile: string;
     igorPath: string;
-    runtimeDir: string;
+    cache: Cache;
     target: Target;
   },
 ): Promise<string> {
+  const runtimeDir = await cache.getSubDirPath(ctx, "runtime");
   let runtimeLocation: string | undefined;
   try {
     runtimeLocation = await findRuntimeLocation(ctx, runtimeDir);
