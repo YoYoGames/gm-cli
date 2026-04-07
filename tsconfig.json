@@ -1,7 +1,6 @@
 {
     "compilerOptions": {
         "noEmit": true,
-        "rootDir": "..",
         "types": [
             "node"
         ],
@@ -22,7 +21,7 @@
         "verbatimModuleSyntax": true
     },
     "include": [
-        "**/*"
+        "src/**/*"
     ],
     "exclude": []
 }
