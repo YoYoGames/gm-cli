@@ -2,7 +2,7 @@ import type { Cache } from "../cache";
 import { exists, type Context } from "../context";
 import type { Log } from "../log";
 import { KnownError } from "../error";
-import type { Module, Target } from "./target";
+import type { Target } from "./target";
 import { getInstalledRuntimeModules } from "./target";
 import { findRuntimeLocation, installRuntime } from "./run";
 
