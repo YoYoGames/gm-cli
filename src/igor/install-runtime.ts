@@ -113,16 +113,47 @@ export async function installRuntimeIfNeeded(
     return runtimeLocation!;
   }
 
+  // Install into a temporary directory first, then merge into the real
+  // runtime dir. This avoids overwriting modules that were already installed
+  // by a previous call.
+  const tempDir = await ctx.fs.mkdtemp(
+    ctx.path.join(ctx.os.tmpdir(), "gm-runtime-"),
+  );
+
   try {
     await installRuntime(ctx, log, {
       igorPath,
-      runtimeDir,
+      runtimeDir: tempDir,
       modules: [target],
       licenseFile,
     });
+
+    const tempRuntimeLocation = await findRuntimeLocation(ctx, tempDir);
+    const runtimeName = ctx.path.basename(tempRuntimeLocation);
+    const destLocation = ctx.path.join(runtimeDir, runtimeName);
+
+    // Read the existing receipt before copying so we can merge it
+    const receiptPath = ctx.path.join(destLocation, "receipt.json");
+    let existingReceipt: Record<string, unknown> = {};
+    try {
+      existingReceipt = JSON.parse(await ctx.fs.readFile(receiptPath, "utf-8"));
+    } catch {
+      // No existing receipt
+    }
+
+    await ctx.fs.mkdir(destLocation, { recursive: true });
+    await ctx.fs.cp(tempRuntimeLocation, destLocation, { recursive: true });
+
+    // Merge the old receipt entries into the new one so previously
+    // installed modules are not forgotten.
+    const newRaw = await ctx.fs.readFile(receiptPath, "utf-8");
+    const mergedReceipt = { ...existingReceipt, ...JSON.parse(newRaw) };
+    await ctx.fs.writeFile(receiptPath, JSON.stringify(mergedReceipt, null, 2));
   } catch (e) {
     log.error("Failed to install runtime");
     throw new KnownError(e);
+  } finally {
+    await ctx.fs.rm(tempDir, { recursive: true, force: true });
   }
   log.success("Runtime installed");
 
