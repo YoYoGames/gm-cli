@@ -25,6 +25,12 @@ export const app = buildApplication(routes, {
   versionInfo: {
     currentVersion: version,
   },
+  documentation: {
+    caseStyle: "convert-camel-to-kebab",
+  },
+  scanner: {
+    caseStyle: "allow-kebab-for-camel",
+  },
   localization: {
     loadText() {
       return {
