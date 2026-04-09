@@ -1,0 +1,49 @@
+name: Builder template
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # You can pin a particular version by replacing latest. E.g., @experimental/gm@1.0.2
+  GM_COMMAND: "@experimental/gm@latest"
+  # TODO: Remove when not needed
+  GAMEMAKER_PREFABS: ".prefabs"
+  # TODO: Remove when not needed
+  GAMEMAKER_AUTH_TOKEN: ${{ secrets.GAMEMAKER_AUTH_TOKEN }}
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Cache
+        uses: actions/cache@v5
+        with:
+          # TODO: Remove test/ for the real thing
+          path: test/.gm-cache
+          key: ${{ runner.os }}-gm-cache
+
+      - name: (TODO Remove) Make prefabs dir
+        run: |
+          echo "GAMEMAKER_PREFABS=$(pwd)/.prefabs" >> $GITHUB_ENV
+          mkdir .prefabs
+
+      # TODO: Add condition when it's optional
+      - run: npx "$GM_COMMAND" login "$GAMEMAKER_PAT"
+        env:
+          GAMEMAKER_PAT: ${{ secrets.GAMEMAKER_PAT }}
+
+      - run: npx "$GM_COMMAND" compile
