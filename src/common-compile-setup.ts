@@ -9,7 +9,7 @@ import {
 import { downloadProjectTool } from "./projectTool";
 import { KnownError } from "./error";
 import { LICENSE_FILENAME } from "./commands/login/impl";
-import { findProjectFile } from "./project";
+import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
 import type { Log } from "./log";
 
@@ -49,7 +49,7 @@ async function getLicenseOrThrow(
 export async function commonCompileSetup(
   ctx: Context,
   flags: BuildFlags,
-  project: string | undefined,
+  project: ProjectPath | undefined,
   action: {
     label: (target: Target) => string;
     invoke: (ctx: Context, log: Log, options: IgorBuildOptions) => Promise<void>;

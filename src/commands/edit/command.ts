@@ -1,4 +1,5 @@
 import { buildCommand } from "@stricli/core";
+import { parseProjectPath } from "../../project";
 
 export const editCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -9,7 +10,7 @@ export const editCommand = buildCommand({
         {
           brief: "Path to the project yyp file",
           placeholder: "project",
-          parse: String,
+          parse: parseProjectPath,
           optional: true,
         },
       ],
