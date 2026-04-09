@@ -1,5 +1,6 @@
 import type { Context } from "./context";
 import { KnownError } from "./error";
+import type { ProjectPath } from "./project";
 import { getPlatformSuffix, npmExec, PRIVATE_REGISTRY } from "./npm";
 
 export type ResourceToolMode =
@@ -9,7 +10,7 @@ export type ResourceToolMode =
 
 export interface ResourceToolArgs {
   run: ResourceToolMode;
-  projectPath?: string;
+  projectPath?: ProjectPath;
   projectToolPath?: string;
   prefabsFolder?: string;
   ignoreStdio?: boolean;

@@ -1,6 +1,6 @@
 import { Cache } from "../../cache";
 import { type Context, getPrefabsDirOrThrow } from "../../context";
-import { findProjectFile } from "../../project";
+import { findProjectFile, type ProjectPath } from "../../project";
 import { KnownError } from "../../error";
 import { downloadProjectTool } from "../../projectTool";
 import { callResourceTool, type ResourceToolMode } from "../../resourceTool";
@@ -15,7 +15,7 @@ interface EditCommandFlags {
 export default async function (
   this: Context,
   flags: EditCommandFlags,
-  project?: string,
+  project?: ProjectPath,
 ): Promise<void> {
   if (flags.mcp && flags.command) {
     throw new KnownError("Please use either --mcp or --command, not both.");

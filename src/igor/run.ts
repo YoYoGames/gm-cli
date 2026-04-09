@@ -3,6 +3,7 @@ import type { Context } from "../context";
 import type { Log } from "../log";
 import type { Module, Target } from "./target";
 import { stopProcesses } from "./kill-process";
+import type { ProjectPath } from "../project";
 
 export async function findRuntimeLocation(
   ctx: Context,
@@ -133,7 +134,7 @@ export interface IgorBuildOptions {
   runtimeDir: string;
   target: Target;
   cacheDir: string;
-  projectPath: string;
+  projectPath: ProjectPath;
   projectToolPath: string;
   verbose: boolean;
 }

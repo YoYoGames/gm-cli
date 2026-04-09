@@ -1,5 +1,6 @@
 import { buildCommand } from "@stricli/core";
 import { TARGETS, TargetSchema } from "../../igor";
+import { parseProjectPath } from "../../project";
 
 export const runCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -10,7 +11,7 @@ export const runCommand = buildCommand({
         {
           brief: "Path to the project yyp file",
           placeholder: "project",
-          parse: String, // FIXME: should probably check that this it has a yyp extension
+          parse: parseProjectPath,
           optional: true,
         },
       ],
