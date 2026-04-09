@@ -59,7 +59,9 @@ export async function callResourceTool(
       args,
       registry: PRIVATE_REGISTRY,
       extraEnvVars:
-        process.platform === "darwin" ? { COMPlus_ZapDisable: "1" } : undefined,
+        ctx.process.platform === "darwin"
+          ? { COMPlus_ZapDisable: "1" }
+          : undefined,
       ignoreStdio,
     });
   } catch (e) {

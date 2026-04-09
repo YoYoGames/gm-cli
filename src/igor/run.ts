@@ -35,7 +35,7 @@ function spawnIgor(
     const child = ctx.child_process.spawn(igorPath, args, {
       stdio: ["inherit", "pipe", "pipe"],
       env:
-        process.platform === "darwin"
+        ctx.process.platform === "darwin"
           ? { ...process.env, COMPlus_ZapDisable: "1" }
           : undefined,
     });
