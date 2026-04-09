@@ -46,6 +46,12 @@ export const runCommand = buildCommand({
         brief: "License .plist file",
         optional: true,
       },
+      cacheDir: {
+        kind: "parsed",
+        parse: String,
+        brief: "Cache directory",
+        optional: true,
+      },
     },
   },
   docs: {

@@ -18,6 +18,7 @@ export interface BuildFlags {
   verbose?: boolean;
   license?: string;
   prefabs?: string;
+  cacheDir?: string;
 }
 
 async function getLicenseOrThrow(
@@ -58,7 +59,7 @@ export async function commonCompileSetup(
   const target = flags.target ?? targetForPlatform(ctx.process.platform);
   const projectPath = project ?? (await findProjectFile(ctx, cwd));
 
-  const cache = await Cache.getOrInit(ctx);
+  const cache = await Cache.getOrInit(ctx, flags.cacheDir);
 
   const igorLog = ctx.makeTaskLogger("Downloading Igor");
   let igorPath: string;

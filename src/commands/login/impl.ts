@@ -7,10 +7,10 @@ export const LICENSE_FILENAME = "licence.plist";
 
 export default async function (
   this: Context,
-  flags: { print?: boolean },
+  flags: { print?: boolean; cacheDir?: string },
   accessKey: string,
 ): Promise<void> {
-  const cache = await Cache.getOrInit(this);
+  const cache = await Cache.getOrInit(this, flags.cacheDir);
 
   const igorLog = this.makeTaskLogger("Downloading Igor");
   let igorPath: string;

@@ -1,5 +1,6 @@
 import * as p from "@clack/prompts";
 import { type Context, exists } from "../../context";
+import { Cache } from "../../cache";
 import { KnownError } from "../../error";
 import { callResourceTool } from "../../resourceTool";
 import { gitignore, gitattributes, claudemd } from "./base-files";
@@ -14,6 +15,7 @@ interface InitCommandFlags {
   name?: string;
   template?: string;
   claude: boolean;
+  cacheDir?: string;
 }
 
 export default async function (
@@ -82,10 +84,14 @@ export default async function (
     } else {
       s.start("Downloading template");
       s.message("Extracting template");
+      const cache = await Cache.getOrInit(
+        this,
+        flags.cacheDir ?? this.path.join(projectDir, ".gmcache"),
+      );
       await scaffoldProject(this, selectedTemplate, {
         name: config.projectName,
         dir: projectDir,
-      });
+      }, cache);
     }
 
     s.message("Creating base files");
