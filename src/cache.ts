@@ -2,6 +2,7 @@ import type { Context } from "./context";
 import { exists } from "./context";
 import { version } from "../package.json";
 import { z } from "zod";
+import { KnownError } from "./error";
 
 export class Cache {
   private _path: string;
@@ -12,18 +13,30 @@ export class Cache {
 
   static async getOrInit(ctx: Context, path?: string): Promise<Cache> {
     const cachePath = path ?? ctx.path.join(ctx.process.cwd(), ".gmcache");
-
     const metaPath = ctx.path.join(cachePath, META_FILENAME);
 
     if (await exists(ctx, metaPath)) {
-      const raw = await ctx.fs.readFile(metaPath, "utf-8");
-      const meta = CacheMetaSchema.safeParse(JSON.parse(raw));
+      const rawMetaFile = await ctx.fs.readFile(metaPath, "utf-8");
+      const meta = CacheMetaSchema.safeParse(JSON.parse(rawMetaFile));
 
+      // If there is an existing meta file, check and see if it's of a compatible version
       if (!meta.success || !isCompatibleVersion(meta.data.version, version)) {
+        // If not, it's fine to remove the contents
+        await ctx.fs.rm(cachePath, { recursive: true });
         await createCacheDir(ctx, cachePath);
       }
-    } else {
+    } else if (
+      // Fine to create cache dir if the directory is empty or does not exist yet
+      !(await exists(ctx, cachePath)) ||
+      (await ctx.fs.readdir(cachePath)).length === 0
+    ) {
       await createCacheDir(ctx, cachePath);
+    } else {
+      // However, we don't dare deleting files in a pre-existing directory that does not seem to have been used
+      // as a cache. We want to avoid deleting the users files.
+      throw new KnownError(
+        `The path '${cachePath}' already exists but it not a cache directory!\nAre you sure you want to use this directory as a cache? If so, manually delete its content.`,
+      );
     }
 
     return new Cache(cachePath);
@@ -58,13 +71,10 @@ function isCompatibleVersion(cached: string, current: string): boolean {
 }
 
 async function createCacheDir(ctx: Context, cachePath: string): Promise<void> {
-  if (await exists(ctx, cachePath)) {
-    // FIXME: this can be pretty dangerous, since the user can provide a custom cache path
-    await ctx.fs.rm(cachePath, { recursive: true });
-  }
   await ctx.fs.mkdir(cachePath, { recursive: true });
   await ctx.fs.writeFile(
     ctx.path.join(cachePath, META_FILENAME),
     JSON.stringify({ version }, null, 2),
   );
+  await ctx.fs.writeFile(ctx.path.join(cachePath, ".gitignore"), "*\n");
 }
