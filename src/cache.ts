@@ -38,7 +38,7 @@ export class Cache {
       // However, we don't dare deleting files in a pre-existing directory that does not seem to have been used
       // as a cache. We want to avoid deleting the users files.
       throw new KnownError(
-        `The path '${cachePath}' already exists but it not a cache directory!\nAre you sure you want to use this directory as a cache? If so, manually delete its content.`,
+        `The path '${cachePath}' already exists but it's not a cache directory!\nAre you sure you want to use this directory as a cache? If so, manually delete its content.`,
       );
     }
 
