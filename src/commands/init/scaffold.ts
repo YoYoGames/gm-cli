@@ -30,12 +30,21 @@ export async function scaffoldProject(
   });
 
   const destinationYyp = ctx.path.join(project.dir, `${project.name}.yyp`);
-  ctx.child_process.execFileSync(projectToolPath, [
-    "PROJECT",
-    "SAVE",
-    `SOURCE=${archivePath}`,
-    `DESTINATION=${destinationYyp}`,
-  ]);
+  ctx.child_process.execFileSync(
+    projectToolPath,
+    [
+      "PROJECT",
+      "SAVE",
+      `SOURCE=${archivePath}`,
+      `DESTINATION=${destinationYyp}`,
+    ],
+    {
+      env:
+        ctx.process.platform === "darwin"
+          ? { ...process.env, COMPlus_ZapDisable: "1" }
+          : undefined,
+    },
+  );
 
   await ctx.fs.unlink(archivePath);
 }
