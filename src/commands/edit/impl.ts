@@ -9,6 +9,7 @@ interface EditCommandFlags {
   mcp?: boolean;
   command?: string;
   prefabs?: string;
+  cacheDir?: string;
 }
 
 export default async function (
@@ -23,7 +24,7 @@ export default async function (
   const cwd = this.process.cwd();
   const projectPath = project ?? (await findProjectFile(this, cwd));
 
-  const cache = await Cache.getOrInit(this);
+  const cache = await Cache.getOrInit(this, flags.cacheDir);
   const projectToolPath = await downloadProjectTool(this, {
     cache,
     log: { error() {}, message() {}, success() {} },

@@ -32,6 +32,12 @@ export const editCommand = buildCommand({
         parse: String,
         optional: true,
       },
+      cacheDir: {
+        kind: "parsed",
+        parse: String,
+        brief: "Cache directory",
+        optional: true,
+      },
     },
     aliases: {
       C: "command",

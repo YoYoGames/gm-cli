@@ -30,6 +30,12 @@ export const initCommand = buildCommand({
         brief: "Create CLAUDE.md file",
         default: true,
       },
+      cacheDir: {
+        kind: "parsed",
+        parse: String,
+        brief: "Cache directory",
+        optional: true,
+      },
     },
     aliases: {
       n: "name",

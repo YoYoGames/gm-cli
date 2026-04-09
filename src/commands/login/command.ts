@@ -19,6 +19,12 @@ export const loginCommand = buildCommand({
         brief: "Print the license to stdout instead of saving to a file",
         optional: true,
       },
+      cacheDir: {
+        kind: "parsed",
+        parse: String,
+        brief: "Cache directory",
+        optional: true,
+      },
     },
   },
   docs: {

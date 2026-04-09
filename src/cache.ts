@@ -12,7 +12,10 @@ export class Cache {
   }
 
   static async getOrInit(ctx: Context, path?: string): Promise<Cache> {
-    const cachePath = path ?? ctx.path.join(ctx.process.cwd(), ".gmcache");
+    const cachePath =
+      path ??
+      ctx.process.env["GAMEMAKER_CACHE_DIR"] ??
+      ctx.path.join(ctx.process.cwd(), ".gmcache");
     const metaPath = ctx.path.join(cachePath, META_FILENAME);
 
     if (await exists(ctx, metaPath)) {
