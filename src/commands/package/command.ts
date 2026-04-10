@@ -1,6 +1,7 @@
 import { buildCommand } from "@stricli/core";
 import { TARGETS, TargetSchema } from "../../igor";
 import { parseProjectPath } from "../../project";
+import { parseToolchainVersion } from "../../toolchain";
 
 export const packageCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -28,6 +29,12 @@ export const packageCommand = buildCommand({
           }
         },
         brief: "The platform target to package for",
+        optional: true,
+      },
+      toolchain: {
+        kind: "parsed",
+        parse: parseToolchainVersion,
+        brief: "Toolchain to use, e.g. GMS2, GMS2@2024.14.4, or GMRT@0.18",
         optional: true,
       },
       verbose: {

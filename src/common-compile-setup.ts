@@ -12,12 +12,14 @@ import { LICENSE_FILENAME } from "./commands/login/impl";
 import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
 import type { Log } from "./log";
+import type { ToolchainVersion } from "./toolchain";
 
 /**
  * Command flags exposed in package/run/compile
  */
 export interface CommonCliBuildFlags {
   target?: Target;
+  toolchain?: ToolchainVersion;
   verbose?: boolean;
   license?: string;
   prefabs?: string;
@@ -68,6 +70,16 @@ export async function commonCompileSetup(
   const cwd = ctx.process.cwd();
   const target = flags.target ?? targetForPlatform(ctx.process.platform);
   const projectPath = project ?? (await findProjectFile(ctx, cwd));
+
+  if (flags.toolchain?.type === "GMRT") {
+    throw new KnownError("GMRT support coming soon!"); // FIXME
+  }
+
+  if (flags.toolchain?.version !== undefined) {
+    throw new KnownError(
+      "Specifing the toolchain version is not yet supported",
+    ); // FIXME
+  }
 
   const cache = await Cache.getOrInit(ctx, flags.cacheDir);
 
