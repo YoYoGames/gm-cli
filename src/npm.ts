@@ -111,7 +111,7 @@ export function npmInstall(
     child.stdout?.on("data", onData);
     child.stderr?.on("data", onData);
 
-    child.on("error", (err) => reject(err));
+    child.on("error", (err) => { reject(err); });
 
     child.on("close", (code) => {
       if (code === 0) {

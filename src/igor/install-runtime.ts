@@ -43,9 +43,7 @@ async function extractDmgs(ctx: Context, runtimeLocation: string) {
     ]);
 
     // Parse plist output to find mount point
-    const mountPointMatch = mountOut.match(
-      /<key>mount-point<\/key>\s*<string>([^<]+)<\/string>/,
-    );
+    const mountPointMatch = /<key>mount-point<\/key>\s*<string>([^<]+)<\/string>/.exec(mountOut);
     if (!mountPointMatch?.[1]) continue;
     const mountPoint: string = mountPointMatch[1];
 

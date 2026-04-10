@@ -2,10 +2,10 @@ import * as p from "@clack/prompts";
 import { validateProjectName } from "./validation";
 import type { Template, ProjectConfig } from "./types";
 
-type ArgvOptions = {
+interface ArgvOptions {
   name?: string;
   claude?: boolean;
-};
+}
 
 export async function runInteractive(
   argv: ArgvOptions,
@@ -20,7 +20,7 @@ export async function runInteractive(
           message: "What's your project name?",
           placeholder: "my-awesome-game",
           defaultValue: argv.name,
-          validate: (value) => validateProjectName(value as string),
+          validate: (value) => validateProjectName(value!),
         }),
       projectType: async () => {
         const types = [...new Set(templates.map((t) => t.type))].sort();
@@ -61,8 +61,8 @@ export async function runInteractive(
   );
 
   return {
-    projectName: answers.projectName as string,
+    projectName: answers.projectName,
     template: answers.template as string,
-    createClaude: answers.createClaude as boolean,
+    createClaude: answers.createClaude,
   };
 }
