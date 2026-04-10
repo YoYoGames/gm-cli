@@ -70,3 +70,16 @@ export async function getInstalledRuntimeModules(
     .filter((result) => result.success)
     .map((result) => result.data);
 }
+
+export function packageExtension(target: Target): string | undefined {
+  switch (target) {
+    case "windows":
+    case "linux":
+    case "mac":
+    case "operagx":
+      return ".zip";
+    default:
+      // FIXME: implement for all platforms
+      return;
+  }
+}

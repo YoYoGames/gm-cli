@@ -1,4 +1,4 @@
 export * from "./target";
-export * from "./run";
+export * from "./spawn";
 export * from "./download";
 export * from "./install-runtime";
