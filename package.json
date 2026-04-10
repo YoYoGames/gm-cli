@@ -18,10 +18,10 @@
     "prebuild": "tsc -p tsconfig.json",
     "build": "tsup --silent",
     "prepublishOnly": "pnpm run build",
-    "lint:eslint": "eslint",
+    "lint:eslint": "eslint --max-warnings 0",
     "lint:tsc": "tsc -p tsconfig.json",
     "lint": "run-p lint:*",
-    "fix:eslint": "eslint --fix",
+    "fix:eslint": "eslint --fix --max-warnings 0",
     "fix": "run-p fix:*"
   },
   "tsup": {
