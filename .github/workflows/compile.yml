@@ -1,4 +1,4 @@
-name: Builder template
+name: Compile
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ env:
   GAMEMAKER_AUTH_TOKEN: ${{ secrets.GAMEMAKER_AUTH_TOKEN }}
 
 jobs:
-  ci:
+  compile:
     runs-on: ubuntu-latest
     defaults:
       run:
