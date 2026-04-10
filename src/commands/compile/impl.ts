@@ -19,7 +19,7 @@ export default async function (
         igorPath: options.igorPath,
         args: constructIgorBuildArgs(options, "Compile"),
         label: "Igor",
-        onSignal: () => stopProcesses(ctx),
+        onSignal: () => { stopProcesses(ctx); },
       });
       return { successMessage: "Compilation finished" };
     },
