@@ -33,8 +33,8 @@ jobs:
         uses: actions/cache@v5
         with:
           # TODO: Remove test/ for the real thing
-          path: test/.gm-cache
-          key: ${{ runner.os }}-gm-cache
+          path: test/.gmcache
+          key: ${{ runner.os }}-gmcache
 
       - name: (TODO Remove) Make prefabs dir
         run: |
