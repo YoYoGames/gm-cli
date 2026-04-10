@@ -53,7 +53,8 @@ export async function callResourceTool(
     ...(projectToolPath ? [`projecttool=${projectToolPath}`] : []),
     ...(prefabsFolder ? [`prefabsfolder=${prefabsFolder}`] : []),
   ];
-  const packageName = `@gm-tools/resource-tool-${getPlatformSuffix()}@latest`;
+  const platformSuffix = getPlatformSuffix(ctx);
+  const packageName = `@gm-tools/resource-tool-${platformSuffix}@latest`;
   try {
     await npmExec(ctx, {
       packageName,

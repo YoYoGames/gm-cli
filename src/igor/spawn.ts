@@ -36,7 +36,7 @@ export function spawnIgor(
       stdio: ["inherit", "pipe", "pipe"],
       env:
         ctx.process.platform === "darwin"
-          ? { ...process.env, COMPlus_ZapDisable: "1" }
+          ? { ...ctx.process.env, COMPlus_ZapDisable: "1" }
           : undefined,
     });
 
@@ -45,31 +45,31 @@ export function spawnIgor(
         if (line) log.message(line);
       }
     };
-    child.stdout?.on("data", onData);
-    child.stderr?.on("data", onData);
+    child.stdout.on("data", onData);
+    child.stderr.on("data", onData);
 
     if (onSignal) {
-      process.on("SIGINT", onSignal);
-      process.on("SIGTERM", onSignal);
+      ctx.process.on("SIGINT", onSignal);
+      ctx.process.on("SIGTERM", onSignal);
     }
 
     child.on("error", (err) => {
       if (onSignal) {
-        process.removeListener("SIGINT", onSignal);
-        process.removeListener("SIGTERM", onSignal);
+        ctx.process.removeListener("SIGINT", onSignal);
+        ctx.process.removeListener("SIGTERM", onSignal);
       }
       reject(err);
     });
 
     child.on("close", (code) => {
       if (onSignal) {
-        process.removeListener("SIGINT", onSignal);
-        process.removeListener("SIGTERM", onSignal);
+        ctx.process.removeListener("SIGINT", onSignal);
+        ctx.process.removeListener("SIGTERM", onSignal);
       }
       if (code === 0 || code === null) {
         resolve();
       } else {
-        reject(new Error(`${label} exited with code ${code}`));
+        reject(new Error(`${label} exited with code ${String(code)}`));
       }
     });
   });

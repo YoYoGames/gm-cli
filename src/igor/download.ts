@@ -31,8 +31,8 @@ export async function downloadIgor(
   cache: Cache,
 ): Promise<string> {
   const destDir = await cache.getSubDirPath(ctx, "igor");
-  const platform = process.platform;
-  const arch = process.arch;
+  const platform = ctx.process.platform;
+  const arch = ctx.process.arch;
   const platformDir = IGOR_PLATFORM_DIRS[platform] ?? platform;
   const exeName = platform === "win32" ? "Igor.exe" : "Igor";
   const igorPath = ctx.path.join(destDir, platformDir, arch, exeName);
@@ -60,7 +60,7 @@ export async function downloadIgor(
   });
   if (!response.ok) {
     throw new KnownError(
-      `Failed to download Igor: ${response.status} ${response.statusText}`,
+      `Failed to download Igor: ${String(response.status)} ${response.statusText}`,
     );
   }
 

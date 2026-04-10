@@ -3,6 +3,7 @@ import type { Cache } from "../../cache";
 import type { Context } from "../../context";
 import { KnownError } from "../../error";
 import { downloadProjectTool } from "../../projectTool";
+import { noopLog } from "../../log";
 
 export async function scaffoldProject(
   ctx: Context,
@@ -22,7 +23,7 @@ export async function scaffoldProject(
 
   const projectToolPath = await downloadProjectTool(ctx, {
     cache,
-    log: { message() {}, error() {}, success() {} },
+    log: noopLog,
     verbose: false,
   });
 
@@ -38,7 +39,7 @@ export async function scaffoldProject(
     {
       env:
         ctx.process.platform === "darwin"
-          ? { ...process.env, COMPlus_ZapDisable: "1" }
+          ? { ...ctx.process.env, COMPlus_ZapDisable: "1" }
           : undefined,
     },
   );

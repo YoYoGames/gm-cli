@@ -21,7 +21,7 @@ export default async function (
         const ext = packageExtension(options.target);
         const projectDir = ctx.path.dirname(options.projectPath);
         const projectName = ctx.path.basename(options.projectPath, ".yyp");
-        const defaultFileName = `${projectName}${ext != null ? ext : ""}`;
+        const defaultFileName = `${projectName}${ext ?? ""}`;
         targetFile = ctx.path.join(projectDir, defaultFileName);
       } else {
         targetFile = flags.output;

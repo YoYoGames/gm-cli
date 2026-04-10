@@ -8,12 +8,21 @@ export async function downloadProjectTool(
   { cache, log, verbose }: { cache: Cache; log: Log; verbose: boolean },
 ): Promise<string> {
   const destDir = await cache.getSubDirPath(ctx, "project-tool");
-  const packageName = `@gm-tools/project-tool-${getPlatformSuffix()}`;
+  const platformSuffix = getPlatformSuffix(ctx);
+  const packageName = `@gm-tools/project-tool-${platformSuffix}`;
   const exeName =
-    process.platform === "win32" ? "ProjectTool.exe" : "ProjectTool";
+    ctx.process.platform === "win32" ? "ProjectTool.exe" : "ProjectTool";
   const toolPath =
-    process.platform === "darwin"
-      ? ctx.path.join(destDir, "lib", "node_modules", packageName, "Contents", "MacOS", exeName)
+    ctx.process.platform === "darwin"
+      ? ctx.path.join(
+          destDir,
+          "lib",
+          "node_modules",
+          packageName,
+          "Contents",
+          "MacOS",
+          exeName,
+        )
       : ctx.path.join(destDir, "lib", "node_modules", packageName, exeName);
 
   try {
@@ -30,7 +39,7 @@ export async function downloadProjectTool(
     verbose,
   });
 
-  if (process.platform !== "win32") {
+  if (ctx.process.platform !== "win32") {
     await ctx.fs.chmod(toolPath, 0o755);
   }
 

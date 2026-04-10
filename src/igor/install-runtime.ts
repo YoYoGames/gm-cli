@@ -1,3 +1,4 @@
+import { promisify } from "node:util";
 import type { Cache } from "../cache";
 import { exists, type Context } from "../context";
 import type { Log } from "../log";
@@ -5,14 +6,17 @@ import { KnownError } from "../error";
 import type { Target } from "./target";
 import { getInstalledRuntimeModules } from "./target";
 import { findRuntimeLocation, installRuntime } from "./spawn";
+import { z } from "zod";
+
+const ReceiptSchema = z.record(z.string(), z.unknown());
 
 async function installationFixup(ctx: Context, runtimeLocation: string) {
-  if (process.platform === "win32") {
+  if (ctx.process.platform === "win32") {
     return;
   }
   const binDir = ctx.path.join(runtimeLocation, "bin");
   await chmodRecursive(ctx, binDir);
-  if (process.platform === "darwin") {
+  if (ctx.process.platform === "darwin") {
     await extractDmgs(ctx, runtimeLocation);
   }
 }
@@ -29,9 +33,7 @@ async function extractDmgs(ctx: Context, runtimeLocation: string) {
   const dmgs = entries.filter((e) => e.endsWith(".dmg"));
   for (const dmg of dmgs) {
     const dmgPath = ctx.path.join(macDir, dmg);
-    const { execFile } = await import("child_process");
-    const { promisify } = await import("util");
-    const exec = promisify(execFile);
+    const exec = promisify(ctx.child_process.execFile);
 
     // Mount the DMG
     const { stdout: mountOut } = await exec("hdiutil", [
@@ -43,7 +45,8 @@ async function extractDmgs(ctx: Context, runtimeLocation: string) {
     ]);
 
     // Parse plist output to find mount point
-    const mountPointMatch = /<key>mount-point<\/key>\s*<string>([^<]+)<\/string>/.exec(mountOut);
+    const mountPointMatch =
+      /<key>mount-point<\/key>\s*<string>([^<]+)<\/string>/.exec(mountOut);
     if (!mountPointMatch?.[1]) continue;
     const mountPoint: string = mountPointMatch[1];
 
@@ -106,9 +109,9 @@ export async function installRuntimeIfNeeded(
     ? await getInstalledRuntimeModules(ctx, runtimeLocation)
     : [];
 
-  if (installedModules.includes(target)) {
+  if (runtimeLocation && installedModules.includes(target)) {
     log.success("Runtime found");
-    return runtimeLocation!;
+    return runtimeLocation;
   }
 
   // Install into a temporary directory first, then merge into the real
@@ -134,7 +137,9 @@ export async function installRuntimeIfNeeded(
     const receiptPath = ctx.path.join(destLocation, "receipt.json");
     let existingReceipt: Record<string, unknown> = {};
     try {
-      existingReceipt = JSON.parse(await ctx.fs.readFile(receiptPath, "utf-8"));
+      existingReceipt = ReceiptSchema.parse(
+        JSON.parse(await ctx.fs.readFile(receiptPath, "utf-8")),
+      );
     } catch {
       // No existing receipt
     }
@@ -145,7 +150,10 @@ export async function installRuntimeIfNeeded(
     // Merge the old receipt entries into the new one so previously
     // installed modules are not forgotten.
     const newRaw = await ctx.fs.readFile(receiptPath, "utf-8");
-    const mergedReceipt = { ...existingReceipt, ...JSON.parse(newRaw) };
+    const mergedReceipt = {
+      ...existingReceipt,
+      ...ReceiptSchema.parse(JSON.parse(newRaw)),
+    };
     await ctx.fs.writeFile(receiptPath, JSON.stringify(mergedReceipt, null, 2));
   } catch (e) {
     log.error("Failed to install runtime");
