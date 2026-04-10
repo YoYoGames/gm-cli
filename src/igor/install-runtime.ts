@@ -4,7 +4,7 @@ import type { Log } from "../log";
 import { KnownError } from "../error";
 import type { Target } from "./target";
 import { getInstalledRuntimeModules } from "./target";
-import { findRuntimeLocation, installRuntime } from "./run";
+import { findRuntimeLocation, installRuntime } from "./spawn";
 
 async function installationFixup(ctx: Context, runtimeLocation: string) {
   if (process.platform === "win32") {

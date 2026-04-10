@@ -4,7 +4,7 @@ import {
   downloadIgor,
   installRuntimeIfNeeded,
   type Target,
-  type IgorBuildOptions,
+  type CommonIgorBuildArgs,
 } from "./igor";
 import { downloadProjectTool } from "./projectTool";
 import { KnownError } from "./error";
@@ -13,7 +13,10 @@ import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
 import type { Log } from "./log";
 
-export interface BuildFlags {
+/**
+ * Command flags exposed in package/run/compile
+ */
+export interface CommonCliBuildFlags {
   target?: Target;
   verbose?: boolean;
   license?: string;
@@ -23,7 +26,7 @@ export interface BuildFlags {
 
 async function getLicenseOrThrow(
   ctx: Context,
-  flags: BuildFlags,
+  flags: CommonCliBuildFlags,
   cache: Cache,
 ): Promise<string> {
   if (flags.license !== undefined) {
@@ -45,14 +48,21 @@ async function getLicenseOrThrow(
   );
 }
 
-
+/**
+ * Utility used in run, compile and package commands.
+ * Setup the cache, Igor, and install the required runtime for a build
+ */
 export async function commonCompileSetup(
   ctx: Context,
-  flags: BuildFlags,
+  flags: CommonCliBuildFlags,
   project: ProjectPath | undefined,
   action: {
     label: (target: Target) => string;
-    invoke: (ctx: Context, log: Log, options: IgorBuildOptions) => Promise<void>;
+    invoke: (
+      ctx: Context,
+      log: Log,
+      options: CommonIgorBuildArgs,
+    ) => Promise<string | void>;
   },
 ): Promise<void> {
   const cwd = ctx.process.cwd();
@@ -96,8 +106,9 @@ export async function commonCompileSetup(
   const buildCacheDir = await cache.getSubDirPath(ctx, "build");
 
   const actionLog = ctx.makeTaskLogger(action.label(target));
+  let successMessage: string | void;
   try {
-    await action.invoke(ctx, actionLog, {
+    successMessage = await action.invoke(ctx, actionLog, {
       igorPath,
       runtimeDir: runtimeLocation,
       target,
@@ -112,5 +123,5 @@ export async function commonCompileSetup(
     actionLog.error("Compilation failed");
     throw new KnownError(e);
   }
-  actionLog.success("Done");
+  actionLog.success(successMessage ?? "Done");
 }

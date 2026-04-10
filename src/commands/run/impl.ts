@@ -1,18 +1,26 @@
 import type { Context } from "../../context";
 import type { ProjectPath } from "../../project";
-import { igorRun } from "../../igor";
 import {
   commonCompileSetup,
-  type BuildFlags,
+  type CommonCliBuildFlags,
 } from "../../common-compile-setup";
+import { stopProcesses } from "../../igor/kill-process";
+import { constructIgorBuildArgs, spawnIgor } from "../../igor/spawn";
 
 export default async function (
   this: Context,
-  flags: BuildFlags,
+  flags: CommonCliBuildFlags,
   project?: ProjectPath,
 ): Promise<void> {
   await commonCompileSetup(this, flags, project, {
     label: (target) => `Compiling & running for ${target}`,
-    invoke: igorRun,
+    invoke: (ctx, log, args) => {
+      return spawnIgor(ctx, log, {
+        igorPath: args.igorPath,
+        args: constructIgorBuildArgs(args, "Run"),
+        label: "Igor",
+        onSignal: () => stopProcesses(ctx),
+      });
+    },
   });
 }

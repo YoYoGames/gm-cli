@@ -5,6 +5,7 @@ import { compileProjectCommand } from "./commands/compile/command";
 import { runCommand } from "./commands/run/command";
 import { editCommand } from "./commands/edit/command";
 import { loginCommand } from "./commands/login/command";
+import { packageCommand } from "./commands/package/command";
 import { KnownError } from "./error";
 
 const routes = buildRouteMap({
@@ -14,6 +15,7 @@ const routes = buildRouteMap({
     run: runCommand,
     edit: editCommand,
     login: loginCommand,
+    package: packageCommand,
   },
   docs: {
     brief: description,
