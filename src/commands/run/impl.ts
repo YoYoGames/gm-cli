@@ -14,13 +14,14 @@ export default async function (
 ): Promise<void> {
   await commonCompileSetup(this, flags, project, {
     label: (target) => `Compiling & running for ${target}`,
-    invoke: (ctx, log, args) => {
-      return spawnIgor(ctx, log, {
+    invoke: async (ctx, log, args) => {
+      await spawnIgor(ctx, log, {
         igorPath: args.igorPath,
         args: constructIgorBuildArgs(args, "Run"),
         label: "Igor",
         onSignal: () => stopProcesses(ctx),
       });
+      return { successMessage: "Game exited" };
     },
   });
 }
