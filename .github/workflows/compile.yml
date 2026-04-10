@@ -20,7 +20,18 @@ env:
 
 jobs:
   compile:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: operagx
+          # - runner: ubuntu-latest
+          #   target: linux
+          # - runner: ubuntu-latest
+          #   target: windows
+          # - runner: macos-latest
+          #   target: mac
+    runs-on: ${{ matrix.runner }}
     defaults:
       run:
         working-directory: ./test
@@ -34,7 +45,7 @@ jobs:
         with:
           # TODO: Remove test/ for the real thing
           path: test/.gmcache
-          key: ${{ runner.os }}-gmcache
+          key: ${{ runner.os }}-gmcache-${{ matrix.target }}
 
       - name: (TODO Remove) Make prefabs dir
         run: |
@@ -46,4 +57,6 @@ jobs:
         env:
           GAMEMAKER_PAT: ${{ secrets.GAMEMAKER_PAT }}
 
-      - run: npx "$GM_COMMAND" compile
+      - run: npx "$GM_COMMAND" compile --target ${{ matrix.target }}
+        env:
+          NO_COLOR: 1
