@@ -1,7 +1,7 @@
 import type { Context } from "../context";
 
 export function stopProcesses(ctx: Context): void {
-  if (process.platform === "win32") {
+  if (ctx.process.platform === "win32") {
     stopWindowsProcesses(ctx);
   } else {
     stopMacProcesses(ctx);
@@ -30,7 +30,7 @@ const KILL_LIST = [
 function stopMacProcesses(ctx: Context): void {
   for (const name of KILL_LIST) {
     // macOS truncates process names to 15 characters
-    const truncated = process.platform === "darwin" ? name.slice(0, 15) : name;
+    const truncated = ctx.process.platform === "darwin" ? name.slice(0, 15) : name;
     const escaped = truncated.replace(/'/g, "\\'").replace(/ /g, "\\ ");
 
     let psOutput: string;
@@ -52,7 +52,7 @@ function stopMacProcesses(ctx: Context): void {
       // Skip the grep process itself
       if (trimmed.includes("grep")) continue;
 
-      const pidStr = (/^(\d+)/.exec(trimmed))?.[1];
+      const pidStr = /^(\d+)/.exec(trimmed)?.[1];
       if (!pidStr) continue;
 
       const pid = parseInt(pidStr, 10);
@@ -66,7 +66,7 @@ function stopMacProcesses(ctx: Context): void {
 function killMacProcessTree(ctx: Context, pid: number): void {
   try {
     const children = ctx.child_process
-      .execSync(`pgrep -P ${pid}`, {
+      .execSync(`pgrep -P ${String(pid)}`, {
         encoding: "utf-8",
       })
       .trim();
@@ -81,7 +81,7 @@ function killMacProcessTree(ctx: Context, pid: number): void {
   }
 
   try {
-    process.kill(pid, "SIGKILL");
+    ctx.process.kill(pid, "SIGKILL");
   } catch {
     // process already exited
   }
@@ -105,8 +105,13 @@ function stopWindowsProcesses(ctx: Context): void {
     if (!match) continue;
 
     const [, processName, pidStr] = match;
-    const nameNoExt = processName!.replace(/\.exe$/i, "");
-    if (!KILL_LIST.includes(nameNoExt)) continue;
+    if (!processName || !pidStr) {
+      continue;
+    }
+    const nameNoExt = processName.replace(/\.exe$/i, "");
+    if (!KILL_LIST.includes(nameNoExt)) {
+      continue;
+    }
 
     try {
       ctx.child_process.execSync(`taskkill /T /F /PID ${pidStr}`, {

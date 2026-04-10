@@ -63,7 +63,7 @@ export async function getInstalledRuntimeModules(
 ): Promise<Module[]> {
   const receiptPath = ctx.path.join(runtimeLocation, "receipt.json");
   const content = await ctx.fs.readFile(receiptPath, "utf-8");
-  const receipt = JSON.parse(content);
+  const receipt = z.record(z.string(), z.unknown()).parse(JSON.parse(content));
 
   return Object.keys(receipt)
     .map((key) => ModuleSchema.safeParse(key))

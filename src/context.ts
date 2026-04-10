@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { KnownError } from "./error";
-import type { Log, TaskLogger } from "./log";
+import type { TaskLogger } from "./log";
 import { fancyTaskLogger, plainTaskLogger } from "./log";
 
 export interface Context extends CommandContext {

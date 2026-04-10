@@ -15,9 +15,9 @@ const PLATFORM_SUFFIXES: Record<string, Record<string, string>> = {
   },
 };
 
-export function getPlatformSuffix(): string {
-  const platform = process.platform;
-  const arch = process.arch;
+export function getPlatformSuffix(ctx: Context): string {
+  const platform = ctx.process.platform;
+  const arch = ctx.process.arch;
 
   const platformNames = PLATFORM_SUFFIXES[platform];
   if (!platformNames) {
@@ -56,13 +56,13 @@ export function npmExec(
   return new Promise<void>((resolve, reject) => {
     const child = ctx.child_process.spawn("npx", fullArgs, {
       stdio: ignoreStdio ? "ignore" : "inherit",
-      env: { ...process.env, ...extraEnvVars },
+      env: { ...ctx.process.env, ...extraEnvVars },
     });
 
     child.on("error", reject);
     child.on("exit", (code) => {
       if (code !== 0) {
-        reject(new Error(`npm exec failed with code ${code}`));
+        reject(new Error(`npm exec failed with code ${String(code)}`));
       } else {
         resolve();
       }
@@ -108,8 +108,8 @@ export function npmInstall(
         if (line) log.message(line);
       }
     };
-    child.stdout?.on("data", onData);
-    child.stderr?.on("data", onData);
+    child.stdout.on("data", onData);
+    child.stderr.on("data", onData);
 
     child.on("error", (err) => { reject(err); });
 
@@ -117,7 +117,7 @@ export function npmInstall(
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`npm install exited with code ${code}`));
+        reject(new Error(`npm install exited with code ${String(code)}`));
       }
     });
   });

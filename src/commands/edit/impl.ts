@@ -4,6 +4,7 @@ import { findProjectFile, type ProjectPath } from "../../project";
 import { KnownError } from "../../error";
 import { downloadProjectTool } from "../../projectTool";
 import { callResourceTool, type ResourceToolMode } from "../../resourceTool";
+import { noopLog } from "../../log";
 
 interface EditCommandFlags {
   mcp?: boolean;
@@ -27,7 +28,7 @@ export default async function (
   const cache = await Cache.getOrInit(this, flags.cacheDir);
   const projectToolPath = await downloadProjectTool(this, {
     cache,
-    log: { error() {}, message() {}, success() {} },
+    log: noopLog,
     verbose: false,
   });
 

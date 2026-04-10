@@ -8,6 +8,16 @@ export interface Log {
 
 export type TaskLogger = (title: string) => Log;
 
+const noop = () => {
+  // intentionally empty
+};
+
+export const noopLog: Log = {
+  message: noop,
+  error: noop,
+  success: noop,
+};
+
 export function fancyTaskLogger(): TaskLogger {
   return (title) => taskLog({ title, retainLog: true });
 }

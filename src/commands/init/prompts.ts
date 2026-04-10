@@ -20,7 +20,7 @@ export async function runInteractive(
           message: "What's your project name?",
           placeholder: "my-awesome-game",
           defaultValue: argv.name,
-          validate: (value) => validateProjectName(value!),
+          validate: (value) => validateProjectName(value ?? ""),
         }),
       projectType: async () => {
         const types = [...new Set(templates.map((t) => t.type))].sort();
@@ -35,10 +35,9 @@ export async function runInteractive(
           .filter(({ type }) => type === results.projectType)
           .sort((a, b) => a.title.localeCompare(b.title));
 
-        p.selectKey;
         return p.select({
           message: "Pick a template",
-          options: filtered.map(({ id, title, description }) => ({
+          options: filtered.map(({ id, title }) => ({
             value: id,
             label: title
               .replace(/ Template$/, "")
