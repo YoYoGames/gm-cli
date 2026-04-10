@@ -46,7 +46,7 @@ export default async function (
         label: "Igor",
         onSignal: () => stopProcesses(ctx),
       });
-      return targetFile;
+      return { successMessage: `Package created: ${targetFile}` };
     },
   });
 }

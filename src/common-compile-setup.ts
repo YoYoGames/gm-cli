@@ -62,7 +62,7 @@ export async function commonCompileSetup(
       ctx: Context,
       log: Log,
       options: CommonIgorBuildArgs,
-    ) => Promise<string | void>;
+    ) => Promise<{ successMessage: string }>;
   },
 ): Promise<void> {
   const cwd = ctx.process.cwd();
@@ -106,9 +106,9 @@ export async function commonCompileSetup(
   const buildCacheDir = await cache.getSubDirPath(ctx, "build");
 
   const actionLog = ctx.makeTaskLogger(action.label(target));
-  let successMessage: string | void;
+  let successMessage: string;
   try {
-    successMessage = await action.invoke(ctx, actionLog, {
+    ({ successMessage } = await action.invoke(ctx, actionLog, {
       igorPath,
       runtimeDir: runtimeLocation,
       target,
@@ -118,10 +118,10 @@ export async function commonCompileSetup(
       projectPath,
       projectToolPath,
       verbose: flags.verbose ?? false,
-    });
+    }));
   } catch (e) {
     actionLog.error("Compilation failed");
     throw new KnownError(e);
   }
-  actionLog.success(successMessage ?? "Done");
+  actionLog.success(successMessage);
 }
