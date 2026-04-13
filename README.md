@@ -12,17 +12,6 @@ The GM CLI and parts of the underlying tools are only available internally in th
 npm login --registry https://gmpm-private.gamemaker.io --scope @experimental
 ```
 
-### Get a license
-
-**This won't be needed in the future.** But for now, make sure to set the env variable `GAMEMAKER_LICENSE`. You can fetch a new license by issuing an [access key](https://gamemaker.io/en/account/access-keys) and running:
-
-```bash
-npx @experimental/gm@latest login --print <access key>
-# then save output to a file and export GAMEMAKER_LICENSE=...
-```
-
-Alternatively, running the command without the `--print` flag will save a license file that's automatically picked up by all other gm commands ran from the same directory.
-
 ### Specify a prefabs folder
 
 **This won't be needed in the future.** Specify what folder should be used to get prefabs. Assuming you have the IDE installed you can set:
