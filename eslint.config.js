@@ -2,8 +2,7 @@ import * as path from "node:path";
 
 import { includeIgnoreFile } from "@eslint/compat";
 import eslint from "@eslint/js";
-// @ts-expect-error - no types available
-import onlyWarn from "eslint-plugin-only-warn";
+import "eslint-plugin-only-warn";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
@@ -31,8 +30,7 @@ export default defineConfig(
       ],
     },
   },
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  { plugins: { onlyWarn } },
+  { plugins: {} },
   {
     languageOptions: {
       parserOptions: {
