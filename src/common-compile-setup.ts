@@ -5,6 +5,7 @@ import {
   installRuntimeIfNeeded,
   type Target,
   type CommonIgorBuildArgs,
+  fetchLicense,
 } from "./igor";
 import { downloadProjectTool } from "./projectTool";
 import { KnownError } from "./error";
@@ -26,28 +27,38 @@ export interface CommonCliBuildFlags {
   cacheDir?: string;
 }
 
-async function getLicenseOrThrow(
+const GUEST_ACCESS_KEY = "09bdd0bc8c2f6cce3391a16679ede918";
+
+async function getLicense(
   ctx: Context,
   flags: CommonCliBuildFlags,
   cache: Cache,
+  igorPath: string,
+  log: Log,
 ): Promise<string> {
   if (flags.license !== undefined) {
+    log.message(`Using --license="${flags.license}"`);
     return flags.license;
   }
 
   const envLicense = ctx.process.env["GAMEMAKER_LICENSE"];
   if (envLicense !== undefined) {
+    log.message(`Using GAMEMAKER_LICENSE="${envLicense}"`);
     return envLicense;
   }
 
-  const cachedLicense = ctx.path.join(cache.dirPath, LICENSE_FILENAME);
-  if (await exists(ctx, cachedLicense)) {
-    return cachedLicense;
+  const cachedLicenseFile = ctx.path.join(cache.dirPath, LICENSE_FILENAME);
+  if (!(await exists(ctx, cachedLicenseFile))) {
+    // If no cached file exists, issue a guest license and cache that
+    log.message("Using guest access key");
+    await fetchLicense(ctx, log, {
+      igorPath,
+      accessKey: GUEST_ACCESS_KEY,
+      outputFile: cachedLicenseFile,
+    });
   }
 
-  throw new KnownError(
-    "You must provide a license. Specify a .plist file with `--license=...` or the GAMEMAKER_LICENSE env variable.\nAlternatively, use `gm login <access-key>`. You can issue an access key at https://gamemaker.io/en/account/access-keys",
-  );
+  return cachedLicenseFile;
 }
 
 /**
@@ -107,9 +118,13 @@ export async function commonCompileSetup(
   }
   projectToolLog.success("ProjectTool downloaded");
 
+  const licenseLog = ctx.makeTaskLogger("Fetching license");
+  const licenseFile = await getLicense(ctx, flags, cache, igorPath, licenseLog);
+  licenseLog.success("License fetched");
+
   const runtimeLog = ctx.makeTaskLogger("Installing runtime");
   const runtimeLocation = await installRuntimeIfNeeded(ctx, runtimeLog, {
-    licenseFile: await getLicenseOrThrow(ctx, flags, cache),
+    licenseFile,
     igorPath,
     cache,
     target,
@@ -126,7 +141,7 @@ export async function commonCompileSetup(
       target,
       cacheDir: buildCacheDir,
       prefabsDir: flags.prefabs ?? getPrefabsDirOrThrow(ctx),
-      licenseFile: await getLicenseOrThrow(ctx, flags, cache),
+      licenseFile,
       projectPath,
       projectToolPath,
       verbose: flags.verbose ?? false,
