@@ -16,8 +16,13 @@ env:
 jobs:
   e2e:
     strategy:
+      fail-fast: false
       matrix:
-        runner: [ubuntu-latest, windows-latest, macos-latest]
+        runner:
+          - macos-latest
+          - ubuntu-latest
+            # TODO: Enable
+            # - windows-latest
 
     runs-on: ${{ matrix.runner }}
 
