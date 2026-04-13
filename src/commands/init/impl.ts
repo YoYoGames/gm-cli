@@ -3,12 +3,14 @@ import { type Context, exists } from "../../context";
 import { Cache } from "../../cache";
 import { KnownError } from "../../error";
 import { callResourceTool } from "../../resourceTool";
-import { gitignore, gitattributes, claudemd, compileYml, packageYml } from "./base-files";
+import { gitignore, gitattributes, compileYml, packageYml } from "./base-files";
 import { getTemplates } from "./get-templates";
 import { runInteractive } from "./prompts";
 import { scaffoldProject } from "./scaffold";
 import { validateProjectName, findTemplate } from "./validation";
 import type { ProjectConfig } from "./types";
+// @ts-expect-error — bundled as text by tsup/esbuild
+import claudeContents from "./claude-contents.txt";
 
 interface InitCommandFlags {
   interactive: boolean;
@@ -88,10 +90,15 @@ export default async function (
         this,
         flags.cacheDir ?? this.path.join(projectDir, ".gmcache"),
       );
-      await scaffoldProject(this, selectedTemplate, {
-        name: config.projectName,
-        dir: projectDir,
-      }, cache);
+      await scaffoldProject(
+        this,
+        selectedTemplate,
+        {
+          name: config.projectName,
+          dir: projectDir,
+        },
+        cache,
+      );
     }
 
     s.message("Creating base files");
@@ -106,7 +113,7 @@ export default async function (
     if (config.createClaude) {
       await this.fs.writeFile(
         this.path.join(projectDir, "CLAUDE.md"),
-        claudemd,
+        claudeContents as string,
       );
     }
     const workflowsDir = this.path.join(projectDir, ".github", "workflows");
