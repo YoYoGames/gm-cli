@@ -77,12 +77,12 @@ export const claudemd = `
  # This is the claude md
 `;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export function compileYml(_params: Record<string, never>): string {
   return `# TODO: fill in compile workflow`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export function packageYml(_params: Record<string, never>): string {
   return `# TODO: fill in package workflow`;
 }
