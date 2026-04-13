@@ -4,7 +4,7 @@ import type { Template, ProjectConfig } from "./types";
 
 interface ArgvOptions {
   name?: string;
-  claude?: boolean;
+  ai?: boolean;
 }
 
 export async function runInteractive(
@@ -46,10 +46,10 @@ export async function runInteractive(
           })),
         });
       },
-      createClaude: () =>
+      useAi: () =>
         p.confirm({
-          message: "Create CLAUDE.md?",
-          initialValue: argv.claude ?? true,
+          message: "Set up AI scaffolding (MCP, CLAUDE.md, etc.)",
+          initialValue: argv.ai ?? true,
         }),
     },
     {
@@ -62,6 +62,6 @@ export async function runInteractive(
   return {
     projectName: answers.projectName,
     template: answers.template as string,
-    createClaude: answers.createClaude,
+    useAi: answers.useAi,
   };
 }

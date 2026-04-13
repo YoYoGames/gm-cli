@@ -16,7 +16,7 @@ interface InitCommandFlags {
   interactive: boolean;
   name?: string;
   template?: string;
-  claude: boolean;
+  ai: boolean;
   cacheDir?: string;
 }
 
@@ -49,13 +49,13 @@ export default async function (
     config = {
       projectName: flags.name,
       template: matchedTemplate.id,
-      createClaude: flags.claude,
+      useAi: flags.ai,
     };
 
     this.process.stdout.write("Creating project...\n");
   } else {
     config = await runInteractive(
-      { name: flags.name, claude: flags.claude },
+      { name: flags.name, ai: flags.ai },
       templates,
     );
   }
@@ -110,10 +110,47 @@ export default async function (
       this.path.join(projectDir, ".gitattributes"),
       gitattributes,
     );
-    if (config.createClaude) {
+    if (config.useAi) {
       await this.fs.writeFile(
         this.path.join(projectDir, "CLAUDE.md"),
         claudeContents as string,
+      );
+      await this.fs.writeFile(
+        this.path.join(projectDir, "AGENTS.md"),
+        claudeContents as string,
+      );
+      const claudeDir = this.path.join(projectDir, ".claude");
+      await this.fs.mkdir(claudeDir, { recursive: true });
+      await this.fs.writeFile(
+        this.path.join(claudeDir, "settings.local.json"),
+        JSON.stringify(
+          {
+            permissions: {
+              deny: ["Edit(*.yy)"],
+            },
+            enabledMcpjsonServers: ["gamemaker-mcp"],
+            enableAllProjectMcpServers: true,
+          },
+          null,
+          2,
+        ) + "\n",
+      );
+      await this.fs.writeFile(
+        this.path.join(projectDir, ".mcp.json"),
+        JSON.stringify(
+          {
+            mcpServers: {
+              "gamemaker-mcp": {
+                type: "stdio",
+                command: "npx",
+                args: ["@experimental/gm@latest", "edit", "--mcp"],
+                env: {},
+              },
+            },
+          },
+          null,
+          2,
+        ) + "\n",
       );
     }
     const workflowsDir = this.path.join(projectDir, ".github", "workflows");
