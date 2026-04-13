@@ -3,7 +3,7 @@ import { type Context, exists } from "../../context";
 import { Cache } from "../../cache";
 import { KnownError } from "../../error";
 import { callResourceTool } from "../../resourceTool";
-import { gitignore, gitattributes, claudemd } from "./base-files";
+import { gitignore, gitattributes, claudemd, compileYml, packageYml } from "./base-files";
 import { getTemplates } from "./get-templates";
 import { runInteractive } from "./prompts";
 import { scaffoldProject } from "./scaffold";
@@ -109,6 +109,16 @@ export default async function (
         claudemd,
       );
     }
+    const workflowsDir = this.path.join(projectDir, ".github", "workflows");
+    await this.fs.mkdir(workflowsDir, { recursive: true });
+    await this.fs.writeFile(
+      this.path.join(workflowsDir, "compile.yml"),
+      compileYml({}),
+    );
+    await this.fs.writeFile(
+      this.path.join(workflowsDir, "package.yml"),
+      packageYml({}),
+    );
     s.stop(`Project created at ${projectDir}`);
 
     if (flags.interactive) {
