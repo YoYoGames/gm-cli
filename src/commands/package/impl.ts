@@ -24,7 +24,8 @@ export default async function (
         const defaultFileName = `${projectName}${ext ?? ""}`;
         targetFile = ctx.path.join(projectDir, defaultFileName);
       } else {
-        targetFile = flags.output;
+        const projectDir = ctx.path.dirname(options.projectPath);
+        targetFile = ctx.path.resolve(projectDir, flags.output);
       }
 
       const extraArgs = [
