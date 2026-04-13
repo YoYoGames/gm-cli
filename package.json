@@ -4,7 +4,7 @@
   "description": "GameMaker CLI",
   "license": "MIT",
   "type": "module",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "files": [
     "dist"
   ],
