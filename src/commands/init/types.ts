@@ -12,5 +12,5 @@ export type Template =
 export interface ProjectConfig {
   projectName: string;
   template: string;
-  createClaude: boolean;
+  useAi: boolean;
 }

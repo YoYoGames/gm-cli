@@ -22,12 +22,13 @@ export const initCommand = buildCommand({
       template: {
         kind: "parsed",
         parse: String,
-        brief: "Template ID or partial name match (required if --no-interactive)",
+        brief:
+          "Template ID or partial name match (required if --no-interactive)",
         optional: true,
       },
-      claude: {
+      ai: {
         kind: "boolean",
-        brief: "Create CLAUDE.md file",
+        brief: "Set up AI scaffolding (MCP, CLAUDE.md, etc.)",
         default: true,
       },
       cacheDir: {
