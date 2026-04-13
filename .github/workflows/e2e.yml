@@ -1,0 +1,53 @@
+name: E2E
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GAMEMAKER_AUTH_TOKEN: ${{ secrets.GAMEMAKER_AUTH_TOKEN }}
+
+jobs:
+  e2e:
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache-dependency-path: "./pnpm-lock.yaml"
+          cache: "pnpm"
+
+      - name: Prep
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Auth private registry
+        run: echo "//gmpm-private.gamemaker.io/:_authToken=\${GAMEMAKER_AUTH_TOKEN}" >> ~/.npmrc
+
+      - name: E2E
+        shell: bash
+        run: bash scripts/e2e.sh
+        env:
+          GAMEMAKER_PAT: ${{ secrets.GAMEMAKER_PAT }}
+          NO_COLOR: 1
