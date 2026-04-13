@@ -55,7 +55,7 @@ jobs:
         env:
           GAMEMAKER_PAT: ${{ secrets.GAMEMAKER_PAT }}
 
-      - run: npx "$GM_COMMAND" package --target ${{ matrix.target }} --output package.zip
+      - run: npx "$GM_COMMAND" package --target ${{ matrix.target }} --output ./package.zip
         env:
           NO_COLOR: 1
 
