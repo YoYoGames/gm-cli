@@ -117,12 +117,6 @@ export async function commonCompileSetup(
     throw new KnownError("GMRT support coming soon!"); // FIXME
   }
 
-  if (flags.toolchain?.version !== undefined) {
-    throw new KnownError(
-      "Specifing the toolchain version is not yet supported",
-    ); // FIXME
-  }
-
   const cache = await Cache.getOrInit(ctx, flags.cacheDir);
 
   const igorLog = ctx.makeTaskLogger("Downloading Igor");
@@ -158,6 +152,7 @@ export async function commonCompileSetup(
     licenseFile,
     igorPath,
     cache,
+    version: flags.toolchain?.version,
     target,
   });
 

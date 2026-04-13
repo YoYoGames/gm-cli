@@ -6,7 +6,7 @@ const toolchainTypeSchema = z
   .pipe(z.enum(["GMS2", "GMRT"], { error: "Expected GMS2 or GMRT" }));
 
 // FIXME: we should probably allow channels like "beta", "lts" too
-const gms2VersionSchema = z
+export const gms2VersionSchema = z
   .string()
   .regex(
     /^\d+(\.\d+){0,3}$/,
@@ -61,9 +61,44 @@ export function parseToolchainVersion(s: string): ToolchainVersion {
   return { type, version: versionResult.data };
 }
 
-export type Gms2Version = z.infer<typeof gms2VersionSchema>;
+/**
+ * Check whether a version satisfies a version prefix.
+ * Only the components specified in the prefix (non-undefined) are compared,
+ * so a prefix of [2024] matches any 2024.x.x.x version.
+ */
+export function gms2VersionSatisfies(
+  version: Gms2Version,
+  prefix: Gms2Version,
+): boolean {
+  for (let i = 0; i < 4; i++) {
+    const p = prefix[i];
+    if (p === undefined) break;
+    if (version[i] !== p) return false;
+  }
+  return true;
+}
+
+/**
+ * Compare two GMS2 versions for sorting.
+ * Returns a positive number if `a` is newer than `b`, negative if older, 0 if equal.
+ */
+export function gms2VersionCompare(a: Gms2Version, b: Gms2Version): number {
+  for (let i = 0; i < 4; i++) {
+    const diff = (a[i] ?? 0) - (b[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+export function gms2VersionToString(version: Gms2Version): string {
+  return version.map((v) => v?.toString() ?? "*").join(".");
+}
 
 export type GmrtVersion = z.infer<typeof gmrtVersionSchema>;
+
+export type Gms2Version = z.infer<typeof gms2VersionSchema>;
+
+export type Gms2VersionComplete = [number, number, number, number];
 
 export type ToolchainType = z.infer<typeof toolchainTypeSchema>;
 
