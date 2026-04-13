@@ -3,6 +3,7 @@ import type { Context } from "../context";
 import type { Log } from "../log";
 import { type Module, type Target } from "./target";
 import { getProjectName, type ProjectPath } from "../project";
+import type { Gms2VersionComplete } from "../toolchain";
 
 export async function findRuntimeLocation(
   ctx: Context,
@@ -75,6 +76,32 @@ export function spawnIgor(
   });
 }
 
+function execIgor(
+  ctx: Context,
+  igorPath: string,
+  args: string[],
+): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    ctx.child_process.execFile(
+      igorPath,
+      args,
+      {
+        env:
+          ctx.process.platform === "darwin"
+            ? { ...ctx.process.env, COMPlus_ZapDisable: "1" }
+            : undefined,
+      },
+      (error, stdout) => {
+        if (error) {
+          reject(error as Error);
+        } else {
+          resolve(stdout);
+        }
+      },
+    );
+  });
+}
+
 export function fetchLicense(
   ctx: Context,
   log: Log,
@@ -95,6 +122,27 @@ export function fetchLicense(
   });
 }
 
+// TODO: Alternatively, we could just read the RSS feed ourselves to avoid relying on Igor
+export async function listRuntimes(
+  ctx: Context,
+  { igorPath }: { igorPath: string },
+): Promise<Gms2VersionComplete[]> {
+  const output = await execIgor(ctx, igorPath, ["Runtime", "List"]);
+
+  const versions: Gms2VersionComplete[] = [];
+  for (const match of output.matchAll(
+    /Version\s+(\d+)\.(\d+)\.(\d+)\.(\d+)/g,
+  )) {
+    versions.push([
+      Number(match[1]),
+      Number(match[2]),
+      Number(match[3]),
+      Number(match[4]),
+    ]);
+  }
+  return versions;
+}
+
 // FIXME: should we run Runtime Verify [-folder=.] ?
 export function installRuntime(
   ctx: Context,
@@ -104,11 +152,13 @@ export function installRuntime(
     igorPath,
     runtimeDir,
     licenseFile,
+    version,
   }: {
     modules?: Module[];
     igorPath: string;
     runtimeDir: string;
     licenseFile: string;
+    version?: Gms2VersionComplete;
   },
 ): Promise<void> {
   return spawnIgor(ctx, log, {
@@ -121,6 +171,7 @@ export function installRuntime(
       "-rp",
       runtimeDir,
       ...(modules ? ["-m", modules.join(",")] : []),
+      ...(version ? [version.join(".")] : []), // FIXME: this won't work for partial versions I don't think!!
     ],
     label: "Igor Runtime Install",
   });

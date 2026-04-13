@@ -5,10 +5,18 @@ import type { Log } from "../log";
 import { KnownError } from "../error";
 import type { Target } from "./target";
 import { getInstalledRuntimeModules } from "./target";
-import { findRuntimeLocation, installRuntime } from "./spawn";
+import { installRuntime, listRuntimes } from "./spawn";
 import { z } from "zod";
+import {
+  gms2VersionSchema,
+  gms2VersionSatisfies,
+  gms2VersionCompare,
+  type Gms2Version,
+  gms2VersionToString,
+  type Gms2VersionComplete,
+} from "../toolchain";
 
-const ReceiptSchema = z.record(z.string(), z.unknown());
+const receiptSchema = z.record(z.string(), z.unknown());
 
 async function installationFixup(ctx: Context, runtimeLocation: string) {
   if (ctx.process.platform === "win32") {
@@ -81,6 +89,42 @@ async function chmodRecursive(ctx: Context, dir: string) {
   }
 }
 
+function parseRuntimeVersionFromDirName(name: string): Gms2Version | undefined {
+  const versionStr = name.replace(/^runtime-/, "");
+  const result = gms2VersionSchema.safeParse(versionStr);
+  return result.success ? result.data : undefined;
+}
+
+async function findRuntimeLocation(
+  ctx: Context,
+  runtimeDir: string,
+  version?: Gms2Version,
+): Promise<string | undefined> {
+  const entries = await ctx.fs.readdir(runtimeDir);
+  const candidates = entries
+    .flatMap((name) => {
+      // Ignore directories that we fail to parse
+      const dirVersion = parseRuntimeVersionFromDirName(name);
+      if (dirVersion === undefined) {
+        return [];
+      }
+      // If a version was specified, we should only include runtimes that satisfies that version!
+      if (version && !gms2VersionSatisfies(dirVersion, version)) {
+        return [];
+      }
+      return [{ name, version: dirVersion }];
+    })
+    // Most recent version first
+    .sort((a, b) => gms2VersionCompare(b.version, a.version));
+
+  if (candidates.length === 0) {
+    return undefined;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return ctx.path.join(runtimeDir, candidates[0]!.name);
+}
+
 export async function installRuntimeIfNeeded(
   ctx: Context,
   log: Log,
@@ -89,20 +133,17 @@ export async function installRuntimeIfNeeded(
     igorPath,
     cache,
     target,
+    version,
   }: {
     licenseFile: string;
     igorPath: string;
     cache: Cache;
     target: Target;
+    version?: Gms2Version;
   },
 ): Promise<string> {
   const runtimeDir = await cache.getSubDirPath(ctx, "runtime");
-  let runtimeLocation: string | undefined;
-  try {
-    runtimeLocation = await findRuntimeLocation(ctx, runtimeDir);
-  } catch {
-    // Runtime not found
-  }
+  let runtimeLocation = await findRuntimeLocation(ctx, runtimeDir, version);
 
   // FIXME: if this fails, we should delete the runtime dir and try again
   const installedModules = runtimeLocation
@@ -112,6 +153,29 @@ export async function installRuntimeIfNeeded(
   if (runtimeLocation && installedModules.includes(target)) {
     log.success("Runtime found");
     return runtimeLocation;
+  }
+
+  // Looks like we need to actually download the runtime!
+
+  // let us start by ensuring the version (if provided) actually exists in Igor's RSS feed
+  let completeVersion: Gms2VersionComplete | undefined;
+  if (version) {
+    const allVersions = await listRuntimes(ctx, { igorPath });
+    const suitableVersions = allVersions
+      .filter((availableVersion) =>
+        gms2VersionSatisfies(availableVersion, version),
+      )
+      // Most recent version first
+      .sort((a, b) => gms2VersionCompare(b, a));
+
+    if (suitableVersions.length === 0) {
+      const fullList = allVersions.map(gms2VersionToString).join("\n");
+      throw new KnownError(
+        `No runtime version '${gms2VersionToString(version)}' found. Available options:\n${fullList}`,
+      );
+    }
+
+    completeVersion = suitableVersions[0];
   }
 
   // Install into a temporary directory first, then merge into the real
@@ -127,9 +191,15 @@ export async function installRuntimeIfNeeded(
       runtimeDir: tempDir,
       modules: [target],
       licenseFile,
+      version: completeVersion,
     });
 
     const tempRuntimeLocation = await findRuntimeLocation(ctx, tempDir);
+    if (!tempRuntimeLocation) {
+      throw new Error(
+        "Invariant broken: no runtime found in temp directory after installation",
+      );
+    }
     const runtimeName = ctx.path.basename(tempRuntimeLocation);
     const destLocation = ctx.path.join(runtimeDir, runtimeName);
 
@@ -137,7 +207,7 @@ export async function installRuntimeIfNeeded(
     const receiptPath = ctx.path.join(destLocation, "receipt.json");
     let existingReceipt: Record<string, unknown> = {};
     try {
-      existingReceipt = ReceiptSchema.parse(
+      existingReceipt = receiptSchema.parse(
         JSON.parse(await ctx.fs.readFile(receiptPath, "utf-8")),
       );
     } catch {
@@ -152,7 +222,7 @@ export async function installRuntimeIfNeeded(
     const newRaw = await ctx.fs.readFile(receiptPath, "utf-8");
     const mergedReceipt = {
       ...existingReceipt,
-      ...ReceiptSchema.parse(JSON.parse(newRaw)),
+      ...receiptSchema.parse(JSON.parse(newRaw)),
     };
     await ctx.fs.writeFile(receiptPath, JSON.stringify(mergedReceipt, null, 2));
   } catch (e) {
@@ -164,6 +234,9 @@ export async function installRuntimeIfNeeded(
   log.success("Runtime installed");
 
   runtimeLocation = await findRuntimeLocation(ctx, runtimeDir);
+  if (!runtimeLocation) {
+    throw new Error("Invariant broken: no runtime found after installation");
+  }
   await installationFixup(ctx, runtimeLocation);
   return runtimeLocation;
 }
