@@ -30,7 +30,8 @@ const KILL_LIST = [
 function stopMacProcesses(ctx: Context): void {
   for (const name of KILL_LIST) {
     // macOS truncates process names to 15 characters
-    const truncated = ctx.process.platform === "darwin" ? name.slice(0, 15) : name;
+    const truncated =
+      ctx.process.platform === "darwin" ? name.slice(0, 15) : name;
     const escaped = truncated.replace(/'/g, "\\'").replace(/ /g, "\\ ");
 
     let psOutput: string;

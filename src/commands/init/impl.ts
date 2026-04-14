@@ -143,16 +143,15 @@ export default async function (
             mcpServers: {
               "gamemaker-mcp": {
                 type: "stdio",
-                ...(isWin ? 
-                  {
-                    command: "cmd",
-                    args: ["/c", "npx @experimental/gm@latest edit --mcp"]
-                  } : 
-                  {
-                    command: "npx",
-                    args: ["@experimental/gm@latest", "edit", "--mcp"],
-                  }
-                ),
+                ...(isWin
+                  ? {
+                      command: "cmd",
+                      args: ["/c", "npx @experimental/gm@latest edit --mcp"],
+                    }
+                  : {
+                      command: "npx",
+                      args: ["@experimental/gm@latest", "edit", "--mcp"],
+                    }),
                 env: {},
               },
             },

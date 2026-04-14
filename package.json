@@ -19,9 +19,11 @@
     "build": "tsup --silent",
     "prepublishOnly": "pnpm run build",
     "lint:eslint": "eslint --max-warnings 0",
+    "lint:prettier": "prettier --check . --ignore-path .gitignore --ignore-path .prettierignore",
     "lint:tsc": "tsc -p tsconfig.json",
     "lint": "run-p lint:*",
     "fix:eslint": "eslint --fix --max-warnings 0",
+    "fix:prettier": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
     "fix": "run-p fix:*"
   },
   "tsup": {
@@ -45,6 +47,7 @@
     "eslint": "^10.2.0",
     "eslint-plugin-only-warn": "^1.2.1",
     "npm-run-all2": "^8.0.4",
+    "prettier": "^3.8.2",
     "tsup": "^6.7.0",
     "typescript": "5.6.x",
     "typescript-eslint": "^8.58.1"

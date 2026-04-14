@@ -145,8 +145,10 @@ export function constructIgorBuildArgs(
   extraArgs: string[] = [],
 ): string[] {
   // Seems like -of argument is ignored on Windows
-  const outputFileName = ctx.process.platform === "win32" ? 
-    `${getProjectName(ctx, commonArgs.projectPath)}.win` : "outputFile";
+  const outputFileName =
+    ctx.process.platform === "win32"
+      ? `${getProjectName(ctx, commonArgs.projectPath)}.win`
+      : "outputFile";
   const outputFile = path.join(commonArgs.cacheDir, "output", outputFileName);
   return [
     "-rp",
