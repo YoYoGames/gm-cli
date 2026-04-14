@@ -1,3 +1,4 @@
+import { unzip } from "fflate";
 import type { Cache } from "../cache";
 import type { Context } from "../context";
 import { KnownError } from "../error";
@@ -66,22 +67,23 @@ export async function downloadIgor(
 
   await ctx.fs.mkdir(destDir, { recursive: true });
 
-  const zipPath = ctx.path.join(destDir, "igor.zip");
-  const buffer = Buffer.from(await response.arrayBuffer());
-  await ctx.fs.writeFile(zipPath, buffer);
-
-  // FIXME: should probably use a cross platform unzip library here instead!
-  const unzipOutput = ctx.child_process.execSync(
-    `unzip -o ${JSON.stringify(zipPath)} -d ${JSON.stringify(destDir)}`,
-    {
-      encoding: "utf-8",
+  const data = new Uint8Array(await response.arrayBuffer());
+  const files = await new Promise<Record<string, Uint8Array>>(
+    (resolve, reject) => {
+      unzip(data, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
     },
   );
-  for (const line of unzipOutput.split("\n")) {
-    if (line) log.message(line);
-  }
 
-  await ctx.fs.unlink(zipPath);
+  for (const [name, content] of Object.entries(files)) {
+    if (name.endsWith("/")) continue;
+    const outPath = ctx.path.join(destDir, name);
+    await ctx.fs.mkdir(ctx.path.dirname(outPath), { recursive: true });
+    log.message(`  extracting: ${name}`);
+    await ctx.fs.writeFile(outPath, content);
+  }
 
   if (platform !== "win32") {
     await ctx.fs.chmod(igorPath, 0o755);

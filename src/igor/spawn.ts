@@ -2,7 +2,7 @@ import path from "path";
 import type { Context } from "../context";
 import type { Log } from "../log";
 import { type Module, type Target } from "./target";
-import type { ProjectPath } from "../project";
+import { getProjectName, type ProjectPath } from "../project";
 
 export async function findRuntimeLocation(
   ctx: Context,
@@ -139,11 +139,15 @@ export interface CommonIgorBuildArgs {
 }
 
 export function constructIgorBuildArgs(
+  ctx: Context,
   commonArgs: CommonIgorBuildArgs,
   action: string,
   extraArgs: string[] = [],
 ): string[] {
-  const outputFile = path.join(commonArgs.cacheDir, "output", "outputFile");
+  // Seems like -of argument is ignored on Windows
+  const outputFileName = ctx.process.platform === "win32" ? 
+    `${getProjectName(ctx, commonArgs.projectPath)}.win` : "outputFile";
+  const outputFile = path.join(commonArgs.cacheDir, "output", outputFileName);
   return [
     "-rp",
     commonArgs.runtimeDir,

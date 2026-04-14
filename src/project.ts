@@ -21,3 +21,7 @@ export async function findProjectFile(
   }
   return ctx.path.join(dir, yypFile) as ProjectPath;
 }
+
+export function getProjectName(ctx: Context, projectPath: ProjectPath) {
+  return ctx.path.basename(projectPath, ".yyp");
+}
