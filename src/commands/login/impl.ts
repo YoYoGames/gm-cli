@@ -23,7 +23,10 @@ export default async function (
   igorLog.success("Igor downloaded");
 
   const licenseFile = flags.print
-    ? this.path.join(this.os.tmpdir(), `gm-licence-${String(this.process.pid)}.plist`)
+    ? this.path.join(
+        this.os.tmpdir(),
+        `gm-licence-${String(this.process.pid)}.plist`,
+      )
     : this.path.join(cache.dirPath, LICENSE_FILENAME);
   const fetchLog = this.makeTaskLogger("Fetching license");
   try {

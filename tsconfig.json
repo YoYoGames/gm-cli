@@ -1,27 +1,21 @@
 {
-    "compilerOptions": {
-        "noEmit": true,
-        "types": [
-            "node"
-        ],
-        "resolveJsonModule": true,
-        "target": "esnext",
-        "module": "esnext",
-        "moduleResolution": "bundler",
-        "lib": [
-            "esnext"
-        ],
-        "skipLibCheck": true,
-        "strict": true,
-        "isolatedModules": true,
-        "forceConsistentCasingInFileNames": true,
-        "noImplicitOverride": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noUncheckedIndexedAccess": true,
-        "verbatimModuleSyntax": true
-    },
-    "include": [
-        "src/**/*"
-    ],
-    "exclude": []
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["esnext"],
+    "skipLibCheck": true,
+    "strict": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src/**/*"],
+  "exclude": []
 }

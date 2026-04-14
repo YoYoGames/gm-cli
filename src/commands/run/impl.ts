@@ -19,7 +19,9 @@ export default async function (
         igorPath: args.igorPath,
         args: constructIgorBuildArgs(ctx, args, "Run"),
         label: "Igor",
-        onSignal: () => { stopProcesses(ctx); },
+        onSignal: () => {
+          stopProcesses(ctx);
+        },
       });
       return { successMessage: "Game exited" };
     },

@@ -39,5 +39,10 @@ export default async function (
       : { mode: "cli" };
 
   const prefabsFolder = flags.prefabs ?? getPrefabsDirOrThrow(this);
-  await callResourceTool(this, { run, projectPath, projectToolPath, prefabsFolder });
+  await callResourceTool(this, {
+    run,
+    projectPath,
+    projectToolPath,
+    prefabsFolder,
+  });
 }
