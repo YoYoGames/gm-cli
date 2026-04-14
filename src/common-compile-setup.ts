@@ -117,7 +117,12 @@ export async function commonCompileSetup(
     throw new KnownError("GMRT support coming soon!"); // FIXME
   }
 
-  const cache = await Cache.getOrInit(ctx, flags.cacheDir);
+  const cache = await Cache.getOrInit(
+    ctx,
+    flags.cacheDir
+      ? { type: "absolute", path: flags.cacheDir }
+      : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
+  );
 
   const igorLog = ctx.makeTaskLogger("Downloading Igor");
   let igorPath: string;

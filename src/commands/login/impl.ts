@@ -2,6 +2,7 @@ import { Cache } from "../../cache";
 import type { Context } from "../../context";
 import { downloadIgor, fetchLicense } from "../../igor";
 import { KnownError } from "../../error";
+import { findProjectFile } from "../../project";
 
 export const LICENSE_FILENAME = "licence.plist";
 
@@ -10,7 +11,23 @@ export default async function (
   flags: { print?: boolean; cacheDir?: string },
   accessKey: string,
 ): Promise<void> {
-  const cache = await Cache.getOrInit(this, flags.cacheDir);
+  const cwd = this.process.cwd();
+  const projectPath = await findProjectFile(this, cwd).catch(() => undefined);
+
+  const cache = await Cache.getOrInit(
+    this,
+    flags.cacheDir
+      ? { type: "absolute", path: flags.cacheDir }
+      : projectPath
+        ? { type: "infer", projectDir: this.path.dirname(projectPath) }
+        : { type: "temporary" },
+  );
+
+  if (cache.cacheType === "temporary" && !flags.print) {
+    throw new KnownError(
+      "No project found in the current directory. Run this command from a project directory, or use --print to output the license to stdout.",
+    );
+  }
 
   const igorLog = this.makeTaskLogger("Downloading Igor");
   let igorPath: string;
