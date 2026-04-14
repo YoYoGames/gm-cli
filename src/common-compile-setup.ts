@@ -28,6 +28,23 @@ export interface CommonCliBuildFlags {
 }
 
 const GUEST_ACCESS_KEY = "09bdd0bc8c2f6cce3391a16679ede918";
+const LICENSE_RENEWAL_THRESHOLD_DAYS = 7;
+
+function parseGuestLicenseExpiry(content: string): Date | null {
+  if (!/name<\/key>\s*<string>Guest<\/string>/.test(content)) return null;
+  const m = /expiry_date<\/key>\s*<string>([^<]+)<\/string>/.exec(content);
+  if (!m?.[1]) return null;
+  const d = new Date(m[1]);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function isExpiringSoon(
+  expiry: Date,
+  thresholdDays = LICENSE_RENEWAL_THRESHOLD_DAYS,
+): boolean {
+  const msThreshold = thresholdDays * 24 * 60 * 60 * 1000;
+  return expiry.getTime() - Date.now() <= msThreshold;
+}
 
 async function getLicense(
   ctx: Context,
@@ -48,6 +65,20 @@ async function getLicense(
   }
 
   const cachedLicenseFile = ctx.path.join(cache.dirPath, LICENSE_FILENAME);
+
+  if (await exists(ctx, cachedLicenseFile)) {
+    const content = await ctx.fs.readFile(cachedLicenseFile, "utf-8");
+    const expiry = parseGuestLicenseExpiry(content);
+    if (expiry !== null && isExpiringSoon(expiry)) {
+      log.message("Guest license expiring soon, renewing...");
+      await fetchLicense(ctx, log, {
+        igorPath,
+        accessKey: GUEST_ACCESS_KEY,
+        outputFile: cachedLicenseFile,
+      });
+    }
+  }
+
   if (!(await exists(ctx, cachedLicenseFile))) {
     // If no cached file exists, issue a guest license and cache that
     log.message("Using guest access key");

@@ -31,9 +31,6 @@ mkdir -p .prefabs
 export GAMEMAKER_PREFABS="$(pwd)/.prefabs"
 export NO_COLOR=1
 
-echo "--- login ---"
-node "$GM_COMMAND" login "$GAMEMAKER_PAT" --cache-dir "$GM_CACHE_DIR"
-
 run_test "Blank Game" operagx
 run_test "Brick Breaker" operagx
 
