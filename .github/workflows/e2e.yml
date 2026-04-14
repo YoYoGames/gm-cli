@@ -18,13 +18,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner:
-          - macos-latest
-          - ubuntu-latest
-            # TODO: Enable
-            # - windows-latest
+        include:
+          - runner: macos-latest
+            shell: bash
+          - runner: ubuntu-latest
+            shell: bash
+          - runner: windows-latest
+            shell: pwsh
 
     runs-on: ${{ matrix.runner }}
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
 
     steps:
       - name: Checkout
@@ -47,12 +53,24 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
 
-      - name: Auth private registry
+      - name: Auth private registry (Bash)
+        if: runner.os != 'Windows'
         run: echo "//gmpm-private.gamemaker.io/:_authToken=\${GAMEMAKER_AUTH_TOKEN}" >> ~/.npmrc
 
-      - name: E2E
-        shell: bash
+      - name: Auth private registry (PowerShell)
+        if: runner.os == 'Windows'
+        run: Add-Content -Path "~/.npmrc" -Value '//gmpm-private.gamemaker.io/:_authToken=${GAMEMAKER_AUTH_TOKEN}'
+
+      - name: E2E (Bash)
+        if: runner.os != 'Windows'
         run: bash scripts/e2e.sh
+        env:
+          GAMEMAKER_PAT: ${{ secrets.GAMEMAKER_PAT }}
+          NO_COLOR: 1
+
+      - name: E2E (PowerShell)
+        if: runner.os == 'Windows'
+        run: .\scripts\e2e.ps1
         env:
           GAMEMAKER_PAT: ${{ secrets.GAMEMAKER_PAT }}
           NO_COLOR: 1
