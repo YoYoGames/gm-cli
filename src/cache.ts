@@ -4,18 +4,41 @@ import { version } from "../package.json";
 import { z } from "zod";
 import { KnownError } from "./error";
 
+export type CacheType = "absolute" | "infer" | "temporary";
+
 export class Cache {
   private _path: string;
+  private _cacheType: CacheType;
 
-  private constructor(path: string) {
+  private constructor(path: string, cacheType: CacheType) {
     this._path = path;
+    this._cacheType = cacheType;
   }
 
-  static async getOrInit(ctx: Context, path?: string): Promise<Cache> {
-    const cachePath =
-      path ??
-      ctx.process.env["GAMEMAKER_CACHE_DIR"] ??
-      ctx.path.join(ctx.process.cwd(), ".gmcache");
+  static async getOrInit(
+    ctx: Context,
+    path:
+      | { type: "absolute"; path: string }
+      | { type: "infer"; projectDir: string }
+      | { type: "temporary" },
+  ): Promise<Cache> {
+    let cachePath: string;
+    if (path.type === "absolute") {
+      cachePath = path.path;
+    } else if (
+      path.type === "infer" &&
+      ctx.process.env["GAMEMAKER_CACHE_DIR"]
+    ) {
+      cachePath = ctx.process.env["GAMEMAKER_CACHE_DIR"];
+    } else if (path.type === "infer") {
+      cachePath = ctx.path.join(path.projectDir, ".gmcache");
+    } else if (path.type === "temporary") {
+      cachePath = ctx.path.join(ctx.os.tmpdir(), "gm-cli-cache");
+    } else {
+      path satisfies never;
+      throw new Error("unreachable");
+    }
+
     const metaPath = ctx.path.join(cachePath, META_FILENAME);
 
     if (await exists(ctx, metaPath)) {
@@ -42,11 +65,15 @@ export class Cache {
       );
     }
 
-    return new Cache(cachePath);
+    return new Cache(cachePath, path.type);
   }
 
   get dirPath(): string {
     return this._path;
+  }
+
+  get cacheType(): CacheType {
+    return this._cacheType;
   }
 
   async getSubDirPath(ctx: Context, name: string): Promise<string> {

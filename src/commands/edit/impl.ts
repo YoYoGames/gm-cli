@@ -25,7 +25,12 @@ export default async function (
   const cwd = this.process.cwd();
   const projectPath = project ?? (await findProjectFile(this, cwd));
 
-  const cache = await Cache.getOrInit(this, flags.cacheDir);
+  const cache = await Cache.getOrInit(
+    this,
+    flags.cacheDir
+      ? { type: "absolute", path: flags.cacheDir }
+      : { type: "infer", projectDir: this.path.dirname(projectPath) },
+  );
   const projectToolPath = await downloadProjectTool(this, {
     cache,
     log: noopLog,

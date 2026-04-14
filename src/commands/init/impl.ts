@@ -88,7 +88,9 @@ export default async function (
       s.message("Extracting template");
       const cache = await Cache.getOrInit(
         this,
-        flags.cacheDir ?? this.path.join(projectDir, ".gmcache"),
+        flags.cacheDir
+          ? { type: "absolute", path: flags.cacheDir }
+          : { type: "infer", projectDir },
       );
       await scaffoldProject(
         this,
