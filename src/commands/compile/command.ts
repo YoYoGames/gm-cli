@@ -1,7 +1,7 @@
 import { buildCommand } from "@stricli/core";
-import { TARGETS, TargetSchema } from "../../igor";
-import { parseProjectPath } from "../../project";
-import { parseToolchainVersion } from "../../toolchain";
+import { TARGETS, TargetSchema } from "~/igor";
+import { parseProjectPath } from "~/project";
+import { parseToolchainVersion } from "~/toolchain";
 
 export const compileProjectCommand = buildCommand({
   loader: async () => import("./impl"),

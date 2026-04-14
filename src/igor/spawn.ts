@@ -1,9 +1,9 @@
 import path from "path";
-import type { Context } from "../context";
-import type { Log } from "../log";
+import type { Context } from "~/context";
+import type { Log } from "~/log";
 import { type Module, type Target } from "./target";
-import { getProjectName, type ProjectPath } from "../project";
-import type { Gms2VersionComplete } from "../toolchain";
+import { getProjectName, type ProjectPath } from "~/project";
+import type { Gms2VersionComplete } from "~/toolchain";
 
 export async function findRuntimeLocation(
   ctx: Context,

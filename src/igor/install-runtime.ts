@@ -1,8 +1,8 @@
 import { promisify } from "node:util";
-import type { Cache } from "../cache";
-import { exists, type Context } from "../context";
-import type { Log } from "../log";
-import { KnownError } from "../error";
+import type { Cache } from "~/cache";
+import { exists, type Context } from "~/context";
+import type { Log } from "~/log";
+import { KnownError } from "~/error";
 import type { Target } from "./target";
 import { getInstalledRuntimeModules } from "./target";
 import { installRuntime, listRuntimes } from "./spawn";
@@ -14,7 +14,7 @@ import {
   type Gms2Version,
   gms2VersionToString,
   type Gms2VersionComplete,
-} from "../toolchain";
+} from "~/toolchain";
 
 const receiptSchema = z.record(z.string(), z.unknown());
 

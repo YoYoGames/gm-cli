@@ -26,18 +26,6 @@
     "fix:prettier": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
     "fix": "run-p fix:*"
   },
-  "tsup": {
-    "entry": [
-      "src/bin/cli.ts"
-    ],
-    "format": [
-      "esm"
-    ],
-    "tsconfig": "tsconfig.json",
-    "clean": true,
-    "splitting": true,
-    "minify": true
-  },
   "devDependencies": {
     "@clack/prompts": "^1.1.0",
     "@eslint/compat": "^2.0.5",

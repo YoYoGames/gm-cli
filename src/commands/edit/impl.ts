@@ -1,10 +1,10 @@
-import { Cache } from "../../cache";
-import { type Context, getPrefabsDirOrThrow } from "../../context";
-import { findProjectFile, type ProjectPath } from "../../project";
-import { KnownError } from "../../error";
-import { downloadProjectTool } from "../../projectTool";
-import { callResourceTool, type ResourceToolMode } from "../../resourceTool";
-import { noopLog } from "../../log";
+import { Cache } from "~/cache";
+import { type Context, getPrefabsDirOrThrow } from "~/context";
+import { findProjectFile, type ProjectPath } from "~/project";
+import { KnownError } from "~/error";
+import { downloadProjectTool } from "~/projectTool";
+import { callResourceTool, type ResourceToolMode } from "~/resourceTool";
+import { noopLog } from "~/log";
 
 interface EditCommandFlags {
   mcp?: boolean;

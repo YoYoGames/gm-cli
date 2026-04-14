@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
     "types": ["node"],
     "resolveJsonModule": true,
     "target": "esnext",

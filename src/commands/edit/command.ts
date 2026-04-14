@@ -1,5 +1,5 @@
 import { buildCommand } from "@stricli/core";
-import { parseProjectPath } from "../../project";
+import { parseProjectPath } from "~/project";
 
 export const editCommand = buildCommand({
   loader: async () => import("./impl"),

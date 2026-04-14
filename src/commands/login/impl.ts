@@ -1,8 +1,8 @@
-import { Cache } from "../../cache";
-import type { Context } from "../../context";
-import { downloadIgor, fetchLicense } from "../../igor";
-import { KnownError } from "../../error";
-import { findProjectFile } from "../../project";
+import { Cache } from "~/cache";
+import type { Context } from "~/context";
+import { downloadIgor, fetchLicense } from "~/igor";
+import { KnownError } from "~/error";
+import { findProjectFile } from "~/project";
 
 export const LICENSE_FILENAME = "licence.plist";
 

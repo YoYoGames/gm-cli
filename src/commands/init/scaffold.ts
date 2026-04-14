@@ -1,9 +1,9 @@
 import type { Template } from "./types";
-import type { Cache } from "../../cache";
-import type { Context } from "../../context";
-import { KnownError } from "../../error";
-import { downloadProjectTool } from "../../projectTool";
-import { noopLog } from "../../log";
+import type { Cache } from "~/cache";
+import type { Context } from "~/context";
+import { KnownError } from "~/error";
+import { downloadProjectTool } from "~/projectTool";
+import { noopLog } from "~/log";
 
 export async function scaffoldProject(
   ctx: Context,
