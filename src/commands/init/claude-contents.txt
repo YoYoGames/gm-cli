@@ -30,7 +30,7 @@ var _mystruct =
     b : "Hello World"
 };
 
-// Their are constructor functions and methods tied to the struct too
+// There is support for constructor functions and methods tied to the struct too
 function Vector2(_x, _y) constructor
 {
     x = _x;
