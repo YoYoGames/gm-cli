@@ -35,6 +35,13 @@ export function getPlatformSuffix(ctx: Context): string {
 export const REGISTRY = "https://gmpm.gamemaker.io";
 export const PRIVATE_REGISTRY = "https://gmpm-private.gamemaker.io";
 
+function cmd(ctx: Context, name: string, args: string[]): [string, string[]] {
+  if (ctx.process.platform === "win32") {
+    return ["cmd.exe", ["/c", `${name}.cmd`, ...args]];
+  }
+  return [name, args];
+}
+
 export function npmExec(
   ctx: Context,
   {
@@ -54,7 +61,8 @@ export function npmExec(
   const fullArgs = ["--yes", "--registry", registry, packageName, ...args];
 
   return new Promise<void>((resolve, reject) => {
-    const child = ctx.child_process.spawn("npx", fullArgs, {
+    const [npxCmd, npxArgs] = cmd(ctx, "npx", fullArgs);
+    const child = ctx.child_process.spawn(npxCmd, npxArgs, {
       stdio: ignoreStdio ? "ignore" : "inherit",
       env: { ...ctx.process.env, ...extraEnvVars },
     });
@@ -99,7 +107,8 @@ export function npmInstall(
   ];
 
   return new Promise<void>((resolve, reject) => {
-    const child = ctx.child_process.spawn("npm", args, {
+    const [npmCmd, npmArgs] = cmd(ctx, "npm", args);
+    const child = ctx.child_process.spawn(npmCmd, npmArgs, {
       stdio: ["inherit", "pipe", "pipe"],
     });
 

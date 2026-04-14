@@ -1,5 +1,5 @@
 import type { Context } from "../../context";
-import type { ProjectPath } from "../../project";
+import { getProjectName, type ProjectPath } from "../../project";
 import { packageExtension, type Target } from "../../igor";
 import {
   commonCompileSetup,
@@ -20,7 +20,7 @@ export default async function (
       if (flags.output === undefined) {
         const ext = packageExtension(options.target);
         const projectDir = ctx.path.dirname(options.projectPath);
-        const projectName = ctx.path.basename(options.projectPath, ".yyp");
+        const projectName = getProjectName(ctx, options.projectPath);
         const defaultFileName = `${projectName}${ext ?? ""}`;
         targetFile = ctx.path.join(projectDir, defaultFileName);
       } else {
@@ -40,6 +40,7 @@ export default async function (
       await spawnIgor(ctx, log, {
         igorPath: options.igorPath,
         args: constructIgorBuildArgs(
+          ctx,
           options,
           getPackageAction(options.target),
           extraArgs,

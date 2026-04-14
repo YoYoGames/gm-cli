@@ -23,7 +23,9 @@ export async function downloadProjectTool(
           "MacOS",
           exeName,
         )
-      : ctx.path.join(destDir, "lib", "node_modules", packageName, exeName);
+      : ctx.process.platform === "win32"
+        ? ctx.path.join(destDir, "node_modules", packageName, exeName)
+        : ctx.path.join(destDir, "lib", "node_modules", packageName, exeName);
 
   try {
     await ctx.fs.access(toolPath);

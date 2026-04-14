@@ -135,6 +135,7 @@ export default async function (
           2,
         ) + "\n",
       );
+      const isWin = this.process.platform === "win32";
       await this.fs.writeFile(
         this.path.join(projectDir, ".mcp.json"),
         JSON.stringify(
@@ -142,8 +143,16 @@ export default async function (
             mcpServers: {
               "gamemaker-mcp": {
                 type: "stdio",
-                command: "npx",
-                args: ["@experimental/gm@latest", "edit", "--mcp"],
+                ...(isWin ? 
+                  {
+                    command: "cmd",
+                    args: ["/c", "npx @experimental/gm@latest edit --mcp"]
+                  } : 
+                  {
+                    command: "npx",
+                    args: ["@experimental/gm@latest", "edit", "--mcp"],
+                  }
+                ),
                 env: {},
               },
             },

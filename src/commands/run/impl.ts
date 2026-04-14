@@ -17,7 +17,7 @@ export default async function (
     invoke: async (ctx, log, args) => {
       await spawnIgor(ctx, log, {
         igorPath: args.igorPath,
-        args: constructIgorBuildArgs(args, "Run"),
+        args: constructIgorBuildArgs(ctx, args, "Run"),
         label: "Igor",
         onSignal: () => { stopProcesses(ctx); },
       });
