@@ -1,4 +1,4 @@
-import { KnownError } from "../../error";
+import { KnownError } from "~/error";
 import type { Template } from "./types";
 
 interface TemplateDto {

@@ -1,12 +1,12 @@
-import type { Context } from "../../context";
-import { getProjectName, type ProjectPath } from "../../project";
-import { packageExtension, type Target } from "../../igor";
+import type { Context } from "~/context";
+import { getProjectName, type ProjectPath } from "~/project";
+import { packageExtension, type Target } from "~/igor";
 import {
   commonCompileSetup,
   type CommonCliBuildFlags,
-} from "../../common-compile-setup";
-import { constructIgorBuildArgs, spawnIgor } from "../../igor/spawn";
-import { stopProcesses } from "../../igor/kill-process";
+} from "~/common-compile-setup";
+import { constructIgorBuildArgs, spawnIgor } from "~/igor/spawn";
+import { stopProcesses } from "~/igor/kill-process";
 
 export default async function (
   this: Context,

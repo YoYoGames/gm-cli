@@ -1,4 +1,4 @@
-import type { Context } from "../context";
+import type { Context } from "~/context";
 import { z } from "zod";
 
 // From Zeus/Igor/Modules.cs and Zeus/Igor/Targets.cs in GameMaker repo

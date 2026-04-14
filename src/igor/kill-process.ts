@@ -1,4 +1,4 @@
-import type { Context } from "../context";
+import type { Context } from "~/context";
 
 export function stopProcesses(ctx: Context): void {
   if (ctx.process.platform === "win32") {

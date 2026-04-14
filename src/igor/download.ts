@@ -1,8 +1,8 @@
 import { unzip } from "fflate";
-import type { Cache } from "../cache";
-import type { Context } from "../context";
-import { KnownError } from "../error";
-import type { Log } from "../log";
+import type { Cache } from "~/cache";
+import type { Context } from "~/context";
+import { KnownError } from "~/error";
+import type { Log } from "~/log";
 
 const IGOR_ZIPS: Record<string, Record<string, string>> = {
   win32: {
