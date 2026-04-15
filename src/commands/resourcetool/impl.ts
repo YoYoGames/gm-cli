@@ -6,7 +6,7 @@ import { downloadProjectTool } from "~/projectTool";
 import { callResourceTool, type ResourceToolMode } from "~/resourceTool";
 import { noopLog } from "~/log";
 
-interface EditCommandFlags {
+interface ResourcetoolCommandFlags {
   mcp?: boolean;
   command?: string;
   prefabs?: string;
@@ -15,7 +15,7 @@ interface EditCommandFlags {
 
 export default async function (
   this: Context,
-  flags: EditCommandFlags,
+  flags: ResourcetoolCommandFlags,
   project?: ProjectPath,
 ): Promise<void> {
   if (flags.mcp && flags.command) {

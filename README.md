@@ -35,11 +35,11 @@ npx @experimental/gm@latest run # assuming you are in the project dir
 npx @experimental/gm@latest run /path/to/project.yyp
 
 # Running a ResourceTool shell
-npx @experimental/gm@latest edit
+npx @experimental/gm@latest resourcetool
 # Running ResourceTool as an MCP server
-npx @experimental/gm@latest edit --mcp
+npx @experimental/gm@latest resourcetool --mcp
 # Add MCP server to Claude (assuming you are in the project dir)
-claude mcp add gamemaker -- npx @experimental/gm@latest edit --mcp
+claude mcp add gamemaker -- npx @experimental/gm@latest resourcetool --mcp
 ```
 
 ## Development

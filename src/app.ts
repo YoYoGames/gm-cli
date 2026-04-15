@@ -3,7 +3,7 @@ import { name, version, description } from "../package.json";
 import { initCommand } from "./commands/init/command";
 import { compileProjectCommand } from "./commands/compile/command";
 import { runCommand } from "./commands/run/command";
-import { editCommand } from "./commands/edit/command";
+import { resourcetoolCommand } from "./commands/resourcetool/command";
 import { loginCommand } from "./commands/login/command";
 import { packageCommand } from "./commands/package/command";
 import { KnownError } from "./error";
@@ -13,7 +13,7 @@ const routes = buildRouteMap({
     init: initCommand,
     compile: compileProjectCommand,
     run: runCommand,
-    edit: editCommand,
+    resourcetool: resourcetoolCommand,
     login: loginCommand,
     package: packageCommand,
   },

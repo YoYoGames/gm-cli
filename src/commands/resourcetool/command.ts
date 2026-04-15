@@ -1,7 +1,7 @@
 import { buildCommand } from "@stricli/core";
 import { parseProjectPath } from "~/project";
 
-export const editCommand = buildCommand({
+export const resourcetoolCommand = buildCommand({
   loader: async () => import("./impl"),
   parameters: {
     positional: {

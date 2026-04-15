@@ -28,9 +28,9 @@ function Invoke-Test {
         node "$gmCommand" compile --target "$Target" --cache-dir "$gmCacheDir"
         if ($LASTEXITCODE -ne 0) { throw "compile (warm) failed" }
 
-        Write-Output "--- edit ---"
-        node "$gmCommand" edit -C "resource list" --cache-dir "$gmCacheDir"
-        if ($LASTEXITCODE -ne 0) { throw "edit failed" }
+        Write-Output "--- resourcetool ---"
+        node "$gmCommand" resourcetool -C "resource list" --cache-dir "$gmCacheDir"
+        if ($LASTEXITCODE -ne 0) { throw "resourcetool failed" }
     }
     finally {
         Set-Location ..
