@@ -11,7 +11,7 @@ export async function scaffoldProject(
   project: { name: string; dir: string },
   cache: Cache,
 ) {
-  const response = await fetch(template.downloadUrl);
+  const response = await ctx.fetch(template.downloadUrl);
   if (!response.ok) {
     throw new KnownError(`Failed to download template: ${response.statusText}`);
   }

@@ -55,8 +55,7 @@ export async function downloadIgor(
     throw new Error(`Unsupported architecture for ${platform}: ${arch}`);
   }
 
-  // FIXME: fetch should be part of context object
-  const response = await fetch(url, {
+  const response = await ctx.fetch(url, {
     headers: { "User-Agent": "gm-cli" },
   });
   if (!response.ok) {
