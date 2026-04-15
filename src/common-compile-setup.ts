@@ -113,8 +113,21 @@ export async function commonCompileSetup(
   const target = flags.target ?? targetForPlatform(ctx.process.platform);
   const projectPath = project ?? (await findProjectFile(ctx, cwd));
 
+  // FIXME: Add support for GMRT
   if (flags.toolchain?.type === "GMRT") {
-    throw new KnownError("GMRT support coming soon!"); // FIXME
+    throw new KnownError(
+      "Support for the GMRT toolchain is coming soon to GameMaker CLI.",
+    );
+  }
+
+  // FIXME: Add full support for all platforms
+  if (
+    flags.target &&
+    !["mac", "windows", "linux", "operagx"].includes(flags.target)
+  ) {
+    throw new KnownError(
+      `Support for target '${flags.target}' is coming soon to GameMaker CLI.`,
+    );
   }
 
   const cache = await Cache.getOrInit(
