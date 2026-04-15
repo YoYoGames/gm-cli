@@ -9,7 +9,7 @@
 The GM CLI and parts of the underlying tools are only available internally in the https://gmpm-private.gamemaker.io registry. So start by signing in.
 
 ```bash
-npm login --registry https://gmpm-private.gamemaker.io --scope @experimental
+npm login --registry https://gmpm-private.gamemaker.io --scope @gamemaker
 ```
 
 ### Specify a prefabs folder
@@ -25,21 +25,21 @@ export GAMEMAKER_PREFABS=/Users/Shared/GameMakerStudio2/Prefabs
 Simply run the command without any arguments for more details. Each subcommand has a `--help` flag that can be used for more details.
 
 ```bash
-npx @experimental/gm@latest
+npx @gamemaker/gm-cli@latest
 
 # Scaffolding a project
-npx @experimental/gm@latest init
+npx @gamemaker/gm-cli@latest init
 
 # building a project
-npx @experimental/gm@latest run # assuming you are in the project dir
-npx @experimental/gm@latest run /path/to/project.yyp
+npx @gamemaker/gm-cli@latest run # assuming you are in the project dir
+npx @gamemaker/gm-cli@latest run /path/to/project.yyp
 
 # Running a ResourceTool shell
-npx @experimental/gm@latest resourcetool
+npx @gamemaker/gm-cli@latest resourcetool
 # Running ResourceTool as an MCP server
-npx @experimental/gm@latest resourcetool --mcp
+npx @gamemaker/gm-cli@latest resourcetool --mcp
 # Add MCP server to Claude (assuming you are in the project dir)
-claude mcp add gamemaker -- npx @experimental/gm@latest resourcetool --mcp
+claude mcp add gamemaker -- npx @gamemaker/gm-cli@latest resourcetool --mcp
 ```
 
 ## Development
@@ -50,7 +50,7 @@ We use pnpm when developing.
 pnpm install
 pnpm build
 pnpm link
-gm
+gm-cli
 ```
 
 ## Publish

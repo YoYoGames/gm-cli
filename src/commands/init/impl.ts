@@ -150,13 +150,13 @@ export default async function (
                       command: "cmd",
                       args: [
                         "/c",
-                        "npx @experimental/gm@latest resourcetool --mcp",
+                        "npx @gamemaker/gm-cli@latest resourcetool --mcp",
                       ],
                     }
                   : {
                       command: "npx",
                       args: [
-                        "@experimental/gm@latest",
+                        "@gamemaker/gm-cli@latest",
                         "resourcetool",
                         "--mcp",
                       ],
