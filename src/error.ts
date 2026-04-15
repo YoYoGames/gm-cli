@@ -1,3 +1,7 @@
+/**
+ * An error that may occur during normal use.
+ * All other uncought Error subtypes are treated as bugs.
+ */
 export class KnownError extends Error {
   constructor(cause: unknown) {
     const message = cause instanceof Error ? cause.message : String(cause);
