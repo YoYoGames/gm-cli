@@ -38,15 +38,15 @@
     "prettier": "^3.8.2",
     "tsup": "^6.7.0",
     "typescript": "5.6.x",
-    "typescript-eslint": "^8.58.1"
+    "typescript-eslint": "^8.58.1",
+    "fflate": "^0.8.2",
+    "zod": "^4.3.6"
   },
   "inlinedDependencies": {
     "@clack/core": "1.1.0",
     "@clack/prompts": "1.1.0",
     "sisteransi": "1.0.5",
-    "@stricli/core": "^1.2.6"
-  },
-  "dependencies": {
+    "@stricli/core": "^1.2.6",
     "fflate": "^0.8.2",
     "zod": "^4.3.6"
   }
