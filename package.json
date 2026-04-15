@@ -1,5 +1,5 @@
 {
-  "name": "@experimental/gm",
+  "name": "@gamemaker/gm-cli",
   "author": "YoYo Games",
   "description": "GameMaker CLI",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "dist"
   ],
   "bin": {
-    "gm": "dist/cli.js"
+    "gm-cli": "dist/cli.js"
   },
   "engines": {
     "node": ">=24"

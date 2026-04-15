@@ -4,8 +4,8 @@ on: [workflow_dispatch]
 
 env:
   GAME_NAME: "mygame"
-  # You can pin a particular version by replacing latest. E.g., @experimental/gm@1.0.2
-  GM_COMMAND: "@experimental/gm@latest"
+  # You can pin a particular version by replacing latest. E.g., @gamemaker/gm-cli@1.0.2
+  GM_COMMAND: "@gamemaker/gm-cli@latest"
   # TODO: Remove when not needed
   GAMEMAKER_AUTH_TOKEN: ${{ secrets.GAMEMAKER_AUTH_TOKEN }}
 
