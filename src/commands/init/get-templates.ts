@@ -1,3 +1,4 @@
+import type { Context } from "~/context";
 import { KnownError } from "~/error";
 import type { Template } from "./types";
 
@@ -23,8 +24,8 @@ interface TemplateResponse {
   data: TemplateDto[];
 }
 
-export async function getTemplates(): Promise<Template[]> {
-  const response = await fetch(
+export async function getTemplates(ctx: Context): Promise<Template[]> {
+  const response = await ctx.fetch(
     "https://api.gamemaker.io/api/gamemaker/project-templates",
   );
   if (!response.ok) {

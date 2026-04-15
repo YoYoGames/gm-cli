@@ -13,6 +13,7 @@ export interface Context extends CommandContext {
   readonly os: typeof os;
   readonly fs: typeof fs;
   readonly path: typeof path;
+  readonly fetch: typeof globalThis.fetch;
   readonly makeTaskLogger: TaskLogger;
 }
 
@@ -44,6 +45,7 @@ export function buildContext(process: NodeJS.Process): Context {
     os,
     fs,
     path,
+    fetch,
     makeTaskLogger: noColor ? plainTaskLogger() : fancyTaskLogger(),
   };
 }

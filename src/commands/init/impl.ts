@@ -24,7 +24,7 @@ export default async function (
   this: Context,
   flags: InitCommandFlags,
 ): Promise<void> {
-  const templates = await getTemplates();
+  const templates = await getTemplates(this);
 
   let config: ProjectConfig;
 
