@@ -175,7 +175,14 @@ export async function commonCompileSetup(
     target,
   });
 
-  const buildCacheDir = await cache.getSubDirPath(ctx, "build");
+  // We use the name "native" when facing the user instead of YYC so that we can use the same
+  // flag for GMRT later too. Default to VM if not set.
+  const runtime = flags.runtime === "native" ? "YYC" : "VM";
+
+  const buildCacheDir = await cache.getSubDirPath(
+    ctx,
+    `build-gms2-${target}-${runtime}`,
+  );
 
   const actionLog = ctx.makeTaskLogger(action.label(target));
   let successMessage: string;
@@ -190,9 +197,7 @@ export async function commonCompileSetup(
       projectPath,
       projectToolPath,
       verbose: flags.verbose ?? false,
-      // We use the name "native" instead of yyc so that we can use the same
-      // flag for GMRT later too. Default to VM if not set.
-      runtime: flags.runtime === "native" ? "YYC" : "VM",
+      runtime,
     }));
   } catch (e) {
     actionLog.error("Compilation failed");
