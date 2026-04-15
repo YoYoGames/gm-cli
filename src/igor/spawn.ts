@@ -187,6 +187,7 @@ export interface CommonIgorBuildArgs {
   projectPath: ProjectPath;
   projectToolPath: string;
   verbose: boolean;
+  runtime: "YYC" | "VM";
 }
 
 export function constructIgorBuildArgs(
@@ -208,6 +209,8 @@ export function constructIgorBuildArgs(
     commonArgs.cacheDir,
     "-project",
     commonArgs.projectPath,
+    "-runtime",
+    commonArgs.runtime,
     "-of",
     outputFile,
     "-lf",

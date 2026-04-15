@@ -25,6 +25,7 @@ export interface CommonCliBuildFlags {
   license?: string;
   prefabs?: string;
   cacheDir?: string;
+  runtime?: "native" | "vm";
 }
 
 const GUEST_ACCESS_KEY = "09bdd0bc8c2f6cce3391a16679ede918";
@@ -189,6 +190,9 @@ export async function commonCompileSetup(
       projectPath,
       projectToolPath,
       verbose: flags.verbose ?? false,
+      // We use the name "native" instead of yyc so that we can use the same
+      // flag for GMRT later too. Default to VM if not set.
+      runtime: flags.runtime === "native" ? "YYC" : "VM",
     }));
   } catch (e) {
     actionLog.error("Compilation failed");

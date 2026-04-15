@@ -37,6 +37,13 @@ export const compileProjectCommand = buildCommand({
         brief: "Toolchain to use, e.g. GMS2, GMS2@2024.14.4, or GMRT@0.18",
         optional: true,
       },
+      runtime: {
+        kind: "enum",
+        values: ["vm", "native"],
+        default: "vm",
+        brief: "Virtual machine (VM) or ahead-of-time native compilation.",
+        optional: true,
+      },
       verbose: {
         kind: "boolean",
         brief: "Verbose output",
