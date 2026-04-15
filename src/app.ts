@@ -29,6 +29,7 @@ export const app = buildApplication(routes, {
   },
   documentation: {
     caseStyle: "convert-camel-to-kebab",
+    onlyRequiredInUsageLine: true,
   },
   scanner: {
     caseStyle: "allow-kebab-for-camel",
