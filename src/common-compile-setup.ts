@@ -95,7 +95,7 @@ async function getLicense(
 
 /**
  * Utility used in run, compile and package commands.
- * Setup the cache, Igor, and install the required runtime for a build
+ * Setup the cache, Igor, and install the required runtime for a build.
  */
 export async function commonCompileSetup(
   ctx: Context,
@@ -113,6 +113,9 @@ export async function commonCompileSetup(
   const cwd = ctx.process.cwd();
   const target = flags.target ?? targetForPlatform(ctx.process.platform);
   const projectPath = project ?? (await findProjectFile(ctx, cwd));
+  // We use the name "native" when facing the user instead of YYC so that we can use the same
+  // flag for GMRT later too. Default to VM if not set.
+  const runtime = flags.runtime === "native" ? "YYC" : "VM";
 
   // FIXME: Add support for GMRT
   if (flags.toolchain?.type === "GMRT") {
@@ -122,12 +125,17 @@ export async function commonCompileSetup(
   }
 
   // FIXME: Add full support for all platforms
-  if (
-    flags.target &&
-    !["mac", "windows", "linux", "operagx"].includes(flags.target)
-  ) {
+  if (!["mac", "windows", "linux", "operagx"].includes(target)) {
     throw new KnownError(
-      `Support for target '${flags.target}' is coming soon to GameMaker CLI.`,
+      `Support for target '${target}' is coming soon to GameMaker CLI.`,
+    );
+  }
+
+  // FIXME: Add full support for configuring YYC, currently the underlying tooling
+  // expects to be given a user directory with a local_settings.json file. (At least on windows/operagx)
+  if (runtime === "YYC" && (target === "windows" || target === "operagx")) {
+    throw new KnownError(
+      "Support for the native runtime (YYC) is coming soon to GameMaker CLI.",
     );
   }
 
@@ -174,10 +182,6 @@ export async function commonCompileSetup(
     version: flags.toolchain?.version,
     target,
   });
-
-  // We use the name "native" when facing the user instead of YYC so that we can use the same
-  // flag for GMRT later too. Default to VM if not set.
-  const runtime = flags.runtime === "native" ? "YYC" : "VM";
 
   const buildCacheDir = await cache.getSubDirPath(
     ctx,
