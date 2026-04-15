@@ -1,6 +1,6 @@
 /**
  * An error that may occur during normal use.
- * All other uncought Error subtypes are treated as bugs.
+ * All other uncaught Error subtypes are treated as bugs.
  */
 export class KnownError extends Error {
   constructor(cause: unknown) {
