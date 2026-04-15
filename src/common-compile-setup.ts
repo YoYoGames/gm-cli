@@ -12,6 +12,7 @@ import { KnownError } from "./error";
 import { LICENSE_FILENAME } from "./commands/login/impl";
 import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
+import { errorsOnlyTaskLogger } from "./log";
 import type { Log } from "./log";
 import type { ToolchainVersion } from "./toolchain";
 
@@ -22,6 +23,7 @@ export interface CommonCliBuildFlags {
   target?: Target;
   toolchain?: ToolchainVersion;
   verbose?: boolean;
+  errorsOnly?: boolean;
   license?: string;
   prefabs?: string;
   cacheDir?: string;
@@ -137,7 +139,11 @@ export async function commonCompileSetup(
       : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
   );
 
-  const igorLog = ctx.makeTaskLogger("Downloading Igor");
+  const makeTaskLogger = flags.errorsOnly
+    ? errorsOnlyTaskLogger(ctx.makeTaskLogger)
+    : ctx.makeTaskLogger;
+
+  const igorLog = makeTaskLogger("Downloading Igor");
   let igorPath: string;
   try {
     igorPath = await downloadIgor(ctx, igorLog, cache);
@@ -147,7 +153,7 @@ export async function commonCompileSetup(
   }
   igorLog.success("Igor downloaded");
 
-  const projectToolLog = ctx.makeTaskLogger("Downloading ProjectTool");
+  const projectToolLog = makeTaskLogger("Downloading ProjectTool");
   let projectToolPath: string;
   try {
     projectToolPath = await downloadProjectTool(ctx, {
@@ -161,11 +167,11 @@ export async function commonCompileSetup(
   }
   projectToolLog.success("ProjectTool downloaded");
 
-  const licenseLog = ctx.makeTaskLogger("Fetching license");
+  const licenseLog = makeTaskLogger("Fetching license");
   const licenseFile = await getLicense(ctx, flags, cache, igorPath, licenseLog);
   licenseLog.success("License fetched");
 
-  const runtimeLog = ctx.makeTaskLogger("Installing runtime");
+  const runtimeLog = makeTaskLogger("Installing runtime");
   const runtimeLocation = await installRuntimeIfNeeded(ctx, runtimeLog, {
     licenseFile,
     igorPath,
@@ -176,7 +182,7 @@ export async function commonCompileSetup(
 
   const buildCacheDir = await cache.getSubDirPath(ctx, "build");
 
-  const actionLog = ctx.makeTaskLogger(action.label(target));
+  const actionLog = makeTaskLogger(action.label(target));
   let successMessage: string;
   try {
     ({ successMessage } = await action.invoke(ctx, actionLog, {

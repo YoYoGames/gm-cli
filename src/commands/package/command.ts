@@ -42,6 +42,11 @@ export const packageCommand = buildCommand({
         brief: "Verbose output",
         optional: true,
       },
+      errorsOnly: {
+        kind: "boolean",
+        brief: "Only output errors",
+        optional: true,
+      },
       prefabs: {
         kind: "parsed",
         brief: "Prefabs directory",

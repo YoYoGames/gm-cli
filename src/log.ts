@@ -22,6 +22,19 @@ export function fancyTaskLogger(): TaskLogger {
   return (title) => taskLog({ title, retainLog: true });
 }
 
+export function errorsOnlyTaskLogger(inner: TaskLogger): TaskLogger {
+  return (title) => {
+    const log = inner(title);
+    return {
+      message: noop,
+      error: (msg) => {
+        log.error(msg);
+      },
+      success: noop,
+    };
+  };
+}
+
 export function plainTaskLogger(): TaskLogger {
   return (title) => {
     let headerPrinted = false;

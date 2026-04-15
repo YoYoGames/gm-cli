@@ -41,13 +41,16 @@ export function spawnIgor(
           : undefined,
     });
 
-    const onData = (data: Buffer) => {
+    child.stdout.on("data", (data: Buffer) => {
       for (const line of data.toString().split("\n")) {
         if (line) log.message(line);
       }
-    };
-    child.stdout.on("data", onData);
-    child.stderr.on("data", onData);
+    });
+    child.stderr.on("data", (data: Buffer) => {
+      for (const line of data.toString().split("\n")) {
+        if (line) log.error(line);
+      }
+    });
 
     if (onSignal) {
       ctx.process.on("SIGINT", onSignal);
