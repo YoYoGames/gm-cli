@@ -148,11 +148,18 @@ export default async function (
                 ...(isWin
                   ? {
                       command: "cmd",
-                      args: ["/c", "npx @experimental/gm@latest edit --mcp"],
+                      args: [
+                        "/c",
+                        "npx @experimental/gm@latest resourcetool --mcp",
+                      ],
                     }
                   : {
                       command: "npx",
-                      args: ["@experimental/gm@latest", "edit", "--mcp"],
+                      args: [
+                        "@experimental/gm@latest",
+                        "resourcetool",
+                        "--mcp",
+                      ],
                     }),
                 env: {},
               },

@@ -20,8 +20,8 @@ run_test() {
   echo "--- compile (warm) ---"
   node "$GM_COMMAND" compile --target "$target" --cache-dir "$GM_CACHE_DIR"
 
-  echo "--- edit ---"
-  node "$GM_COMMAND" edit -C "resource list" --cache-dir "$GM_CACHE_DIR"
+  echo "--- resourcetool ---"
+  node "$GM_COMMAND" resourcetool -C "resource list" --cache-dir "$GM_CACHE_DIR"
 
   cd ..
   echo "=== PASSED: '$template' / $target ==="
