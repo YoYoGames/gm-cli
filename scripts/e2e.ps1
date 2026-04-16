@@ -29,7 +29,7 @@ function Invoke-Test {
         if ($LASTEXITCODE -ne 0) { throw "compile (warm) failed" }
 
         Write-Output "--- resourcetool ---"
-        node "$gmCommand" resourcetool -C "resource list" --cache-dir "$gmCacheDir"
+        node "$gmCommand" resourcetool eval "resource list" --cache-dir "$gmCacheDir"
         if ($LASTEXITCODE -ne 0) { throw "resourcetool failed" }
     }
     finally {

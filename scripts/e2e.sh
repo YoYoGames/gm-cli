@@ -21,7 +21,7 @@ run_test() {
   node "$GM_COMMAND" compile --target "$target" --cache-dir "$GM_CACHE_DIR"
 
   echo "--- resourcetool ---"
-  node "$GM_COMMAND" resourcetool -C "resource list" --cache-dir "$GM_CACHE_DIR"
+  node "$GM_COMMAND" resourcetool eval "resource list" --cache-dir "$GM_CACHE_DIR"
 
   cd ..
   echo "=== PASSED: '$template' / $target ==="

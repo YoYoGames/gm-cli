@@ -6,7 +6,8 @@ import { getPlatformSuffix, npmExec, PRIVATE_REGISTRY } from "./npm";
 export type ResourceToolMode =
   | { mode: "cli" }
   | { mode: "mcp" }
-  | { mode: "command"; command: string };
+  | { mode: "command"; command: string }
+  | { mode: "script"; file: string };
 
 export interface ResourceToolArgs {
   run: ResourceToolMode;
@@ -34,6 +35,21 @@ function splitCommand(input: string): string[] {
   return args;
 }
 
+function modeToArgs(run: ResourceToolMode): string[] {
+  switch (run.mode) {
+    case "command":
+      return splitCommand(run.command);
+    case "script":
+      return ["script", `path=${run.file}`];
+    case "cli":
+    case "mcp":
+      return [run.mode];
+    default:
+      run satisfies never;
+      throw new Error("Unreachable");
+  }
+}
+
 export async function callResourceTool(
   ctx: Context,
   {
@@ -44,8 +60,7 @@ export async function callResourceTool(
     ignoreStdio,
   }: ResourceToolArgs,
 ): Promise<void> {
-  const command =
-    run.mode === "command" ? splitCommand(run.command) : [run.mode];
+  const command = modeToArgs(run);
 
   const args = [
     ...command,
