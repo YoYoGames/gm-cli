@@ -157,11 +157,7 @@ export default async function (
                     }
                   : {
                       command: "npx",
-                      args: [
-                        "@gamemaker/gm-cli@latest",
-                        "resourcetool",
-                        "mcp",
-                      ],
+                      args: ["@gamemaker/gm-cli@latest", "resourcetool", "mcp"],
                     }),
                 env: {},
               },
