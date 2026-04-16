@@ -1,51 +1,39 @@
 import { Cache } from "~/cache";
 import { type Context, getPrefabsDirOrThrow } from "~/context";
 import { findProjectFile, type ProjectPath } from "~/project";
-import { KnownError } from "~/error";
 import { downloadProjectTool } from "~/projectTool";
 import { callResourceTool, type ResourceToolMode } from "~/resourceTool";
 import { noopLog } from "~/log";
 
-interface ResourcetoolCommandFlags {
-  mcp?: boolean;
-  command?: string;
+export interface CommonFlags {
   prefabs?: string;
   cacheDir?: string;
 }
 
-export default async function (
-  this: Context,
-  flags: ResourcetoolCommandFlags,
-  project?: ProjectPath,
+export async function run(
+  ctx: Context,
+  flags: CommonFlags,
+  project: ProjectPath | undefined,
+  mode: ResourceToolMode,
 ): Promise<void> {
-  if (flags.mcp && flags.command) {
-    throw new KnownError("Please use either --mcp or --command, not both.");
-  }
-
-  const cwd = this.process.cwd();
-  const projectPath = project ?? (await findProjectFile(this, cwd));
+  const cwd = ctx.process.cwd();
+  const projectPath = project ?? (await findProjectFile(ctx, cwd));
 
   const cache = await Cache.getOrInit(
-    this,
+    ctx,
     flags.cacheDir
       ? { type: "absolute", path: flags.cacheDir }
-      : { type: "infer", projectDir: this.path.dirname(projectPath) },
+      : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
   );
-  const projectToolPath = await downloadProjectTool(this, {
+  const projectToolPath = await downloadProjectTool(ctx, {
     cache,
     log: noopLog,
     verbose: false,
   });
 
-  const run: ResourceToolMode = flags.command
-    ? { mode: "command", command: flags.command }
-    : flags.mcp
-      ? { mode: "mcp" }
-      : { mode: "cli" };
-
-  const prefabsFolder = flags.prefabs ?? getPrefabsDirOrThrow(this);
-  await callResourceTool(this, {
-    run,
+  const prefabsFolder = flags.prefabs ?? getPrefabsDirOrThrow(ctx);
+  await callResourceTool(ctx, {
+    run: mode,
     projectPath,
     projectToolPath,
     prefabsFolder,

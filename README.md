@@ -34,12 +34,12 @@ npx @gamemaker/gm-cli@latest init
 npx @gamemaker/gm-cli@latest run # assuming you are in the project dir
 npx @gamemaker/gm-cli@latest run /path/to/project.yyp
 
-# Running a ResourceTool shell
+# Running a ResourceTool REPL
 npx @gamemaker/gm-cli@latest resourcetool
 # Running ResourceTool as an MCP server
-npx @gamemaker/gm-cli@latest resourcetool --mcp
+npx @gamemaker/gm-cli@latest resourcetool mcp
 # Add MCP server to Claude (assuming you are in the project dir)
-claude mcp add gamemaker -- npx @gamemaker/gm-cli@latest resourcetool --mcp
+claude mcp add gamemaker -- npx @gamemaker/gm-cli@latest resourcetool mcp
 ```
 
 ## Development
