@@ -90,3 +90,15 @@ Currently every project using `gm-cli` has it's own local `.gmcache` directory
 `gm-cli` will expose it's internals as a TypeScript library that you can use to more easily make your own editor tools. 
 ### Editor integration
 `gm-cli` will support opening projects in the IDE (or your preferred editor) and likely also help you download the IDE itself.  
+
+# Development
+```sh
+pnpm install
+pnpm build
+pnpm link
+```
+
+## Publish
+```sh
+pnpm publish --access restricted
+```
