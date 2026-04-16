@@ -25,9 +25,11 @@ import { packageCommand } from "./commands/package/command";
 import { gxgamesCommand } from "./commands/gxgames/command";
 import { KnownError } from "./error";
 import { getLatestVersion } from "./get-latest-version";
+import { manualCommand } from "./commands/manual/command";
 
 const routes = buildRouteMap({
   routes: {
+    manual: manualCommand,
     init: initCommand,
     compile: compileProjectCommand,
     run: runCommand,
