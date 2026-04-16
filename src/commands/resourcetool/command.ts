@@ -106,7 +106,10 @@ export const resourcetoolCommand = buildRouteMap({
             file: string,
             project?: ProjectPath,
           ) {
-            return run(this, flags, project, { mode: "script", file: this.path.resolve(file) });
+            return run(this, flags, project, {
+              mode: "script",
+              file: this.path.resolve(file),
+            });
           },
         };
       },
