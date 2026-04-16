@@ -1,20 +1,60 @@
 import path from "path";
+import { z } from "zod";
 import type { Context } from "~/context";
 import type { Log } from "~/log";
 import { type Module, type Target } from "./target";
 import { getProjectName, type ProjectPath } from "~/project";
 import type { Gms2VersionComplete } from "~/toolchain";
+import { KnownError } from "~/error";
 
-export async function findRuntimeLocation(
-  ctx: Context,
-  runtimeDir: string,
-): Promise<string> {
-  const entries = await ctx.fs.readdir(runtimeDir);
-  const subdir = entries[0]; // FIXME: pick the most recent runtime? Or given an error an ask the user to clearify?
-  if (!subdir) {
-    throw new Error(`No runtime found in ${runtimeDir}`);
+const RunnerErrorSchema = z.object({
+  source: z.literal("Runner"),
+  message: z.string(),
+  // Additional fields supported by more recent GMS2 runtimes:
+  // longMessage: z.string().optional(),
+  // script: z.string().optional(),
+  // line: z.number().optional(),
+  // stacktrace: z.array(z.string()).optional(),
+});
+
+const AssetCompilerErrorSchema = z.object({
+  source: z.literal("AssetCompiler"),
+  message: z.string(),
+});
+
+const IgorErrorSchema = z.object({
+  source: z.literal("Igor"),
+  message: z.string(),
+});
+
+const ErrorFromIgorSchema = z.discriminatedUnion("source", [
+  RunnerErrorSchema,
+  AssetCompilerErrorSchema,
+  IgorErrorSchema,
+]);
+
+type ErrorFromIgor = z.infer<typeof ErrorFromIgorSchema>;
+
+const ErrorsFromIgorSchema = z.object({
+  errors: z.array(ErrorFromIgorSchema),
+});
+
+function unescapeIgorString(s: string): string {
+  return s.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+}
+
+function parseIgorErrors(stderr: string): ErrorFromIgor[] | undefined {
+  try {
+    const parsed = ErrorsFromIgorSchema.parse(JSON.parse(stderr));
+    return parsed.errors
+      .filter((error) => error.message)
+      .map((error) => ({
+        ...error,
+        message: unescapeIgorString(error.message),
+      }));
+  } catch {
+    return undefined;
   }
-  return path.join(runtimeDir, subdir);
 }
 
 export function spawnIgor(
@@ -41,13 +81,19 @@ export function spawnIgor(
           : undefined,
     });
 
-    const onData = (data: Buffer) => {
+    child.stdout.on("data", (data: Buffer) => {
       for (const line of data.toString().split("\n")) {
-        if (line) log.message(line);
+        if (line) {
+          log.message(line);
+        }
       }
-    };
-    child.stdout.on("data", onData);
-    child.stderr.on("data", onData);
+    });
+    // Stderr is assumed to only contain a JSON object and nothing else,
+    // so we collect the output and parse it on close.
+    const stderrChunks: Buffer[] = [];
+    child.stderr.on("data", (data: Buffer) => {
+      stderrChunks.push(Buffer.from(data));
+    });
 
     if (onSignal) {
       ctx.process.on("SIGINT", onSignal);
@@ -67,10 +113,19 @@ export function spawnIgor(
         ctx.process.removeListener("SIGINT", onSignal);
         ctx.process.removeListener("SIGTERM", onSignal);
       }
-      if (code === 0 || code === null) {
+
+      const stderrOutput = Buffer.concat(stderrChunks).toString().trim();
+      const errors = parseIgorErrors(stderrOutput) ?? [];
+
+      if (errors.length === 0 && (code === 0 || code === null)) {
         resolve();
       } else {
-        reject(new Error(`${label} exited with code ${String(code)}`));
+        const errorMessages = errors.map((e) => e.message).join("\n");
+        reject(
+          new KnownError(
+            errorMessages || `${label} exited with code ${String(code)}`,
+          ),
+        );
       }
     });
   });
@@ -91,8 +146,17 @@ function execIgor(
             ? { ...ctx.process.env, COMPlus_ZapDisable: "1" }
             : undefined,
       },
-      (error, stdout) => {
+      (error, stdout, stderr) => {
         if (error) {
+          const stderrOutput = stderr?.trim();
+          if (stderrOutput) {
+            const errors = parseIgorErrors(stderr) ?? [];
+            const messages = errors.map((e) => e.message).join("\n");
+            if (messages) {
+              reject(new KnownError(messages));
+              return;
+            }
+          }
           reject(error as Error);
         } else {
           resolve(stdout);
@@ -220,6 +284,7 @@ export function constructIgorBuildArgs(
     ...(commonArgs.verbose ? ["-v"] : []),
     "-projectool",
     commonArgs.projectToolPath,
+    "-jsonErrors",
     ...extraArgs,
     "--",
     commonArgs.target,
