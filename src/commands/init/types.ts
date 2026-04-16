@@ -13,4 +13,5 @@ export interface ProjectConfig {
   projectName: string;
   template: string;
   useAi: boolean;
+  useActions: boolean;
 }
