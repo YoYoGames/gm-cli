@@ -85,7 +85,7 @@ Search and open the [GameMaker Manual](https://manual.gamemaker.io/monthly/en/) 
 ### Publishing games to the web
 Direct integration with [gx.games](https://gx.games) to share your games! 
 ### Smarter caching and manifest files
-Currently every project using `gm-cli` has it's own local `.gmcache` directory
+Currently every project using `gm-cli` has it's own local `.gmcache` directory. This will be improved with shared caches and manifest file format (similar to `pyprojects.toml` and `package.json`) 
 ### A library to make your own tools
 `gm-cli` will expose it's internals as a TypeScript library that you can use to more easily make your own editor tools. 
 ### Editor integration
