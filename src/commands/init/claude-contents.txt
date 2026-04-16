@@ -3,6 +3,15 @@
 It's very hard to correctly edit project files manually! Instead of making changes to
 `.yy` files yourself you MUST make use of commands exposed by the `gamemaker-mcp` server. However, if you want to make changes to existing `.gml` files you may use your built-in tools if you so wish.
 
+# Running / debugging games
+
+To help users debug and play games you can make use of:
+
+```
+npx @gamemaker/gm-cli compile --errors-only
+npx @gamemaker/gm-cli run --errors-only
+```
+
 ## GameMaker Language (GML) Naming Conventions
 
 **Naming conventions**

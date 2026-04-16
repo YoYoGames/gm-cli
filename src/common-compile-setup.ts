@@ -12,7 +12,7 @@ import { KnownError } from "./error";
 import { LICENSE_FILENAME } from "./commands/login/impl";
 import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
-import type { Log } from "./log";
+import { noopLog, type Log } from "./log";
 import type { ToolchainVersion } from "./toolchain";
 
 /**
@@ -26,6 +26,7 @@ export interface CommonCliBuildFlags {
   prefabs?: string;
   cacheDir?: string;
   runtime?: "native" | "vm";
+  errorsOnly?: boolean;
 }
 
 const GUEST_ACCESS_KEY = "09bdd0bc8c2f6cce3391a16679ede918";
@@ -110,6 +111,10 @@ export async function commonCompileSetup(
     ) => Promise<{ successMessage: string }>;
   },
 ): Promise<void> {
+  if (flags.errorsOnly) {
+    ctx = { ...ctx, makeTaskLogger: () => noopLog };
+  }
+
   const cwd = ctx.process.cwd();
   const target = flags.target ?? targetForPlatform(ctx.process.platform);
   const projectPath = project ?? (await findProjectFile(ctx, cwd));
