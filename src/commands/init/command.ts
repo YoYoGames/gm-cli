@@ -31,6 +31,11 @@ export const initCommand = buildCommand({
         brief: "Set up AI scaffolding (MCP, CLAUDE.md, etc.)",
         default: true,
       },
+      actions: {
+        kind: "boolean",
+        brief: "Set up GitHub Actions workflows",
+        default: true,
+      },
       cacheDir: {
         kind: "parsed",
         parse: String,

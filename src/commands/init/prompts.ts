@@ -5,6 +5,7 @@ import type { Template, ProjectConfig } from "./types";
 interface ArgvOptions {
   name?: string;
   ai?: boolean;
+  actions?: boolean;
 }
 
 export async function runInteractive(
@@ -51,6 +52,11 @@ export async function runInteractive(
           message: "Set up AI scaffolding (MCP, CLAUDE.md, etc.)",
           initialValue: argv.ai ?? true,
         }),
+      useActions: () =>
+        p.confirm({
+          message: "Set up GitHub Actions workflows",
+          initialValue: argv.actions ?? true,
+        }),
     },
     {
       onCancel: () => {
@@ -63,5 +69,6 @@ export async function runInteractive(
     projectName: answers.projectName,
     template: answers.template as string,
     useAi: answers.useAi,
+    useActions: answers.useActions,
   };
 }

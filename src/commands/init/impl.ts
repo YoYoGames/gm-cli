@@ -17,6 +17,7 @@ interface InitCommandFlags {
   name?: string;
   template?: string;
   ai: boolean;
+  actions: boolean;
   cacheDir?: string;
 }
 
@@ -50,12 +51,13 @@ export default async function (
       projectName: flags.name,
       template: matchedTemplate.id,
       useAi: flags.ai,
+      useActions: flags.actions,
     };
 
     this.process.stdout.write("Creating project...\n");
   } else {
     config = await runInteractive(
-      { name: flags.name, ai: flags.ai },
+      { name: flags.name, ai: flags.ai, actions: flags.actions },
       templates,
     );
   }
@@ -170,16 +172,18 @@ export default async function (
         ) + "\n",
       );
     }
-    const workflowsDir = this.path.join(projectDir, ".github", "workflows");
-    await this.fs.mkdir(workflowsDir, { recursive: true });
-    await this.fs.writeFile(
-      this.path.join(workflowsDir, "compile.yml"),
-      compileYml({}),
-    );
-    await this.fs.writeFile(
-      this.path.join(workflowsDir, "package.yml"),
-      packageYml({}),
-    );
+    if (config.useActions) {
+      const workflowsDir = this.path.join(projectDir, ".github", "workflows");
+      await this.fs.mkdir(workflowsDir, { recursive: true });
+      await this.fs.writeFile(
+        this.path.join(workflowsDir, "compile.yml"),
+        compileYml({}),
+      );
+      await this.fs.writeFile(
+        this.path.join(workflowsDir, "package.yml"),
+        packageYml({}),
+      );
+    }
     s.stop(`Project created at ${projectDir}`);
 
     if (flags.interactive) {
