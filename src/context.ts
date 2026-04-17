@@ -6,6 +6,8 @@ import path from "node:path";
 import { KnownError } from "./error";
 import type { TaskLogger } from "./log";
 import { fancyTaskLogger, plainTaskLogger } from "./log";
+import open from "open";
+import http from "node:http";
 
 export interface Context extends CommandContext {
   readonly process: NodeJS.Process;
@@ -14,6 +16,8 @@ export interface Context extends CommandContext {
   readonly fs: typeof fs;
   readonly path: typeof path;
   readonly fetch: typeof globalThis.fetch;
+  readonly open: typeof open;
+  readonly http: typeof http;
   readonly makeTaskLogger: TaskLogger;
 }
 
@@ -42,6 +46,8 @@ export function buildContext(process: NodeJS.Process): Context {
   return {
     process,
     child_process,
+    open,
+    http,
     os,
     fs,
     path,
