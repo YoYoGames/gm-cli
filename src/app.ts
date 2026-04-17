@@ -6,6 +6,7 @@ import { runCommand } from "./commands/run/command";
 import { resourcetoolCommand } from "./commands/resourcetool/command";
 import { loginCommand } from "./commands/login/command";
 import { packageCommand } from "./commands/package/command";
+import { gxgamesCommand } from "./commands/gxgames/command";
 import { KnownError } from "./error";
 
 const routes = buildRouteMap({
@@ -16,8 +17,12 @@ const routes = buildRouteMap({
     resourcetool: resourcetoolCommand,
     login: loginCommand,
     package: packageCommand,
+    gxgames: gxgamesCommand,
   },
   docs: {
+    hideRoute: {
+      gxgames: !process.env["GAMEMAKER_CLI_UNSTABLE_FEATURES"],
+    },
     brief: description,
   },
 });

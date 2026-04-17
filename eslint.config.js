@@ -8,7 +8,7 @@ import tseslint from "typescript-eslint";
 
 export default defineConfig(
   includeIgnoreFile(path.join(import.meta.dirname, ".gitignore")),
-  { ignores: ["**/*.config.*"] },
+  { ignores: ["**/*.config.*", "scripts"] },
   eslint.configs.recommended,
   tseslint.configs.strict,
   tseslint.configs.strictTypeChecked,
