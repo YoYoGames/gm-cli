@@ -49,7 +49,7 @@ If you wish, it will also help you setup more advanced feature like:
 - GitHub automation pipelines to compile and package your project
 - AI agent integration (AGENTS.md, MCP, Claude config)
 ### Compile, run, and package projects
-GameMaker CLI can automatically download the the runtime and all other tools needed to compile and run your projects.
+GameMaker CLI can automatically download the runtime and all other tools needed to compile and run your projects.
 
 Try running one of these commands in a folder with a `.yyp` file:
 ```sh
@@ -77,7 +77,7 @@ npx @gamemaker/gm-cli@latest login <my key>
 > [!NOTE]
 >  The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
 
-**Many features are planned to soon be added to `gm-cli`. These include.**
+**Many features are planned to soon be added to `gm-cli`. These include:**
 ### GMRT and more targets
 GameMaker CLI will have full support to manage more targets for the GMS2 runtime as well as the new GMRT toolchain. 
 ### GameMaker Manual integration
