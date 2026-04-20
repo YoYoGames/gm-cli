@@ -1,12 +1,16 @@
 import { Cache } from "~/cache";
-import { type Context, getPrefabsDirOrThrow } from "~/context";
+import { type Context } from "~/context";
 import { findProjectFile, type ProjectPath } from "~/project";
-import { downloadProjectTool } from "~/gmTools";
+import {
+  downloadGmpm,
+  downloadPackageTool,
+  downloadProjectTool,
+} from "~/gmTools";
 import { callResourceTool, type ResourceToolMode } from "~/resourceTool";
 import { noopLog } from "~/log";
+import { restorePrefabs } from "~/restorePrefabs";
 
 export interface CommonFlags {
-  prefabs?: string;
   cacheDir?: string;
 }
 
@@ -28,12 +32,25 @@ export async function run(
   const projectToolPath = await downloadProjectTool(ctx, cache, noopLog, {
     verbose: false,
   });
+  const gmpmPath = await downloadGmpm(ctx, cache, noopLog, {
+    verbose: false,
+  });
+  const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
+    verbose: false,
+  });
 
-  const prefabsFolder = flags.prefabs ?? getPrefabsDirOrThrow(ctx);
+  await restorePrefabs(ctx, cache, noopLog, {
+    projectToolPath,
+    projectPath,
+    packageToolPath,
+    gmpmPath,
+    verbose: false,
+  });
+
   await callResourceTool(ctx, {
     run: mode,
     projectPath,
     projectToolPath,
-    prefabsFolder,
+    prefabsFolder: await cache.getSubDirPath(ctx, "prefabs"),
   });
 }

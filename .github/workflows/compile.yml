@@ -34,12 +34,6 @@ jobs:
           path: test/.gmcache
           key: ${{ runner.os }}-gmcache
 
-      # TODO: Remove when CLI doesn't require this
-      - name: Make prefabs dir
-        run: |
-          echo "GAMEMAKER_PREFABS=$(pwd)/.prefabs" >> $GITHUB_ENV
-          mkdir .prefabs
-
       - run: npx "$GM_COMMAND" login "$GAMEMAKER_PAT"
         # TODO: When license is no longer required
         # if: ${{ secrets.GAMEMAKER_PAT != '' }}

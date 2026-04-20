@@ -4,12 +4,6 @@ import type { Context } from "~/context";
 import type { CommonFlags } from "./impl";
 
 const commonFlags = {
-  prefabs: {
-    kind: "parsed" as const,
-    brief: "Prefabs directory",
-    parse: String,
-    optional: true as const,
-  },
   cacheDir: {
     kind: "parsed" as const,
     parse: String,

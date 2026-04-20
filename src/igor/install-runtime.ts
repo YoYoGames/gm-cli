@@ -144,7 +144,7 @@ export async function installRuntimeIfNeeded(
     version?: Gms2Version;
   },
 ): Promise<string> {
-  const runtimeDir = await cache.getSubDirPath(ctx, "runtime");
+  const runtimeDir = await cache.getSubDirPath(ctx, "runtimes-gms2");
   let runtimeLocation = await findRuntimeLocation(ctx, runtimeDir, version);
 
   // FIXME: if this fails, we should delete the runtime dir and try again

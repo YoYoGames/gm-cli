@@ -54,12 +54,6 @@ export const compileProjectCommand = buildCommand({
         brief: "Suppress all output except errors",
         optional: true,
       },
-      prefabs: {
-        kind: "parsed",
-        brief: "Prefabs directory",
-        parse: String,
-        optional: true,
-      },
       license: {
         kind: "parsed",
         parse: String,

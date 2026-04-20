@@ -39,8 +39,6 @@ function Invoke-Test {
     Write-Output "=== PASSED: '$Template' / $Target ==="
 }
 
-New-Item -ItemType Directory -Force -Path ".prefabs" | Out-Null
-$env:GAMEMAKER_PREFABS = (Get-Location).Path + "/.prefabs"
 $env:NO_COLOR = "1"
 
 Invoke-Test "Blank Game" "operagx"
