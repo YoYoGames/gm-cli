@@ -1,7 +1,7 @@
 import { Cache } from "~/cache";
 import { type Context, getPrefabsDirOrThrow } from "~/context";
 import { findProjectFile, type ProjectPath } from "~/project";
-import { downloadProjectTool } from "~/projectTool";
+import { downloadProjectTool } from "~/gmTools";
 import { callResourceTool, type ResourceToolMode } from "~/resourceTool";
 import { noopLog } from "~/log";
 
@@ -25,9 +25,7 @@ export async function run(
       ? { type: "absolute", path: flags.cacheDir }
       : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
   );
-  const projectToolPath = await downloadProjectTool(ctx, {
-    cache,
-    log: noopLog,
+  const projectToolPath = await downloadProjectTool(ctx, cache, noopLog, {
     verbose: false,
   });
 

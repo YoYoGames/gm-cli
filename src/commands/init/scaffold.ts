@@ -2,7 +2,7 @@ import type { Template } from "./types";
 import type { Cache } from "~/cache";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import { downloadProjectTool } from "~/projectTool";
+import { downloadProjectTool } from "~/gmTools";
 import { noopLog } from "~/log";
 
 export async function scaffoldProject(
@@ -21,9 +21,7 @@ export async function scaffoldProject(
   const archivePath = project.dir + ".zip";
   await ctx.fs.writeFile(archivePath, Buffer.from(buffer));
 
-  const projectToolPath = await downloadProjectTool(ctx, {
-    cache,
-    log: noopLog,
+  const projectToolPath = await downloadProjectTool(ctx, cache, noopLog, {
     verbose: false,
   });
 
