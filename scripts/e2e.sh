@@ -27,8 +27,6 @@ run_test() {
   echo "=== PASSED: '$template' / $target ==="
 }
 
-mkdir -p .prefabs
-export GAMEMAKER_PREFABS="$(pwd)/.prefabs"
 export NO_COLOR=1
 
 run_test "Blank Game" operagx

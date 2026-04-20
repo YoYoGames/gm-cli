@@ -1,4 +1,4 @@
-import { exists, getPrefabsDirOrThrow, type Context } from "./context";
+import { exists, type Context } from "./context";
 import {
   targetForPlatform,
   downloadIgor,
@@ -18,6 +18,7 @@ import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
 import { noopLog, type Log } from "./log";
 import type { ToolchainVersion } from "./toolchain";
+import { restorePrefabs } from "./restorePrefabs";
 
 /**
  * Command flags exposed in package/run/compile
@@ -27,7 +28,6 @@ export interface CommonCliBuildFlags {
   toolchain?: ToolchainVersion;
   verbose?: boolean;
   license?: string;
-  prefabs?: string;
   cacheDir?: string;
   runtime?: "native" | "vm";
   errorsOnly?: boolean;
@@ -202,6 +202,21 @@ export async function commonCompileSetup(
     target,
   });
 
+  const prefabsLog = ctx.makeTaskLogger("Restoring prefabs");
+  try {
+    await restorePrefabs(ctx, cache, prefabsLog, {
+      projectToolPath,
+      projectPath,
+      packageToolPath,
+      gmpmPath,
+      verbose: flags.verbose ?? false,
+    });
+  } catch (e) {
+    prefabsLog.error("Failed to restore prefabs");
+    throw e;
+  }
+  prefabsLog.success("Prefabs restored");
+
   const buildCacheDir = await cache.getSubDirPath(
     ctx,
     `build-gms2-${target}-${runtime}`,
@@ -215,7 +230,7 @@ export async function commonCompileSetup(
       runtimeDir: runtimeLocation,
       target,
       cacheDir: buildCacheDir,
-      prefabsDir: flags.prefabs ?? getPrefabsDirOrThrow(ctx),
+      prefabsDir: await cache.getSubDirPath(ctx, "prefabs"),
       licenseFile,
       projectPath,
       projectToolPath,

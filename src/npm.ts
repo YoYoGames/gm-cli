@@ -1,11 +1,11 @@
 import type { Context } from "./context";
 import type { Log } from "./log";
 
-export type PlatformSuffixes = {
+export interface PlatformSuffixes {
   win32: { x64: string };
   linux: { x64: string; arm64: string };
   darwin: { x64: string; arm64: string };
-};
+}
 
 const DEFAULT_PLATFORM_SUFFIXES: PlatformSuffixes = {
   win32: {

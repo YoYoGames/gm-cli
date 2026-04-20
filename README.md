@@ -11,14 +11,6 @@ The GM CLI and parts of the underlying tools are only available internally in th
 ```bash
 npm login --registry https://gmpm-private.gamemaker.io --scope @gamemaker
 ```
-### Specify a prefabs folder
-
-Specify what folder should be used to get prefabs. This won't be needed once https://github.com/YoYoGames/gm-cli/issues/17 is resolved.
-
-Set the environment variable `GAMEMAKER_PREFABS` to where the IDE stores its prefabs. E.g. on macOS:
-```bash
-export GAMEMAKER_PREFABS=/Users/Shared/GameMakerStudio2/Prefabs
-```
 
 # Usage
 
