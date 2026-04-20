@@ -7,7 +7,11 @@ import {
   type CommonIgorBuildArgs,
   fetchLicense,
 } from "./igor";
-import { downloadProjectTool } from "./projectTool";
+import {
+  downloadGmpm,
+  downloadPackageTool,
+  downloadProjectTool,
+} from "./gmTools";
 import { KnownError } from "./error";
 import { LICENSE_FILENAME } from "./commands/login/impl";
 import { findProjectFile, type ProjectPath } from "./project";
@@ -165,19 +169,25 @@ export async function commonCompileSetup(
   }
   igorLog.success("Igor downloaded");
 
-  const projectToolLog = ctx.makeTaskLogger("Downloading ProjectTool");
+  const gmToolLog = ctx.makeTaskLogger("Downloading tools");
   let projectToolPath: string;
+  let gmpmPath: string;
+  let packageToolPath: string;
   try {
-    projectToolPath = await downloadProjectTool(ctx, {
-      cache,
-      log: projectToolLog,
+    projectToolPath = await downloadProjectTool(ctx, cache, gmToolLog, {
+      verbose: flags.verbose ?? false,
+    });
+    gmpmPath = await downloadGmpm(ctx, cache, gmToolLog, {
+      verbose: flags.verbose ?? false,
+    });
+    packageToolPath = await downloadPackageTool(ctx, cache, gmToolLog, {
       verbose: flags.verbose ?? false,
     });
   } catch (e) {
-    projectToolLog.error("Failed to download ProjectTool");
+    gmToolLog.error("Failed to download tools");
     throw new KnownError(e);
   }
-  projectToolLog.success("ProjectTool downloaded");
+  gmToolLog.success("Tools downloaded");
 
   const licenseLog = ctx.makeTaskLogger("Fetching license");
   const licenseFile = await getLicense(ctx, flags, cache, igorPath, licenseLog);

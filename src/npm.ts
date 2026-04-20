@@ -1,7 +1,13 @@
 import type { Context } from "./context";
 import type { Log } from "./log";
 
-const PLATFORM_SUFFIXES: Record<string, Record<string, string>> = {
+export type PlatformSuffixes = {
+  win32: { x64: string };
+  linux: { x64: string; arm64: string };
+  darwin: { x64: string; arm64: string };
+};
+
+const DEFAULT_PLATFORM_SUFFIXES: PlatformSuffixes = {
   win32: {
     x64: "win-x64",
   },
@@ -15,18 +21,21 @@ const PLATFORM_SUFFIXES: Record<string, Record<string, string>> = {
   },
 };
 
-export function getPlatformSuffix(ctx: Context): string {
-  const platform = ctx.process.platform;
+export function getPlatformSuffix(
+  ctx: Context,
+  overrides?: { [K in keyof PlatformSuffixes]?: Partial<PlatformSuffixes[K]> },
+): string {
+  const platform = ctx.process.platform as keyof PlatformSuffixes;
   const arch = ctx.process.arch;
 
-  const platformNames = PLATFORM_SUFFIXES[platform];
-  if (!platformNames) {
-    throw new Error(`Unsupported platform: ${platform}`);
-  }
+  const platformNames = {
+    ...DEFAULT_PLATFORM_SUFFIXES[platform],
+    ...overrides?.[platform],
+  };
 
-  const suffix = platformNames[arch];
+  const suffix = (platformNames as Record<string, string>)[arch];
   if (!suffix) {
-    throw new Error(`Unsupported architecture for ${platform}: ${arch}`);
+    throw new Error(`Unsupported platform/arch: ${platform}/${arch}`);
   }
 
   return suffix;
@@ -130,7 +139,11 @@ export function npmInstall(
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`npm install exited with code ${String(code)}`));
+        reject(
+          new Error(
+            `npm install ${packageName} exited with code ${String(code)}`,
+          ),
+        );
       }
     });
   });
