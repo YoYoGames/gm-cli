@@ -1,6 +1,6 @@
 import { unzip } from "fflate";
 import type { Cache } from "~/cache";
-import type { Context } from "~/context";
+import { exists, type Context } from "~/context";
 import { KnownError } from "~/error";
 import type { Log } from "~/log";
 
@@ -38,12 +38,10 @@ export async function downloadIgor(
   const exeName = platform === "win32" ? "Igor.exe" : "Igor";
   const igorPath = ctx.path.join(destDir, platformDir, arch, exeName);
 
-  try {
-    await ctx.fs.access(igorPath);
+  if (await exists(ctx, igorPath)) {
     return igorPath;
-  } catch {
-    // not yet downloaded
   }
+  // not yet downloaded
 
   const platformZips = IGOR_ZIPS[platform];
   if (!platformZips) {

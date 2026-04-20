@@ -1,5 +1,5 @@
 import type { Cache } from "./cache";
-import type { Context } from "./context";
+import { exists, type Context } from "./context";
 import type { Log } from "./log";
 import { npmInstall, getPlatformSuffix, REGISTRY } from "./npm";
 
@@ -27,12 +27,10 @@ export async function downloadProjectTool(
         ? ctx.path.join(destDir, "node_modules", packageName, exeName)
         : ctx.path.join(destDir, "lib", "node_modules", packageName, exeName);
 
-  try {
-    await ctx.fs.access(toolPath);
+  if (await exists(ctx, toolPath)) {
     return toolPath;
-  } catch {
-    // not yet downloaded
   }
+  // not yet downloaded
 
   await npmInstall(ctx, log, {
     prefix: destDir,
