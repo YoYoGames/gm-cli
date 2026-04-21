@@ -28,6 +28,8 @@ export const loginCommand = buildCommand({
     },
   },
   docs: {
-    brief: "Log in with an access key",
+    brief: "Sign-in using an access key",
+    fullDescription:
+      "Sign-in using an access key.\n\nYou can issue an access key at: https://gamemaker.io/en/account/access-keys",
   },
 });
