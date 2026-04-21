@@ -71,12 +71,29 @@ export async function downloadGmpm(
       },
     },
     (destDir, packageName) => {
-      const base = ctx.path.join(destDir, "lib", "node_modules", packageName);
       // Note: we only want the DLL file (regardless of platform)
       if (ctx.process.platform === "darwin") {
-        return ctx.path.join(base, "bundle", "Contents", "MacOS", "gmpm.dll");
+        return ctx.path.join(
+          destDir,
+          "lib",
+          "node_modules",
+          packageName,
+          "bundle",
+          "Contents",
+          "MacOS",
+          "gmpm.dll",
+        );
       }
-      return ctx.path.join(base, "gmpm.dll");
+      if (ctx.process.platform === "win32") {
+        return ctx.path.join(destDir, "node_modules", packageName, "gmpm.dll");
+      }
+      return ctx.path.join(
+        destDir,
+        "lib",
+        "node_modules",
+        packageName,
+        "gmpm.dll",
+      );
     },
   );
 }
@@ -108,7 +125,6 @@ export async function downloadPackageTool(
         case "win32":
           return ctx.path.join(
             destDir,
-            "lib",
             "node_modules",
             packageName,
             "PackageTool.exe",
