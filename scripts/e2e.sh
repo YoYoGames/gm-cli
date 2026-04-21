@@ -30,6 +30,10 @@ run_test() {
 export NO_COLOR=1
 
 run_test "Blank Game" operagx
-run_test "Brick Breaker" operagx
+
+# let's save some CI resources and only run multiple games on Windows!
+
+# The platformer game is a good tests since it makes use of prefabs
+#run_test "Platformer" operagx
 
 rm -rf test-game
