@@ -1,6 +1,8 @@
 # GameMaker CLI
 **The GameMaker command-line interface `gm-cli` is a helpful tool to edit, compile, package, and run your GameMaker projects.**
 
+![Demo video of `gm-cli init` command](recordings/init.gif)
+
 ## Setup (first time)
 > [!NOTE]
 >  These steps should not be needed at release!
