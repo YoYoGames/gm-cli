@@ -59,7 +59,7 @@
     "zod": "^4.3.6"
   },
   "dependencies": {
-    "marked": "^15.0.0",
+    "marked": "^12.0.2",
     "marked-terminal": "^7.2.0",
     "open": "^11.0.0"
   }
