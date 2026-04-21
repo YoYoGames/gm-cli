@@ -278,7 +278,7 @@ export function constructIgorBuildArgs(
     "-of",
     outputFile,
     "-lf",
-    commonArgs.licenseFile, // FIXME: should not be needed but asset compiler requires it
+    commonArgs.licenseFile,
     "-prefabs",
     commonArgs.prefabsDir,
     ...(commonArgs.verbose ? ["-v"] : []),
