@@ -48,13 +48,19 @@ function stopMacProcesses(ctx: Context): void {
 
     for (const line of psOutput.split("\n")) {
       const trimmed = line.trim();
-      if (!trimmed) continue;
+      if (!trimmed) {
+        continue;
+      }
 
       // Skip the grep process itself
-      if (trimmed.includes("grep")) continue;
+      if (trimmed.includes("grep")) {
+        continue;
+      }
 
       const pidStr = /^(\d+)/.exec(trimmed)?.[1];
-      if (!pidStr) continue;
+      if (!pidStr) {
+        continue;
+      }
 
       const pid = parseInt(pidStr, 10);
       killMacProcessTree(ctx, pid);
@@ -103,7 +109,9 @@ function stopWindowsProcesses(ctx: Context): void {
   for (const line of tasklist.split("\n")) {
     // CSV format: "name.exe","PID",...
     const match = /^"([^"]+)","(\d+)"/.exec(line);
-    if (!match) continue;
+    if (!match) {
+      continue;
+    }
 
     const [, processName, pidStr] = match;
     if (!processName || !pidStr) {

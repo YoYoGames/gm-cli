@@ -72,8 +72,12 @@ export function gms2VersionSatisfies(
 ): boolean {
   for (let i = 0; i < 4; i++) {
     const p = prefix[i];
-    if (p === undefined) break;
-    if (version[i] !== p) return false;
+    if (p === undefined) {
+      break;
+    }
+    if (version[i] !== p) {
+      return false;
+    }
   }
   return true;
 }
@@ -85,7 +89,9 @@ export function gms2VersionSatisfies(
 export function gms2VersionCompare(a: Gms2Version, b: Gms2Version): number {
   for (let i = 0; i < 4; i++) {
     const diff = (a[i] ?? 0) - (b[i] ?? 0);
-    if (diff !== 0) return diff;
+    if (diff !== 0) {
+      return diff;
+    }
   }
   return 0;
 }

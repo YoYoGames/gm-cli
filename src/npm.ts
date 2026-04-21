@@ -114,7 +114,9 @@ export function npmInstall(
 
     const onData = (data: Buffer) => {
       for (const line of data.toString().split("\n")) {
-        if (line) log.message(line);
+        if (line) {
+          log.message(line);
+        }
       }
     };
     child.stdout.on("data", onData);

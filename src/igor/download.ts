@@ -70,14 +70,19 @@ export async function downloadIgor(
   const files = await new Promise<Record<string, Uint8Array>>(
     (resolve, reject) => {
       unzip(data, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
       });
     },
   );
 
   for (const [name, content] of Object.entries(files)) {
-    if (name.endsWith("/")) continue;
+    if (name.endsWith("/")) {
+      continue;
+    }
     const outPath = ctx.path.join(destDir, name);
     await ctx.fs.mkdir(ctx.path.dirname(outPath), { recursive: true });
     log.message(`  extracting: ${name}`);

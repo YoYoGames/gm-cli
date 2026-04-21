@@ -15,6 +15,7 @@ export default defineConfig(
   tseslint.configs.stylisticTypeChecked,
   {
     rules: {
+      curly: "warn",
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/no-unused-vars": [
