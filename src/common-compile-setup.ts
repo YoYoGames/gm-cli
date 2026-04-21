@@ -33,9 +33,13 @@ const GUEST_ACCESS_KEY = "09bdd0bc8c2f6cce3391a16679ede918";
 const LICENSE_RENEWAL_THRESHOLD_DAYS = 7;
 
 function parseGuestLicenseExpiry(content: string): Date | null {
-  if (!/name<\/key>\s*<string>Guest<\/string>/.test(content)) return null;
+  if (!/name<\/key>\s*<string>Guest<\/string>/.test(content)) {
+    return null;
+  }
   const m = /expiry_date<\/key>\s*<string>([^<]+)<\/string>/.exec(content);
-  if (!m?.[1]) return null;
+  if (!m?.[1]) {
+    return null;
+  }
   const d = new Date(m[1]);
   return isNaN(d.getTime()) ? null : d;
 }

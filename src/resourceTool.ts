@@ -25,13 +25,17 @@ function splitCommand(input: string): string[] {
     if (ch === '"') {
       inQuotes = !inQuotes;
     } else if (ch === " " && !inQuotes) {
-      if (current) args.push(current);
+      if (current) {
+        args.push(current);
+      }
       current = "";
     } else {
       current += ch;
     }
   }
-  if (current) args.push(current);
+  if (current) {
+    args.push(current);
+  }
   return args;
 }
 
