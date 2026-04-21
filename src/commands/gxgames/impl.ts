@@ -22,7 +22,9 @@ export default async function (
       value: studioId,
     })),
   });
-  if (p.isCancel(studioId)) return process.exit(0);
+  if (p.isCancel(studioId)) {
+    return process.exit(0);
+  }
 
   const gamesRes = await api.gamedev.getUserGames({
     studioId: [studioId],
@@ -40,7 +42,9 @@ export default async function (
       })),
     ],
   });
-  if (p.isCancel(gameChoice)) return process.exit(0);
+  if (p.isCancel(gameChoice)) {
+    return process.exit(0);
+  }
 
   let gameId: string;
   let previousVersion: string | undefined;
@@ -49,7 +53,9 @@ export default async function (
     const gameName = await p.text({
       message: "Game name",
     });
-    if (p.isCancel(gameName)) return process.exit(0);
+    if (p.isCancel(gameName)) {
+      return process.exit(0);
+    }
 
     const createLog = ctx.makeTaskLogger("Creating game");
     const res = await api.gamedev.createGame({
@@ -71,7 +77,9 @@ export default async function (
     placeholder: "0.0.1.0",
     defaultValue: previousVersion,
   });
-  if (p.isCancel(version)) return process.exit(0);
+  if (p.isCancel(version)) {
+    return process.exit(0);
+  }
 
   const uploadLog = ctx.makeTaskLogger("Uploading bundle");
   const fileBuffer = await ctx.fs.readFile(file);
