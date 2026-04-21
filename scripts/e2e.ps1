@@ -42,7 +42,13 @@ function Invoke-Test {
 $env:NO_COLOR = "1"
 
 Invoke-Test "Blank Game" "operagx"
-Invoke-Test "Brick Breaker" "operagx"
+
+# The platformer game is a good tests since it makes use of prefabs
+Invoke-Test "Platformer" "operagx"
+
+# Make sure windows target works too!
+Invoke-Test "Blank Game" "windows"
+
 
 if (Test-Path "test-game") {
     Remove-Item -Recurse -Force "test-game"
