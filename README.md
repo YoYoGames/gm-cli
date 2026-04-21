@@ -45,8 +45,8 @@ GameMaker CLI can automatically download the runtime and all other tools needed 
 
 Try running one of these commands in a folder with a `.yyp` file:
 ```sh
-npx @gamemaker/gm-cli@latest compile
 npx @gamemaker/gm-cli@latest run
+npx @gamemaker/gm-cli@latest compile
 npx @gamemaker/gm-cli@latest package
 ```
 
