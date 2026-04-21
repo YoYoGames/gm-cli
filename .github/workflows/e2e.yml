@@ -15,6 +15,7 @@ env:
 
 jobs:
   e2e:
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
