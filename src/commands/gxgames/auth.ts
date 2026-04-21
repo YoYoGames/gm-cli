@@ -17,13 +17,23 @@ function waitForAuthCode(ctx: Context): Promise<string> {
       const url = new URL(req.url ?? "/", REDIRECT_URI);
       const code = url.searchParams.get("code");
       res.writeHead(200, { "Content-Type": "text/html" });
-      // TODO: Should exit automatically
+      // TODO: Seems like we can't close this automatically. We could make this page a bit nices though!
+      // We should also handle errors here
       res.end(
-        "<html><body><script>window.close()</script><p>Login successful. You can close this tab.</p></body></html>",
+        [
+          "<html>",
+          "<body>",
+          "<p>Login successful. You can close this tab.</p>",
+          "</body>",
+          "</html>",
+        ].join("\n"),
       );
       server.close();
-      if (code) resolve(code);
-      else reject(new KnownError("No auth code in redirect"));
+      if (code) {
+        resolve(code);
+      } else {
+        reject(new KnownError("No auth code in redirect"));
+      }
     });
     server.on("error", reject);
     server.listen(REDIRECT_PORT);
@@ -46,9 +56,13 @@ async function exchangeCodeForToken(
         state,
       }).toString() + `&scope=${SCOPE}`,
   });
-  if (!res.ok) throw new KnownError(`Token exchange failed: ${res.statusText}`);
+  if (!res.ok) {
+    throw new KnownError(`Token exchange failed: ${res.statusText}`);
+  }
   const json = (await res.json()) as { access_token?: string };
-  if (!json.access_token) throw new KnownError("No access_token in response");
+  if (!json.access_token) {
+    throw new KnownError("No access_token in response");
+  }
   return json.access_token;
 }
 
