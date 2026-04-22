@@ -174,11 +174,11 @@ export default async function (
       await this.fs.mkdir(workflowsDir, { recursive: true });
       await this.fs.writeFile(
         this.path.join(workflowsDir, "compile.yml"),
-        compileYml({}),
+        compileYml(),
       );
       await this.fs.writeFile(
         this.path.join(workflowsDir, "package.yml"),
-        packageYml({}),
+        packageYml({ name: config.projectName }),
       );
     }
     s.stop(`Project created at ${projectDir}`);
