@@ -1,10 +1,7 @@
 name: Compile
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
   push:
-    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
@@ -26,6 +23,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Setup npm
+        run: printf "@gamemaker:registry=https://gmpm-private.gamemaker.io/\n//gmpm-private.gamemaker.io/:_authToken=${GAMEMAKER_AUTH_TOKEN}\n" >> ~/.npmrc
 
       - name: Cache
         uses: actions/cache@v5
