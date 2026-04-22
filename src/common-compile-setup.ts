@@ -155,7 +155,7 @@ export async function commonCompileSetup(
     );
   }
 
-  const cache = new Cache(
+  const cache = new Cache(ctx,
     flags.cacheDir
       ? { type: "absolute", path: flags.cacheDir }
       : { type: "infer", projectDir: ctx.path.dirname(projectPath) },

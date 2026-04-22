@@ -20,7 +20,7 @@ export default async function (
       ? { type: "infer", projectDir: this.path.dirname(projectPath) }
       : { type: "temporary" };
 
-  const cache = new Cache(cacheType);
+  const cache = new Cache(this, cacheType);
 
   if (cacheType.type === "temporary" && !flags.print) {
     throw new KnownError(
