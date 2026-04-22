@@ -29,13 +29,13 @@ import { manualCommand } from "./commands/manual/command";
 
 const routes = buildRouteMap({
   routes: {
-    manual: manualCommand,
     init: initCommand,
-    compile: compileProjectCommand,
     run: runCommand,
+    compile: compileProjectCommand,
+    package: packageCommand,
+    manual: manualCommand,
     resourcetool: resourcetoolCommand,
     login: loginCommand,
-    package: packageCommand,
     gxgames: gxgamesCommand,
   },
   docs: {
