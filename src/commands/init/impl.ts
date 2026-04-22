@@ -88,7 +88,7 @@ export default async function (
     } else {
       s.start("Downloading template");
       s.message("Extracting template");
-      const cache = new Cache(
+      const cache = new Cache(this,
         flags.cacheDir
           ? { type: "absolute", path: flags.cacheDir }
           : { type: "infer", projectDir },
