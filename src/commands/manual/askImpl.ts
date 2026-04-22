@@ -4,6 +4,7 @@ import { marked } from "marked";
 import { markedTerminal } from "marked-terminal";
 import { searchManual } from "./searchManual";
 import chalk from "chalk";
+import { KnownError } from "~/error";
 
 const MD_LINK_PATTERN = /\[([^\]]+)\]\(([^)]+)\)/g;
 const formatLink = chalk.blue.underline;
@@ -48,6 +49,11 @@ export default async function (
   },
   query: string,
 ): Promise<void> {
+  // FIXME: Add support for other languages
+  if (flags.language) {
+    throw new KnownError("Support for ${language} is coming soon");
+  }
+
   const result = await searchManual(query, flags.language ?? "en");
 
   if (!result.content || !result.url) {
