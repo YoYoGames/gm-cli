@@ -1,7 +1,7 @@
 {
   "name": "@gamemaker/gm-cli",
   "author": "YoYo Games",
-  "description": "The GameMaker command-line interface *GM-CLI* is a helpful tool to edit, compile, package, and run your GameMaker projects.",
+  "description": "The GameMaker command-line interface GM-CLI is a helpful tool to edit, compile, package, and run your GameMaker projects.",
   "license": "TBD",
   "type": "module",
   "version": "0.15.0",
