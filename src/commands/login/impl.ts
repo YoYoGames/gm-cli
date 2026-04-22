@@ -1,4 +1,4 @@
-import { Cache } from "~/cache";
+import { Cache, type CacheType } from "~/cache";
 import type { Context } from "~/context";
 import { downloadIgor, fetchLicense } from "~/igor";
 import { KnownError } from "~/error";
@@ -14,16 +14,15 @@ export default async function (
   const cwd = this.process.cwd();
   const projectPath = await findProjectFile(this, cwd).catch(() => undefined);
 
-  const cache = await Cache.getOrInit(
-    this,
-    flags.cacheDir
-      ? { type: "absolute", path: flags.cacheDir }
-      : projectPath
-        ? { type: "infer", projectDir: this.path.dirname(projectPath) }
-        : { type: "temporary" },
-  );
+  const cacheType: CacheType = flags.cacheDir
+    ? { type: "absolute", path: flags.cacheDir }
+    : projectPath
+      ? { type: "infer", projectDir: this.path.dirname(projectPath) }
+      : { type: "temporary" };
 
-  if (cache.cacheType === "temporary" && !flags.print) {
+  const cache = new Cache(cacheType);
+
+  if (cacheType.type === "temporary" && !flags.print) {
     throw new KnownError(
       "No project found in the current directory. Run this command from a project directory, or use --print to output the license to stdout.",
     );
@@ -44,7 +43,11 @@ export default async function (
         this.os.tmpdir(),
         `gm-licence-${String(this.process.pid)}.plist`,
       )
-    : this.path.join(cache.dirPath, LICENSE_FILENAME);
+    : this.path.join(
+        await cache.getSubDirPath(this, "license"),
+        LICENSE_FILENAME,
+      );
+
   const fetchLog = this.makeTaskLogger("Fetching license");
   try {
     await fetchLicense(this, igorLog, {

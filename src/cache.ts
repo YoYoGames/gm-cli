@@ -4,38 +4,51 @@ import { version } from "../package.json";
 import { z } from "zod";
 import { KnownError } from "./error";
 
-export type CacheType = "absolute" | "infer" | "temporary";
+export type CacheType =
+  | { type: "absolute"; path: string }
+  | { type: "infer"; projectDir: string }
+  | { type: "temporary" };
 
 export class Cache {
-  private _path: string;
-  private _cacheType: CacheType;
+  private _privatePath:
+    | {
+        initialized: true;
+        path: string;
+      }
+    | {
+        initialized: false;
+        cacheType:
+          | { type: "absolute"; path: string }
+          | { type: "infer"; projectDir: string }
+          | { type: "temporary" };
+      };
 
-  private constructor(path: string, cacheType: CacheType) {
-    this._path = path;
-    this._cacheType = cacheType;
+  constructor(path: CacheType) {
+    this._privatePath = { initialized: false, cacheType: path };
   }
 
-  static async getOrInit(
-    ctx: Context,
-    path:
-      | { type: "absolute"; path: string }
-      | { type: "infer"; projectDir: string }
-      | { type: "temporary" },
-  ): Promise<Cache> {
+  private async init(ctx: Context) {
+    if (this._privatePath.initialized) {
+      // Nothing to do
+      return;
+    }
+
+    // Resolve the path based on the cache type
+    const cacheType = this._privatePath.cacheType;
     let cachePath: string;
-    if (path.type === "absolute") {
-      cachePath = path.path;
+    if (cacheType.type === "absolute") {
+      cachePath = cacheType.path;
     } else if (
-      path.type === "infer" &&
+      cacheType.type === "infer" &&
       ctx.process.env["GAMEMAKER_CACHE_DIR"]
     ) {
       cachePath = ctx.process.env["GAMEMAKER_CACHE_DIR"];
-    } else if (path.type === "infer") {
-      cachePath = ctx.path.join(path.projectDir, ".gmcache");
-    } else if (path.type === "temporary") {
+    } else if (cacheType.type === "infer") {
+      cachePath = ctx.path.join(cacheType.projectDir, ".gmcache");
+    } else if (cacheType.type === "temporary") {
       cachePath = ctx.path.join(ctx.os.tmpdir(), "gm-cli-cache");
     } else {
-      path satisfies never;
+      cacheType satisfies never;
       throw new Error("unreachable");
     }
 
@@ -64,20 +77,17 @@ export class Cache {
         `The path '${cachePath}' already exists but it's not a cache directory!\nAre you sure you want to use this directory as a cache? If so, manually delete its content.`,
       );
     }
-
-    return new Cache(cachePath, path.type);
-  }
-
-  get dirPath(): string {
-    return this._path;
-  }
-
-  get cacheType(): CacheType {
-    return this._cacheType;
+    this._privatePath = { initialized: true, path: cachePath };
   }
 
   async getSubDirPath(ctx: Context, name: string): Promise<string> {
-    const dir = ctx.path.join(this._path, name);
+    // lazily create the cache directory if needed
+    await this.init(ctx);
+    if (!this._privatePath.initialized) {
+      throw Error("Unreachable");
+    }
+
+    const dir = ctx.path.join(this._privatePath.path, name);
     await ctx.fs.mkdir(dir, { recursive: true });
     return dir;
   }
