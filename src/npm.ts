@@ -47,7 +47,11 @@ export function getPlatformSuffix(
 export const REGISTRY = "https://gmpm.gamemaker.io";
 export const PRIVATE_REGISTRY = "https://gmpm-private.gamemaker.io";
 
-function cmd(ctx: Pick<Context, "process">, name: string, args: string[]): [string, string[]] {
+function cmd(
+  ctx: Pick<Context, "process">,
+  name: string,
+  args: string[],
+): [string, string[]] {
   if (ctx.process.platform === "win32") {
     return ["cmd.exe", ["/c", `${name}.cmd`, ...args]];
   }

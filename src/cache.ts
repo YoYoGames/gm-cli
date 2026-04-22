@@ -195,7 +195,10 @@ const META_FILENAME = "cache.meta.json";
 function isCompatibleVersion(cached: string, current: string): boolean {
   if (semver.major(current) === 0) {
     // For 0.*.* versions, every minor version breaks compatibility
-    return semver.major(cached) === semver.major(current) && semver.minor(cached) === semver.minor(current);
+    return (
+      semver.major(cached) === semver.major(current) &&
+      semver.minor(cached) === semver.minor(current)
+    );
   }
 
   // For >=1.*.* versions, major versions break compatibility
