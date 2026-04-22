@@ -2,7 +2,7 @@ import type { Context } from "./context";
 import type { Log } from "./log";
 
 export interface PlatformSuffixes {
-  win32: { x64: string };
+  win32: { x64: string; arm64: string };
   linux: { x64: string; arm64: string };
   darwin: { x64: string; arm64: string };
 }
@@ -10,6 +10,8 @@ export interface PlatformSuffixes {
 const DEFAULT_PLATFORM_SUFFIXES: PlatformSuffixes = {
   win32: {
     x64: "win-x64",
+    // No arm64-specific Windows builds exist, so we fall back to x64 via emulation
+    arm64: "win-x64",
   },
   linux: {
     x64: "linux-x64",
