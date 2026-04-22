@@ -28,6 +28,8 @@
     "gen:ggbe-api": "node ./scripts/gen-ggbe-api.ts"
   },
   "devDependencies": {
+    "@types/semver": "^7.7.1",
+    "semver": "7.7.4",
     "@clack/prompts": "^1.1.0",
     "@eslint/compat": "^2.0.5",
     "@eslint/js": "^10.0.1",
@@ -46,6 +48,7 @@
     "zod": "^4.3.6"
   },
   "inlinedDependencies": {
+    "semver": "7.7.4",
     "@clack/core": "1.1.0",
     "@clack/prompts": "1.1.0",
     "@stricli/core": "^1.2.6",

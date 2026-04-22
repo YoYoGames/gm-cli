@@ -1,13 +1,19 @@
 import type { Context } from "./context";
 import { exists } from "./context";
+
 import { version } from "../package.json";
 import { z } from "zod";
+import semver from "semver";
 import { KnownError } from "./error";
+
+/** The subset of the cache objects that's used in the cache. Needed because we make use of the cache in app.ts before the context object is constructed */
+type CacheCtx = Pick<Context, "path" | "fs" | "os" | "process">;
 
 export type CacheType =
   | { type: "absolute"; path: string }
   | { type: "infer"; projectDir: string }
-  | { type: "temporary" };
+  | { type: "temporary" }
+  | { type: "shared-only" };
 
 export class Cache {
   private _localOnly: boolean;
@@ -31,23 +37,23 @@ export class Cache {
       }
     | {
         initialized: false;
-        cacheType:
-          | { type: "absolute"; path: string }
-          | { type: "infer"; projectDir: string }
-          | { type: "temporary" };
+        cacheType: CacheType;
       };
 
-  constructor(ctx: Context, cacheType: CacheType) {
+  constructor(ctx: CacheCtx, cacheType: CacheType) {
     this._localPath = { initialized: false, cacheType };
-    // We don't allow using the shared cache if a user has specified an absolute
+    // We don't allow using the shared cache if a user has specified an absolute or temporary
     // path or if inside a CI runner.
-    this._localOnly = cacheType.type === "absolute" || !!ctx.process.env["CI"];
+    this._localOnly =
+      cacheType.type === "absolute" ||
+      cacheType.type === "temporary" ||
+      !!ctx.process.env["CI"];
     this._sharedPath = this._localOnly
       ? { type: "not-allowed" }
       : { type: "not-initialized" };
   }
 
-  private async initCachePath(ctx: Context, cachePath: string): Promise<void> {
+  private async initCachePath(ctx: CacheCtx, cachePath: string): Promise<void> {
     const metaPath = ctx.path.join(cachePath, META_FILENAME);
 
     if (await exists(ctx, metaPath)) {
@@ -75,7 +81,7 @@ export class Cache {
     }
   }
 
-  private async initLocal(ctx: Context) {
+  private async initLocal(ctx: CacheCtx) {
     if (this._localPath.initialized) {
       return;
     }
@@ -94,6 +100,10 @@ export class Cache {
       cachePath = ctx.path.join(cacheType.projectDir, ".gmcache");
     } else if (cacheType.type === "temporary") {
       cachePath = ctx.path.join(ctx.os.tmpdir(), "gm-cli-cache");
+    } else if (cacheType.type === "shared-only") {
+      throw new Error(
+        "Attempting to access the local part of a shared only cache!",
+      );
     } else {
       cacheType satisfies never;
       throw new Error("unreachable");
@@ -103,7 +113,7 @@ export class Cache {
     this._localPath = { initialized: true, path: cachePath };
   }
 
-  private async initShared(ctx: Context) {
+  private async initShared(ctx: CacheCtx) {
     if (this._sharedPath.type === "initialized") {
       return;
     }
@@ -117,7 +127,7 @@ export class Cache {
   }
 
   async getSubDirPath(
-    ctx: Context,
+    ctx: CacheCtx,
     name: string,
     { allowedToBeShared }: { allowedToBeShared: boolean } = {
       allowedToBeShared: false,
@@ -130,7 +140,7 @@ export class Cache {
   }
 
   private async getSubDirPathLocal(
-    ctx: Context,
+    ctx: CacheCtx,
     name: string,
   ): Promise<string> {
     // lazily create the cache directory if needed
@@ -145,7 +155,7 @@ export class Cache {
   }
 
   private async getSubDirPathShared(
-    ctx: Context,
+    ctx: CacheCtx,
     name: string,
   ): Promise<string> {
     await this.initShared(ctx);
@@ -159,7 +169,7 @@ export class Cache {
   }
 }
 
-function resolveSharedCachePath(ctx: Context): string {
+function resolveSharedCachePath(ctx: CacheCtx): string {
   const home = ctx.os.homedir();
   const platform = ctx.os.platform();
 
@@ -183,19 +193,16 @@ const CacheMetaSchema = z.object({ version: z.string() });
 const META_FILENAME = "cache.meta.json";
 
 function isCompatibleVersion(cached: string, current: string): boolean {
-  const [cachedMajor, cachedMinor] = cached.split(".").map(Number);
-  const [currentMajor, currentMinor] = current.split(".").map(Number);
-
-  if (currentMajor === 0) {
+  if (semver.major(current) === 0) {
     // For 0.*.* versions, every minor version breaks compatibility
-    return cachedMajor === currentMajor && cachedMinor === currentMinor;
+    return semver.major(cached) === semver.major(current) && semver.minor(cached) === semver.minor(current);
   }
 
   // For >=1.*.* versions, major versions break compatibility
-  return cachedMajor === currentMajor;
+  return semver.major(cached) === semver.major(current);
 }
 
-async function createCacheDir(ctx: Context, cachePath: string): Promise<void> {
+async function createCacheDir(ctx: CacheCtx, cachePath: string): Promise<void> {
   await ctx.fs.mkdir(cachePath, { recursive: true });
   await ctx.fs.writeFile(
     ctx.path.join(cachePath, META_FILENAME),

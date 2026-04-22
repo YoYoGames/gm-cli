@@ -8,6 +8,7 @@ import { loginCommand } from "./commands/login/command";
 import { packageCommand } from "./commands/package/command";
 import { gxgamesCommand } from "./commands/gxgames/command";
 import { KnownError } from "./error";
+import { getLatestVersion } from "./get-latest-version";
 
 const routes = buildRouteMap({
   routes: {
@@ -31,6 +32,8 @@ export const app = buildApplication(routes, {
   name: "gm-cli",
   versionInfo: {
     currentVersion: version,
+    getLatestVersion,
+    upgradeCommand: "npm install -g @gamemaker/gm-cli",
   },
   documentation: {
     caseStyle: "convert-camel-to-kebab",

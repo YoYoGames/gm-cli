@@ -1,3 +1,4 @@
+import { promisify } from "node:util";
 import type { Context } from "./context";
 import type { Log } from "./log";
 
@@ -46,7 +47,7 @@ export function getPlatformSuffix(
 export const REGISTRY = "https://gmpm.gamemaker.io";
 export const PRIVATE_REGISTRY = "https://gmpm-private.gamemaker.io";
 
-function cmd(ctx: Context, name: string, args: string[]): [string, string[]] {
+function cmd(ctx: Pick<Context, "process">, name: string, args: string[]): [string, string[]] {
   if (ctx.process.platform === "win32") {
     return ["cmd.exe", ["/c", `${name}.cmd`, ...args]];
   }
@@ -87,6 +88,27 @@ export function npmExec(
       }
     });
   });
+}
+
+export async function npmGetLatestVersion(
+  ctx: Pick<Context, "child_process" | "process">,
+  packageName: string,
+  registry: string,
+): Promise<string | undefined> {
+  try {
+    const execFile = promisify(ctx.child_process.execFile);
+    const [command, args] = cmd(ctx, "npm", [
+      "view",
+      packageName,
+      "version",
+      "--registry",
+      registry,
+    ]);
+    const { stdout } = await execFile(command, args);
+    return stdout.trim() || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function npmInstall(
