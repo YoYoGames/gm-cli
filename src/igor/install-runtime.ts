@@ -144,7 +144,9 @@ export async function installRuntimeIfNeeded(
     version?: Gms2Version;
   },
 ): Promise<string> {
-  const runtimeDir = await cache.getSubDirPath(ctx, "runtimes-gms2");
+  const runtimeDir = await cache.getSubDirPath(ctx, "runtimes-gms2", {
+    allowedToBeShared: !!process.env["GAMEMAKER_CLI_UNSTABLE_FEATURES"],
+  });
   let runtimeLocation = await findRuntimeLocation(ctx, runtimeDir, version);
 
   // FIXME: if this fails, we should delete the runtime dir and try again
