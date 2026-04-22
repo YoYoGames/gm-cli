@@ -1,7 +1,7 @@
 import { buildCommand, buildRouteMap } from "@stricli/core";
 
-const ManualReleaseChannels = ["lts", "beta", "monthly"] as const;
 const ManualLanguages = [
+  "en",
   "ru",
   "br",
   "it",
@@ -14,7 +14,6 @@ const ManualLanguages = [
   "zh",
 ] as const;
 
-export type ManualReleaseChannel = (typeof ManualReleaseChannels)[number];
 export type ManualLanguage = (typeof ManualLanguages)[number];
 
 const flags = {
@@ -26,7 +25,6 @@ const flags = {
   },
   channel: {
     kind: "enum",
-    values: ManualReleaseChannels,
     brief: "Use a specific release channel of the manual",
     optional: true,
   },
