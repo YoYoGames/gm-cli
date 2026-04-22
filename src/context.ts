@@ -20,7 +20,10 @@ export interface Context extends CommandContext {
   readonly makeTaskLogger: TaskLogger;
 }
 
-export async function exists(ctx: Context, path: string): Promise<boolean> {
+export async function exists(
+  ctx: Pick<Context, "fs">,
+  path: string,
+): Promise<boolean> {
   try {
     await ctx.fs.access(path);
     return true;

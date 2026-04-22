@@ -1,0 +1,69 @@
+import { npmGetLatestVersion, PRIVATE_REGISTRY } from "./npm";
+import child_process from "node:child_process";
+import { Cache } from "./cache";
+import os from "node:os";
+import nodePath from "node:path";
+import fs from "node:fs/promises";
+import { version as myVersion } from "../package.json";
+import { z } from "zod";
+import semver from "semver";
+
+const versionCheckSchema = z.object({
+  lastVersion: z.string(),
+  lastChecked: z.number(),
+});
+
+export async function getLatestVersion(): Promise<string | undefined> {
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+  // We have not constructed the full context object yet, so we have to build a partial one here
+  const ctx = { os, path: nodePath, fs, process, child_process };
+
+  // Get the path to a file where we can store the last time we checked the version
+  if (ctx.process.env["CI"]) {
+    // However, using a shared only cache will panic in CI since it does not allow shared partitions
+    // so let's skip the version check altogether
+    return;
+  }
+  const cache = new Cache(ctx, { type: "shared-only" });
+  const dir = await cache.getSubDirPath(ctx, "version-check", {
+    allowedToBeShared: true,
+  });
+  const checkFile = nodePath.join(dir, "check.json");
+
+  try {
+    const data = versionCheckSchema.parse(
+      JSON.parse(await fs.readFile(checkFile, "utf-8")),
+    );
+    // If we recently checked for newer version just used our cached value
+    if (Date.now() - data.lastChecked < THREE_DAYS_MS) {
+      // We should only return the last version if it's actually
+      // a greater version then the one we are currently running
+      return semver.gt(data.lastVersion, myVersion)
+        ? data.lastVersion
+        : undefined;
+    }
+  } catch {
+    // File doesn't exist or is malformed, proceed to fetch
+  }
+
+  const latest = await npmGetLatestVersion(
+    ctx,
+    "@gamemaker/gm-cli",
+    // FIXME: Before release, replace with https://registry.npmjs.org
+    PRIVATE_REGISTRY,
+  );
+  if (latest) {
+    try {
+      await ctx.fs.writeFile(
+        checkFile,
+        JSON.stringify({
+          lastVersion: latest,
+          lastChecked: Date.now(),
+        } satisfies z.infer<typeof versionCheckSchema>),
+      );
+    } catch {
+      // Ignore write errors
+    }
+  }
+  return latest && semver.gt(latest, myVersion) ? latest : undefined;
+}
