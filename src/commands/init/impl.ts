@@ -130,7 +130,8 @@ export default async function (
         JSON.stringify(
           {
             permissions: {
-              deny: ["Edit(*.yy)"],
+              allow: ["mcp__gamemaker-mcp"],
+              deny: ["Edit(*.yy)", "Edit(*.yyp)"],
             },
             enabledMcpjsonServers: ["gamemaker-mcp"],
             enableAllProjectMcpServers: true,
