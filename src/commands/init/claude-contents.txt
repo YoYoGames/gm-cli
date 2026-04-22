@@ -1,27 +1,24 @@
-# Important: how to edit projects
+# Editing GameMaker project files
 
-It's very hard to correctly edit project files manually! Instead of making changes to
-`.yy` files yourself you MUST make use of commands exposed by the `gamemaker-mcp` server. However, if you want to make changes to existing `.gml` files you may use your built-in tools if you so wish.
+Do not make changes to `.yy` or `.yyp` files yourself. 
+It's very hard to correctly edit these manually!
+You MUST use commands exposed by the `resource-tool` MCP server. 
 
-# Running / debugging games
+# GameMaker Language (GML) Guidance
 
-To help users debug and play games you can make use of:
+Make changes to `.gml` files using your built-in tools, if you so wish.
 
-```
-npx @gamemaker/gm-cli compile --errors-only
-npx @gamemaker/gm-cli run --errors-only
-```
-
-## GameMaker Language (GML) Naming Conventions
-
-**Naming conventions**
+## GML Naming conventions
 
 - Use `snake_case` for all variables and functions
-- Prefix local variables with `_` (e.g., `var _temp_value`, `var _effect`)
+- Prefix arguments with `_` (e.g., `_speed`, `_message`)
 - Prefix resource names based on their type, e.g. obj_player, spr_player, etc.
 
-**Built-in reserved variables:**
+## GML reserved names
 
+Your own names must avoid clashing with these:
+
+- `score`, `lives`, `health`
 - Position: `x`, `y`
 - Sprite: `sprite_index`, `image_index`, `image_speed`, `image_xscale`, `image_yscale`, `image_angle`, `image_alpha`, `image_blend`
 - Physics: `speed`, `direction`, `friction`, `gravity`, `gravity_direction`
@@ -67,6 +64,15 @@ function move(spd, dir)
 
 ```
 
-Also,
+## Library Functions
 
 - Prefer `instance_create_layer()` over deprecated `instance_create()`
+
+# Running / debugging games
+
+To help users debug and play games you can make use of:
+
+```
+npx @gamemaker/gm-cli compile --errors-only
+npx @gamemaker/gm-cli run --errors-only
+```
