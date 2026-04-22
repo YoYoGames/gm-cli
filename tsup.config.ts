@@ -7,6 +7,9 @@ export default defineConfig({
   clean: true,
   splitting: true,
   minify: true,
+  banner: {
+    js: `import {createRequire as __createRequire} from 'module';var require=__createRequire(import\.meta.url);`,
+  },
   esbuildOptions(options) {
     options.alias = {
       "~": "./src",

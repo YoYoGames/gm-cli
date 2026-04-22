@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ManualLanguage } from "./command";
+import type { Context } from "~/context";
 
 const SearchResultSchema = z.object({
   content: z.string().optional(),
@@ -9,10 +10,11 @@ const SearchResultSchema = z.object({
 export type SearchResult = z.infer<typeof SearchResultSchema>;
 
 export async function searchManual(
+  context: Context,
   query: string,
   language: ManualLanguage,
 ): Promise<SearchResult> {
-  const response = await fetch("https://gx.mcp.opr.gg/ask", {
+  const response = await context.fetch("https://gx.mcp.opr.gg/ask", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
