@@ -1,5 +1,5 @@
 import { buildApplication, buildRouteMap, text_en } from "@stricli/core";
-import { name, version, description } from "../package.json";
+import { version, description } from "../package.json";
 import { initCommand } from "./commands/init/command";
 import { compileProjectCommand } from "./commands/compile/command";
 import { runCommand } from "./commands/run/command";
@@ -28,7 +28,7 @@ const routes = buildRouteMap({
 });
 
 export const app = buildApplication(routes, {
-  name,
+  name: "gm-cli",
   versionInfo: {
     currentVersion: version,
   },
