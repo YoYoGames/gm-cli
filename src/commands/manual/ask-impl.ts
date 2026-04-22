@@ -2,7 +2,7 @@ import type { Context } from "~/context";
 import type { ManualLanguage } from "./command";
 import { marked } from "marked";
 import { markedTerminal } from "marked-terminal";
-import { searchManual } from "./searchManual";
+import { searchManual } from "./search-manual";
 import chalk from "chalk";
 import { KnownError } from "~/error";
 
@@ -50,24 +50,24 @@ export default async function (
   query: string,
 ): Promise<void> {
   // FIXME: Add support for other languages
-  if (flags.language) {
+  if (flags.language && flags.language !== "en") {
     throw new KnownError("Support for ${language} is coming soon");
   }
 
-  const result = await searchManual(query, flags.language ?? "en");
+  const result = await searchManual(this, query, flags.language ?? "en");
 
   if (!result.content || !result.url) {
-    throw new Error("No results found");
+    throw new KnownError("No results found");
   }
 
   // If NO_COLOR is set, simply display raw Markdown
   if ("NO_COLOR" in this.process.env) {
-    console.log(result.content);
+    this.process.stdout.write(result.content);
     return;
   }
 
   // Display the Markdown contents using ANSI
-  console.log(await marked(result.content));
+  this.process.stdout.write(await marked(result.content));
 
   // Collect links to display after article
   if (!supportsTerminalLinks()) {
@@ -82,12 +82,12 @@ export default async function (
       }
 
       const formattedLink = formatLink(toManualUrl(article));
-      console.log(`${text}: ${formattedLink}`);
+      this.process.stdout.write(`${text}: ${formattedLink}`);
     }
   }
 
   const formattedSource = formatLink(result.url);
-  console.log(`Article source: ${formattedSource}`);
+  this.process.stdout.write(`Article source: ${formattedSource}`);
 }
 
 marked.use(

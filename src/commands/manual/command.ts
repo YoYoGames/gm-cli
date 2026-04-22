@@ -1,6 +1,6 @@
 import { buildCommand, buildRouteMap } from "@stricli/core";
 
-const ManualLanguages = [
+const MANUAL_LANGUAGES = [
   "en",
   "ru",
   "br",
@@ -14,23 +14,18 @@ const ManualLanguages = [
   "zh",
 ] as const;
 
-export type ManualLanguage = (typeof ManualLanguages)[number];
+export type ManualLanguage = (typeof MANUAL_LANGUAGES)[number];
 
-const flags = {
+const FLAGS = {
   language: {
     kind: "enum",
-    values: ManualLanguages,
+    values: MANUAL_LANGUAGES,
     brief: "Use the manual in the specified language",
-    optional: true,
-  },
-  channel: {
-    kind: "enum",
-    brief: "Use a specific release channel of the manual",
     optional: true,
   },
 } as const;
 
-const parameters = {
+const PARAMETERS = {
   positional: {
     kind: "tuple",
     parameters: [
@@ -41,20 +36,20 @@ const parameters = {
       },
     ],
   },
-  flags,
+  flags: FLAGS,
 } as const;
 
 export const manualAskCommand = buildCommand({
-  loader: async () => import("./askImpl"),
-  parameters,
+  loader: async () => import("./ask-impl"),
+  parameters: PARAMETERS,
   docs: {
     brief: "Query the GameMaker manual",
   },
 });
 
 export const manualOpenCommand = buildCommand({
-  loader: async () => import("./openImpl"),
-  parameters,
+  loader: async () => import("./open-impl"),
+  parameters: PARAMETERS,
   docs: {
     brief: "Open the GameMaker manual website based on a query",
   },
