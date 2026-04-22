@@ -74,7 +74,10 @@ async function getLicense(
     return envLicense;
   }
 
-  const cachedLicenseFile = ctx.path.join(cache.dirPath, LICENSE_FILENAME);
+  const cachedLicenseFile = ctx.path.join(
+    await cache.getSubDirPath(ctx, "license"),
+    LICENSE_FILENAME,
+  );
 
   if (await exists(ctx, cachedLicenseFile)) {
     const content = await ctx.fs.readFile(cachedLicenseFile, "utf-8");
@@ -152,8 +155,7 @@ export async function commonCompileSetup(
     );
   }
 
-  const cache = await Cache.getOrInit(
-    ctx,
+  const cache = new Cache(
     flags.cacheDir
       ? { type: "absolute", path: flags.cacheDir }
       : { type: "infer", projectDir: ctx.path.dirname(projectPath) },

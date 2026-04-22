@@ -88,8 +88,7 @@ export default async function (
     } else {
       s.start("Downloading template");
       s.message("Extracting template");
-      const cache = await Cache.getOrInit(
-        this,
+      const cache = new Cache(
         flags.cacheDir
           ? { type: "absolute", path: flags.cacheDir }
           : { type: "infer", projectDir },
