@@ -67,6 +67,14 @@ GameMaker CLI automatically gives you a guest license, so there is no need to si
 ```
 npx @gamemaker/gm-cli@latest login <my key>
 ```
+
+### Query the GameMaker Manual
+The [GameMaker Manual](https://manual.gamemaker.io/monthly/en/) can be accessed through `gm-cli manual` and supports semantic search. The `ask` subcommand displays an article directly in your terminal, while the `open` subcommand opens a web page automatically. You can also get results in a specific language through `--language`. Try it out:
+```sh
+gm-cli manual ask "data structures"
+gm-cli manual open "sprites" --language=es
+```
+
 ## Near future
 > [!NOTE]
 >  The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
@@ -74,8 +82,6 @@ npx @gamemaker/gm-cli@latest login <my key>
 **Many features are planned to soon be added to `gm-cli`. These include:**
 ### GMRT and more targets
 GameMaker CLI will have full support to manage more targets for the GMS2 runtime as well as the new GMRT toolchain. 
-### GameMaker Manual integration
-Search and open the [GameMaker Manual](https://manual.gamemaker.io/monthly/en/) directly from the terminal with `gm-cli manual`. It will also support semantic search with natural language as well as an MCP server.
 ### Publishing games to the web
 Direct integration with [gx.games](https://gx.games) to share your games! 
 ### Smarter caching and manifest files
