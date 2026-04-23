@@ -20,6 +20,9 @@ importers:
       '@stricli/core':
         specifier: ^1.2.6
         version: 1.2.6
+      '@tony.ganchev/eslint-plugin-header':
+        specifier: 3.4.3
+        version: 3.4.3(eslint@10.2.0(jiti@2.6.1))
       '@types/node':
         specifier: 24.x
         version: 24.12.0
@@ -330,6 +333,11 @@ packages:
 
   '@stricli/core@1.2.6':
     resolution: {integrity: sha512-j5fa1wyOLrP9WJqqLFEJeQviqb3cK46K+FXTuISEkG/H5C820YfKDoVQ3CDVdM5WLhEx1ARdpiW6+hU4tYHjCQ==}
+
+  '@tony.ganchev/eslint-plugin-header@3.4.3':
+    resolution: {integrity: sha512-C8oGfJNGGcYl3y55JRS6Sfr9pAtjXyVN4qJllr5g3g6wrDkxcPMQ0654FsZtnQJTXA4swcwtR1cUhCBvW0WDKA==}
+    peerDependencies:
+      eslint: '>=7.7.0'
 
   '@types/esrecurse@4.3.1':
     resolution: {integrity: sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw==}
@@ -1525,6 +1533,10 @@ snapshots:
       fastq: 1.20.1
 
   '@stricli/core@1.2.6': {}
+
+  '@tony.ganchev/eslint-plugin-header@3.4.3(eslint@10.2.0(jiti@2.6.1))':
+    dependencies:
+      eslint: 10.2.0(jiti@2.6.1)
 
   '@types/esrecurse@4.3.1': {}
 
