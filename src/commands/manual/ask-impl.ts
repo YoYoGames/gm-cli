@@ -1,3 +1,18 @@
+/**
+ * Copyright 2026, Opera Norway AS
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import type { Context } from "~/context";
 import type { ManualLanguage } from "./command";
 import { marked } from "marked";
@@ -16,7 +31,7 @@ function supportsTerminalLinks(): boolean {
 }
 
 // Use Operating System Commands to create a terminal hyperlink
-function toTerminalLink(input: string): string {
+function toTerminalLink(input: string, language: ManualLanguage): string {
   const match = /^(.+?)\s+\(([^)]+)\)$/.exec(input);
 
   if (!match) {
@@ -29,7 +44,9 @@ function toTerminalLink(input: string): string {
     return input;
   }
 
-  return formatLink(`\x1b]8;;${toManualUrl(url)}\x1b\\${title}\x1b]8;;\x1b\\`);
+  return formatLink(
+    `\x1b]8;;${toManualUrl(url, language)}\x1b\\${title}\x1b]8;;\x1b\\`,
+  );
 }
 
 // Converts "text (url)" -> italic "text"
@@ -38,8 +55,8 @@ function stripLink(link: string): string {
   return text ? `\x1b[3m${text}\x1b[0m` : link;
 }
 
-export function toManualUrl(articlePath: string) {
-  return `https://manual.gamemaker.io/monthly/en/${articlePath}`;
+export function toManualUrl(articlePath: string, language: ManualLanguage) {
+  return `https://manual.gamemaker.io/monthly/${language}/${articlePath}`;
 }
 
 export default async function (
@@ -49,12 +66,8 @@ export default async function (
   },
   query: string,
 ): Promise<void> {
-  // FIXME: Add support for other languages
-  if (flags.language && flags.language !== "en") {
-    throw new KnownError("Support for ${language} is coming soon");
-  }
-
-  const result = await searchManual(this, query, flags.language ?? "en");
+  const language = flags.language ?? "en";
+  const result = await searchManual(this, query, language);
 
   if (!result.content || !result.url) {
     throw new KnownError("No results found");
@@ -65,6 +78,17 @@ export default async function (
     this.process.stdout.write(result.content);
     return;
   }
+
+  marked.use(
+    markedTerminal({
+      showSectionPrefix: false,
+      reflowText: true,
+      link: supportsTerminalLinks()
+        ? (link: string) => toTerminalLink(link, language)
+        : stripLink,
+      href: supportsTerminalLinks() ? (href: string) => href : () => "",
+    }),
+  );
 
   // Display the Markdown contents using ANSI
   this.process.stdout.write(await marked(result.content));
@@ -81,20 +105,11 @@ export default async function (
         continue;
       }
 
-      const formattedLink = formatLink(toManualUrl(article));
-      this.process.stdout.write(`${text}: ${formattedLink}`);
+      const formattedLink = formatLink(toManualUrl(article, language));
+      this.process.stdout.write(`${text}: ${formattedLink}\n`);
     }
   }
 
   const formattedSource = formatLink(result.url);
-  this.process.stdout.write(`Article source: ${formattedSource}`);
+  this.process.stdout.write(`\nArticle source: ${formattedSource}\n`);
 }
-
-marked.use(
-  markedTerminal({
-    showSectionPrefix: false,
-    reflowText: true,
-    link: supportsTerminalLinks() ? toTerminalLink : stripLink,
-    href: supportsTerminalLinks() ? (href: string) => href : () => "",
-  }),
-);
