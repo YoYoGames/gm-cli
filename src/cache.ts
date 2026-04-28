@@ -22,7 +22,9 @@ import { z } from "zod";
 import semver from "semver";
 import { KnownError } from "./error";
 
-/** The subset of the cache objects that's used in the cache. Needed because we make use of the cache in app.ts before the context object is constructed */
+/** The subset of the Context object that's used in the cache.
+ * Needed because we make use of the cache in app.ts before the context object is constructed
+ */
 type CacheCtx = Pick<Context, "path" | "fs" | "os" | "process">;
 
 export type CacheType =
@@ -97,9 +99,9 @@ export class Cache {
     }
   }
 
-  private async initLocal(ctx: CacheCtx) {
+  private async initLocal(ctx: CacheCtx): Promise<boolean> {
     if (this._localPath.initialized) {
-      return;
+      return true;
     }
 
     // Resolve the path based on the cache type
@@ -117,9 +119,7 @@ export class Cache {
     } else if (cacheType.type === "temporary") {
       cachePath = ctx.path.join(ctx.os.tmpdir(), "gm-cli-cache");
     } else if (cacheType.type === "shared-only") {
-      throw new Error(
-        "Attempting to access the local part of a shared only cache!",
-      );
+      return false;
     } else {
       cacheType satisfies never;
       throw new Error("unreachable");
@@ -127,19 +127,45 @@ export class Cache {
 
     await this.initCachePath(ctx, cachePath);
     this._localPath = { initialized: true, path: cachePath };
+    return true;
   }
 
-  private async initShared(ctx: CacheCtx) {
+  private async initShared(ctx: CacheCtx): Promise<boolean> {
     if (this._sharedPath.type === "initialized") {
-      return;
+      return true;
     }
     if (this._sharedPath.type === "not-allowed") {
-      throw new Error("Invariant broken: Not allowed to use the shared cache!");
+      return false;
     }
 
     const cachePath = resolveSharedCachePath(ctx);
     await this.initCachePath(ctx, cachePath);
     this._sharedPath = { type: "initialized", path: cachePath };
+    return true;
+  }
+
+  /** Initializes and returns the local path, or undefined if local access is not allowed for this cache type. */
+  public async getLocalPathStrict(ctx: CacheCtx): Promise<string | undefined> {
+    if (!(await this.initLocal(ctx))) {
+      // Not allowed to use shared cache
+      return undefined;
+    }
+    if (!this._localPath.initialized) {
+      throw new Error("Unreachable: local cache should be initialized");
+    }
+    return this._localPath.path;
+  }
+
+  /** Initializes and returns the shared path, or undefined if shared access is not allowed for this cache. */
+  public async getSharedPathStrict(ctx: CacheCtx): Promise<string | undefined> {
+    if (!(await this.initShared(ctx))) {
+      // Not allowed to use shared cache
+      return undefined;
+    }
+    if (this._sharedPath.type !== "initialized") {
+      throw new Error("Unreachable: shared cache should be initialized");
+    }
+    return this._sharedPath.path;
   }
 
   async getSubDirPath(
