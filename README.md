@@ -69,9 +69,8 @@ npx @gamemaker/gm-cli@latest login <my key>
 ```
 
 ### Query the GameMaker Manual
-The [GameMaker Manual](https://manual.gamemaker.io/monthly/en/) can be accessed through `gm-cli manual` and supports semantic search. The `ask` subcommand displays an article directly in your terminal, while the `open` subcommand opens a web page automatically. You can also get results in a specific language through `--language`. Try it out:
+ The command `gm-cli manual` can be used to _semantically_ search [GameMaker Manual](https://manual.gamemaker.io/monthly/en/). Use the `open` subcommand to open a a web page in your browser. You can also get results in a specific language through `--language`. Try it out:
 ```sh
-gm-cli manual ask "data structures"
 gm-cli manual open "sprites" --language=es
 ```
 
@@ -82,12 +81,28 @@ gm-cli manual open "sprites" --language=es
 **Many features are planned to soon be added to `gm-cli`. These include:**
 ### GMRT and more targets
 GameMaker CLI will have full support to manage more targets for the GMS2 runtime as well as the new GMRT toolchain. 
+
+### Faster & smarter caching and manifest files
+**Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
+
+Currently every project using `gm-cli` has it's own local `.gmcache` directory. This means it takes a long time to install a copy of the runtime for every project. This will be much improved with shared caches and manifest file format (similar to `pyprojects.toml` and `package.json`).
+
+### Read the GameMaker Manual inside the terminal
+**Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
+
+The `ask` subcommand displays an article directly in your terminal, 
+```sh
+gm-cli manual ask "data structures"
+```
+
 ### Publishing games to the web
+**Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
+
 Direct integration with [gx.games](https://gx.games) to share your games! 
-### Smarter caching and manifest files
-Currently every project using `gm-cli` has it's own local `.gmcache` directory. This means it takes a long time to install a copy of the runtime for every project. This will be much improved with shared caches and manifest file format (similar to `pyprojects.toml` and `package.json`). You can already test using a shared cache today by setting the env variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`.
+
 ### A library to make your own tools
 `gm-cli` will expose it's internals as a TypeScript library that you can use to more easily make your own editor tools. 
+
 ### Editor integration
 `gm-cli` will support opening projects in the IDE (or your preferred editor) and likely also help you download the IDE itself.  
 
