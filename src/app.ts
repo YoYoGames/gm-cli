@@ -26,6 +26,7 @@ import { gxgamesCommand } from "./commands/gxgames/command";
 import { KnownError } from "./error";
 import { getLatestVersion } from "./get-latest-version";
 import { manualCommand } from "./commands/manual/command";
+import { cacheCommand } from "./commands/cache/command";
 
 const routes = buildRouteMap({
   routes: {
@@ -37,6 +38,7 @@ const routes = buildRouteMap({
     resourcetool: resourcetoolCommand,
     login: loginCommand,
     gxgames: gxgamesCommand,
+    cache: cacheCommand,
   },
   docs: {
     hideRoute: {
