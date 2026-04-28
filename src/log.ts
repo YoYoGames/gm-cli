@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { taskLog } from "@clack/prompts";
+import { taskLog, log } from "@clack/prompts";
 
 export interface Log {
   message(msg: string): void;
@@ -22,7 +22,10 @@ export interface Log {
   success(message: string): void;
 }
 
-export type TaskLogger = (title: string) => Log;
+export type TaskLogger = (
+  title: string,
+  options?: { noCollapse?: boolean },
+) => Log;
 
 const noop = () => {
   // intentionally empty
@@ -35,11 +38,37 @@ export const noopLog: Log = {
 };
 
 export function fancyTaskLogger(): TaskLogger {
-  return (title) => taskLog({ title, retainLog: true });
+  return (title: string, options?: { noCollapse?: boolean }) => {
+    let headerPrinted = false;
+    function ensureHeader() {
+      if (!headerPrinted) {
+        headerPrinted = true;
+        log.step(title);
+      }
+    }
+
+    if (options?.noCollapse) {
+      return {
+        message(s) {
+          ensureHeader();
+          log.message(s, { spacing: 0 });
+        },
+        error(s) {
+          ensureHeader();
+          log.error(s, { spacing: 0 });
+        },
+        success(s) {
+          ensureHeader();
+          log.success(s, { spacing: 0 });
+        },
+      };
+    }
+    return taskLog({ title, retainLog: true });
+  };
 }
 
 export function plainTaskLogger(): TaskLogger {
-  return (title) => {
+  return (title: string) => {
     let headerPrinted = false;
     function ensureHeader() {
       if (!headerPrinted) {

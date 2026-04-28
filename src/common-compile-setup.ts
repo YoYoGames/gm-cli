@@ -241,7 +241,11 @@ export async function commonCompileSetup(
     `build-gms2-${target}-${runtime}`,
   );
 
-  const actionLog = ctx.makeTaskLogger(action.label(target));
+  const actionLog = ctx.makeTaskLogger(action.label(target), {
+    // To try avoid the scrollback buffer looking really strange when outputting a lot of content, we don't
+    // collapse the main output when running/compiling a project.
+    noCollapse: true,
+  });
   let successMessage: string;
   try {
     ({ successMessage } = await action.invoke(ctx, actionLog, {
