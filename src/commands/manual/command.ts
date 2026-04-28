@@ -76,6 +76,9 @@ export const manualCommand = buildRouteMap({
     open: manualOpenCommand,
   },
   docs: {
+    hideRoute: {
+      ask: !process.env["GAMEMAKER_CLI_UNSTABLE_FEATURES"],
+    },
     brief: "Use the GameMaker manual",
   },
 });
