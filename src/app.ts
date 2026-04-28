@@ -72,7 +72,7 @@ export const app = buildApplication(routes, {
             exc instanceof Error
               ? (exc.stack ?? exc.message)
               : JSON.stringify(exc, null, 2);
-          return `An unexpected error occurred. Please report it as a bug.\nGM-CLI v${version} ${process.platform}/${process.arch}\n\n${detail}`;
+          return `An unexpected error occurred. Please report it as a bug on https://github.com/YoYoGames/gm-cli/issues\nGM-CLI v${version} ${process.platform}/${process.arch}\n\n${detail}`;
         },
       };
     },
