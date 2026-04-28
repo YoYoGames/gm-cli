@@ -69,7 +69,9 @@ export const app = buildApplication(routes, {
             return `Command failed:\n${exc.message}`;
           }
           const detail =
-            exc instanceof Error ? (exc.stack ?? exc.message) : String(exc);
+            exc instanceof Error
+              ? (exc.stack ?? exc.message)
+              : JSON.stringify(exc, null, 2);
           return `An unexpected error occurred. Please report it as a bug.\nGM-CLI v${version} ${process.platform}/${process.arch}\n\n${detail}`;
         },
       };
