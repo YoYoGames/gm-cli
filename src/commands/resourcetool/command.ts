@@ -30,7 +30,7 @@ const commonFlags = {
 
 // FIXME: we might want to make the project optional and just not set the global variable when starting resourcetool
 const projectParam = {
-  brief: "Path to the project yyp file",
+  brief: "Path to the project .yyp file",
   placeholder: "project",
   parse: parseProjectPath,
   optional: true as const,

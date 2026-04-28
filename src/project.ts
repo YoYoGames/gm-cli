@@ -29,11 +29,11 @@ export function parseProjectPath(s: string): ProjectPath {
 export async function findProjectFile(
   ctx: Context,
   dir: string,
-): Promise<ProjectPath> {
+): Promise<undefined | ProjectPath> {
   const files = await ctx.fs.readdir(dir);
   const yypFile = files.find((f: string) => f.endsWith(".yyp"));
   if (!yypFile) {
-    throw new KnownError("No .yyp project file found in the current directory");
+    return undefined;
   }
   return ctx.path.join(dir, yypFile) as ProjectPath;
 }

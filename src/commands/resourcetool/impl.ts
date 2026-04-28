@@ -25,6 +25,7 @@ import {
 import { callResourceTool, type ResourceToolMode } from "~/resource-tool";
 import { noopLog } from "~/log";
 import { restorePrefabs } from "~/restore-prefabs";
+import { KnownError } from "~/error";
 
 export interface CommonFlags {
   cacheDir?: string;
@@ -39,29 +40,41 @@ export async function run(
   const cwd = ctx.process.cwd();
   const projectPath = project ?? (await findProjectFile(ctx, cwd));
 
+  if (projectPath === undefined && mode.mode === "mcp") {
+    // Since we hide the "project load" tool in mcp mode
+    throw new KnownError(
+      "You need to specify a .yyp file to use the ResourceTool in MCP mode",
+    );
+  }
+
   const cache = new Cache(
     ctx,
     flags.cacheDir
       ? { type: "absolute", path: flags.cacheDir }
-      : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
+      : projectPath
+        ? { type: "infer", projectDir: ctx.path.dirname(projectPath) }
+        : { type: "temporary" },
   );
   const projectToolPath = await downloadProjectTool(ctx, cache, noopLog, {
     verbose: false,
   });
-  const gmpmPath = await downloadGmpm(ctx, cache, noopLog, {
-    verbose: false,
-  });
-  const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
-    verbose: false,
-  });
 
-  await restorePrefabs(ctx, cache, noopLog, {
-    projectToolPath,
-    projectPath,
-    packageToolPath,
-    gmpmPath,
-    verbose: false,
-  });
+  if (projectPath !== undefined) {
+    const gmpmPath = await downloadGmpm(ctx, cache, noopLog, {
+      verbose: false,
+    });
+    const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
+      verbose: false,
+    });
+
+    await restorePrefabs(ctx, cache, noopLog, {
+      projectToolPath,
+      projectPath,
+      packageToolPath,
+      gmpmPath,
+      verbose: false,
+    });
+  }
 
   await callResourceTool(ctx, {
     run: mode,
