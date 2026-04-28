@@ -17,7 +17,7 @@
 import type { Context } from "./context";
 import { KnownError } from "./error";
 import type { ProjectPath } from "./project";
-import { getPlatformSuffix, npmExec, PRIVATE_REGISTRY } from "./npm";
+import { getPlatformSuffix, npmExec, GMPM_REGISTRY } from "./npm";
 
 export type ResourceToolMode =
   | { mode: "cli" }
@@ -94,7 +94,7 @@ export async function callResourceTool(
     await npmExec(ctx, {
       packageName,
       args,
-      registry: PRIVATE_REGISTRY,
+      registry: GMPM_REGISTRY,
       extraEnvVars:
         ctx.process.platform === "darwin"
           ? { COMPlus_ZapDisable: "1" }

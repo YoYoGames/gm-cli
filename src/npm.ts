@@ -60,8 +60,7 @@ export function getPlatformSuffix(
   return suffix;
 }
 
-export const REGISTRY = "https://gmpm.gamemaker.io";
-export const PRIVATE_REGISTRY = "https://gmpm-private.gamemaker.io";
+export const GMPM_REGISTRY = "https://gmpm.gamemaker.io";
 
 function cmd(
   ctx: Pick<Context, "process">,
