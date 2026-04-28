@@ -44,7 +44,8 @@ export const runCommand = buildCommand({
             throw new Error(`Valid targets: ${TARGETS.join(", ")}`);
           }
         },
-        brief: "The platform target to run",
+        brief:
+          "The platform the game will run on ('windows', 'mac', 'linux', 'operagx', etc.)",
         optional: true,
       },
       toolchain: {
