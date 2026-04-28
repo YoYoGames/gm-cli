@@ -18,7 +18,7 @@ import * as p from "@clack/prompts";
 import { type Context, exists } from "~/context";
 import { Cache } from "~/cache";
 import { KnownError } from "~/error";
-import { callResourceTool } from "~/resourceTool";
+import { callResourceTool } from "~/resource-tool";
 import { gitignore, gitattributes, compileYml, packageYml } from "./base-files";
 import { getTemplates } from "./get-templates";
 import { runInteractive } from "./prompts";
