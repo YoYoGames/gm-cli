@@ -18,6 +18,7 @@ import type { ManualLanguage } from "./command";
 import open from "open";
 import { searchManual } from "./search-manual";
 import { KnownError } from "~/error";
+import chalk from "chalk";
 
 export default async function (
   this: Context,
@@ -33,4 +34,6 @@ export default async function (
   }
 
   await open(result.url);
+
+  this.process.stdout.write(`Opening ${chalk.blue.underline(result.url)}\n`);
 }
