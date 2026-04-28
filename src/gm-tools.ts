@@ -20,8 +20,8 @@ import type { Log } from "./log";
 import {
   npmInstall,
   getPlatformSuffix,
-  PRIVATE_REGISTRY,
   type PlatformSuffixes,
+  GMPM_REGISTRY,
 } from "./npm";
 
 export async function downloadProjectTool(
@@ -189,7 +189,7 @@ async function download(
   await npmInstall(ctx, log, {
     prefix: destDir,
     packageName,
-    registry: PRIVATE_REGISTRY,
+    registry: GMPM_REGISTRY,
     verbose,
   });
 

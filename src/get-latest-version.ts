@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { npmGetLatestVersion, PRIVATE_REGISTRY } from "./npm";
+import { npmGetLatestVersion } from "./npm";
 import child_process from "node:child_process";
 import { Cache } from "./cache";
 import os from "node:os";
@@ -66,7 +66,7 @@ export async function getLatestVersion(): Promise<string | undefined> {
     ctx,
     "@gamemaker/gm-cli",
     // FIXME: Before release, replace with https://registry.npmjs.org
-    PRIVATE_REGISTRY,
+    "https://gmpm-private.gamemaker.io",
   );
   if (latest) {
     try {
