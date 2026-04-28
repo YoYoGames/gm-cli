@@ -28,7 +28,7 @@ export default async function (
   accessKey: string,
 ): Promise<void> {
   const cwd = this.process.cwd();
-  const projectPath = await findProjectFile(this, cwd).catch(() => undefined);
+  const projectPath = await findProjectFile(this, cwd);
 
   const cacheType: CacheType = flags.cacheDir
     ? { type: "absolute", path: flags.cacheDir }
