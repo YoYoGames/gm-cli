@@ -180,10 +180,12 @@ async function download(
   const toolPath = getPath(destDir, packageName);
 
   if (await exists(ctx, toolPath)) {
+    log.message(`Found ${name}`);
     return toolPath;
   }
   // not yet downloaded
 
+  log.message(`Installing ${name}`);
   await npmInstall(ctx, log, {
     prefix: destDir,
     packageName,
