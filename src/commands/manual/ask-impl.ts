@@ -21,7 +21,6 @@ import { searchManual } from "./search-manual";
 import chalk from "chalk";
 import { KnownError } from "~/error";
 
-const MD_LINK_PATTERN = /\[([^\]]+)\]\(([^)]+)\)/g;
 const formatLink = chalk.blue.underline;
 
 function supportsTerminalLinks(): boolean {
@@ -92,23 +91,6 @@ export default async function (
 
   // Display the Markdown contents using ANSI
   this.process.stdout.write(await marked(result.content));
-
-  // Collect links to display after article
-  if (!supportsTerminalLinks()) {
-    const links = result.content.matchAll(MD_LINK_PATTERN);
-
-    for (const link of links) {
-      const text = link[1];
-      const article = link[2];
-
-      if (!text || !article) {
-        continue;
-      }
-
-      const formattedLink = formatLink(toManualUrl(article, language));
-      this.process.stdout.write(`${text}: ${formattedLink}\n`);
-    }
-  }
 
   const formattedSource = formatLink(result.url);
   this.process.stdout.write(`\nArticle source: ${formattedSource}\n`);
