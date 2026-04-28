@@ -140,7 +140,6 @@ export const resourcetoolCommand = buildRouteMap({
       docs: { brief: "Run a script file" },
     }),
   },
-  defaultCommand: "repl",
   docs: {
     brief: "Programmatically read and manipulate project resources",
   },
