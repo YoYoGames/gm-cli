@@ -26,7 +26,7 @@ export const compileProjectCommand = buildCommand({
       kind: "tuple",
       parameters: [
         {
-          brief: "Path to the project yyp file",
+          brief: "Path to the project .yyp file",
           placeholder: "project",
           parse: parseProjectPath,
           optional: true,

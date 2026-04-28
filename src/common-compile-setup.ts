@@ -145,6 +145,9 @@ export async function commonCompileSetup(
   const cwd = ctx.process.cwd();
   const target = flags.target ?? targetForPlatform(ctx.process.platform);
   const projectPath = project ?? (await findProjectFile(ctx, cwd));
+  if (projectPath === undefined) {
+    throw new KnownError("No .yyp project file found in the current directory");
+  }
   // We use the name "native" when facing the user instead of YYC so that we can use the same
   // flag for GMRT later too. Default to VM if not set.
   const runtime = flags.runtime === "native" ? "YYC" : "VM";

@@ -43,25 +43,30 @@ export async function run(
     ctx,
     flags.cacheDir
       ? { type: "absolute", path: flags.cacheDir }
-      : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
+      : projectPath
+        ? { type: "infer", projectDir: ctx.path.dirname(projectPath) }
+        : { type: "temporary" },
   );
   const projectToolPath = await downloadProjectTool(ctx, cache, noopLog, {
     verbose: false,
   });
-  const gmpmPath = await downloadGmpm(ctx, cache, noopLog, {
-    verbose: false,
-  });
-  const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
-    verbose: false,
-  });
 
-  await restorePrefabs(ctx, cache, noopLog, {
-    projectToolPath,
-    projectPath,
-    packageToolPath,
-    gmpmPath,
-    verbose: false,
-  });
+  if (projectPath !== undefined) {
+    const gmpmPath = await downloadGmpm(ctx, cache, noopLog, {
+      verbose: false,
+    });
+    const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
+      verbose: false,
+    });
+
+    await restorePrefabs(ctx, cache, noopLog, {
+      projectToolPath,
+      projectPath,
+      packageToolPath,
+      gmpmPath,
+      verbose: false,
+    });
+  }
 
   await callResourceTool(ctx, {
     run: mode,
