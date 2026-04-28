@@ -16,6 +16,7 @@
 
 import type { Cache } from "./cache";
 import type { Context } from "./context";
+import { KnownError } from "./error";
 import type { Log } from "./log";
 import type { ProjectPath } from "./project";
 
@@ -78,8 +79,8 @@ export async function restorePrefabs(
         resolve();
       } else {
         reject(
-          new Error(
-            `ProjectTool PREFABS RESTORE exited with code ${String(code)}`,
+          new KnownError(
+            `Failed to restore project. "ProjectTool PREFABS RESTORE" exited with code ${String(code)}`,
           ),
         );
       }
