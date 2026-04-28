@@ -27,14 +27,14 @@ import {
   downloadGmpm,
   downloadPackageTool,
   downloadProjectTool,
-} from "./gmTools";
+} from "./gm-tools";
 import { KnownError } from "./error";
 import { LICENSE_FILENAME } from "./commands/login/impl";
 import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
 import { noopLog, type Log } from "./log";
 import type { ToolchainVersion } from "./toolchain";
-import { restorePrefabs } from "./restorePrefabs";
+import { restorePrefabs } from "./restore-prefabs";
 
 /**
  * Command flags exposed in package/run/compile

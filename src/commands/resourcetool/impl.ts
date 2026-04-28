@@ -21,10 +21,10 @@ import {
   downloadGmpm,
   downloadPackageTool,
   downloadProjectTool,
-} from "~/gmTools";
-import { callResourceTool, type ResourceToolMode } from "~/resourceTool";
+} from "~/gm-tools";
+import { callResourceTool, type ResourceToolMode } from "~/resource-tool";
 import { noopLog } from "~/log";
-import { restorePrefabs } from "~/restorePrefabs";
+import { restorePrefabs } from "~/restore-prefabs";
 
 export interface CommonFlags {
   cacheDir?: string;

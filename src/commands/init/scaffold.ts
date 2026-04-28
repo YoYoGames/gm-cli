@@ -18,7 +18,7 @@ import type { Template } from "./types";
 import type { Cache } from "~/cache";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import { downloadProjectTool } from "~/gmTools";
+import { downloadProjectTool } from "~/gm-tools";
 import { noopLog } from "~/log";
 
 export async function scaffoldProject(
