@@ -261,7 +261,7 @@ export async function commonCompileSetup(
       runtime,
     }));
   } catch (e) {
-    actionLog.error("Compilation failed");
+    actionLog.error("Failed");
     throw new KnownError(e);
   }
   actionLog.success(successMessage);
