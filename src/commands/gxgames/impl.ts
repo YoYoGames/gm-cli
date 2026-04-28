@@ -18,6 +18,8 @@ import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import { getApiClient } from "./client";
 import { authenticate } from "./auth";
+import { unwrapResponse } from "./api/helpers";
+import { KnownError } from "~/error";
 
 // TODO: A lot will change here when we have the new api. I think.
 // Right now we're just very limited in what we can do
@@ -29,7 +31,12 @@ export default async function (
   const token = await authenticate(ctx);
   const api = getApiClient(ctx, token);
 
-  const studiosRes = await api.gamedev.getUserStudios({ pageSize: 999 });
+  const studiosRes = await unwrapResponse(
+    api.getUserStudios({ pageSize: 999 }),
+  );
+  if (!studiosRes.success) {
+    throw new KnownError(studiosRes.errors);
+  }
 
   const studioId = await p.select({
     message: "Select a studio",
@@ -42,11 +49,16 @@ export default async function (
     return process.exit(0);
   }
 
-  const gamesRes = await api.gamedev.getUserGames({
-    studioId: [studioId],
-    pageSize: 999,
-    gameEngine: ["game-maker"],
-  });
+  const gamesRes = await unwrapResponse(
+    api.getUserGames({
+      studioId: [studioId],
+      pageSize: 999,
+      gameEngine: ["game-maker"],
+    }),
+  );
+  if (!gamesRes.success) {
+    throw new KnownError(studiosRes.errors);
+  }
 
   const gameChoice = await p.select({
     message: "Create a new game or upload to an existing one?",
@@ -74,11 +86,16 @@ export default async function (
     }
 
     const createLog = ctx.makeTaskLogger("Creating game");
-    const res = await api.gamedev.createGame({
-      name: gameName,
-      studioId,
-      gameEngine: "game-maker",
-    });
+    const res = await unwrapResponse(
+      api.createGame({
+        name: gameName,
+        studioId,
+        gameEngine: "game-maker",
+      }),
+    );
+    if (!res.success) {
+      throw new KnownError(res.errors);
+    }
     gameId = res.data.gameId;
     createLog.success(`Game created: ${gameId}`);
   } else {
@@ -99,11 +116,16 @@ export default async function (
 
   const uploadLog = ctx.makeTaskLogger("Uploading bundle");
   const fileBuffer = await ctx.fs.readFile(file);
-  await api.gamedev.uploadGameBundle(
-    gameId,
-    { version },
-    { file: new File([fileBuffer], ctx.path.basename(file)) },
+  const res = await unwrapResponse(
+    api.uploadGameBundle(
+      gameId,
+      { version },
+      { file: new File([fileBuffer], ctx.path.basename(file)) },
+    ),
   );
+  if (!res.success) {
+    throw new KnownError(res.errors);
+  }
   uploadLog.success("Bundle uploaded");
   await ctx.open(`https://dev.gx.games/games/${gameId}/details`);
 }
