@@ -14,22 +14,34 @@
  * limitations under the License.
  */
 
-import { buildCommand } from "@stricli/core";
-import type { Context } from "~/context";
+import { buildCommand, buildRouteMap } from "@stricli/core";
 
-export const gxgamesCommand = buildCommand({
-  loader: async () => {
-    const { default: run } = await import("./impl");
-    return {
-      default: async function (
-        this: Context,
-        flags: Record<never, never>,
-        file: string,
-      ) {
-        return run(this, flags, file);
+const gxgamesLinkCommand = buildCommand({
+  loader: async () => import("./link-impl"),
+  parameters: {
+    positional: { kind: "tuple", parameters: [] },
+    flags: {
+      studioid: {
+        kind: "parsed",
+        parse: String,
+        brief: "Studio ID",
+        optional: true,
       },
-    };
+      gameid: {
+        kind: "parsed",
+        parse: String,
+        brief: "Game ID",
+        optional: true,
+      },
+    },
   },
+  docs: {
+    brief: "Link to a GX.Games studio and game",
+  },
+});
+
+const gxgamesUploadCommand = buildCommand({
+  loader: async () => import("./upload-impl"),
   parameters: {
     positional: {
       kind: "tuple",
@@ -44,5 +56,37 @@ export const gxgamesCommand = buildCommand({
   },
   docs: {
     brief: "Upload to GX.Games",
+  },
+});
+
+const gxgamesMetaCommand = buildCommand({
+  loader: async () => import("./meta-impl"),
+  parameters: {
+    positional: { kind: "tuple", parameters: [] },
+  },
+  docs: {
+    brief: "Update GX.Games metadata",
+  },
+});
+
+const gxgamesPublishCommand = buildCommand({
+  loader: async () => import("./publish-impl"),
+  parameters: {
+    positional: { kind: "tuple", parameters: [] },
+  },
+  docs: {
+    brief: "Publish to GX.Games",
+  },
+});
+
+export const gxgamesCommand = buildRouteMap({
+  routes: {
+    link: gxgamesLinkCommand,
+    upload: gxgamesUploadCommand,
+    meta: gxgamesMetaCommand,
+    publish: gxgamesPublishCommand,
+  },
+  docs: {
+    brief: "GX.Games commands",
   },
 });
