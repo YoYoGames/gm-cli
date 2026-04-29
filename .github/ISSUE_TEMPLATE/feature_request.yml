@@ -1,0 +1,27 @@
+name: Feature Request
+description: Suggest an improvement or some new functionality for GameMaker CLI
+type: 'Feature'
+body:
+ - type: textarea
+   id: problem
+   attributes:
+     label: What is the problem this request aims to solve?
+     description: A clear and concise description of what the situation is like in the current version of GameMaker CLI and why this is a problem for you.  You may paste code blocks, screenshots and links at suitable locations in your text. (However, DO NOT add a web link and assume we will read an external discussion and guess at the feature you want - we will simply close the report.)
+   validations:
+     required: true
+
+ - type: textarea
+   id: solution
+   attributes:
+     label: How do you suggest we solve this problem?
+     description: A clear and concise description of what you want to happen differently in future versions of GameMaker CLI
+   validations:
+     required: true
+
+ - type: textarea
+   id: alternatives
+   attributes:
+     label: Are there any alternative ways to solve this problem you want to suggest?
+     description: A clear and concise description of any alternative solutions or features you have considered.
+   validations:
+     required: false
