@@ -20,14 +20,9 @@ import { markedTerminal } from "marked-terminal";
 import { searchManual } from "./search-manual";
 import chalk from "chalk";
 import { KnownError } from "~/error";
+import supportsHyperlinks from "supports-hyperlinks";
 
 const formatLink = chalk.blue.underline;
-
-function supportsTerminalLinks(): boolean {
-  // TODO: Add terminal detection here!
-  // I.e. check env var WT_PROCESS
-  return false;
-}
 
 // Use Operating System Commands to create a terminal hyperlink
 function toTerminalLink(input: string, language: ManualLanguage): string {
@@ -78,14 +73,16 @@ export default async function (
     return;
   }
 
+  const useHyperlinks = supportsHyperlinks.stdout;
+
   marked.use(
     markedTerminal({
       showSectionPrefix: false,
       reflowText: true,
-      link: supportsTerminalLinks()
+      link: useHyperlinks
         ? (link: string) => toTerminalLink(link, language)
         : stripLink,
-      href: supportsTerminalLinks() ? (href: string) => href : () => "",
+      href: useHyperlinks ? (href: string) => href : () => "",
     }),
   );
 

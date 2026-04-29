@@ -29,7 +29,6 @@
     "gen:ggbe-api": "node ./scripts/gen-ggbe-api.ts"
   },
   "devDependencies": {
-    "chalk": "^5.6.2",
     "@clack/prompts": "^1.1.0",
     "@eslint/compat": "^2.0.5",
     "@eslint/js": "^10.0.1",
@@ -37,16 +36,18 @@
     "@tony.ganchev/eslint-plugin-header": "3.4.3",
     "@types/node": "24.x",
     "@types/semver": "^7.7.1",
+    "chalk": "^5.6.2",
     "eslint": "^10.2.0",
     "eslint-plugin-only-warn": "^1.2.1",
     "fflate": "^0.8.2",
     "marked": "^12.0.2",
     "marked-terminal": "^7.2.0",
     "npm-run-all2": "^8.0.4",
-    "open": "^10.2.0",
     "prettier": "^3.8.2",
     "semver": "7.7.4",
+    "supports-hyperlinks": "^4.4.0",
     "swagger-typescript-api": "^13.6.10",
+    "tiny-open": "^1.2.0",
     "tsup": "^6.7.0",
     "typescript": "5.6.x",
     "typescript-eslint": "^8.58.1",
@@ -63,6 +64,8 @@
     "marked-terminal": "^7.2.0",
     "open": "^10.2.0",
     "sisteransi": "1.0.5",
+    "supports-hyperlinks": "^4.4.0",
+    "tiny-open": "^1.2.0",
     "zod": "^4.3.6"
   }
 }
