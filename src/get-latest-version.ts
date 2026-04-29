@@ -23,7 +23,7 @@ import fs from "node:fs/promises";
 import { version as myVersion } from "../package.json";
 import { z } from "zod";
 import semver from "semver";
-import { parseEnv } from "./parse-env";
+import { getParsedEnv } from "./parse-env";
 
 const versionCheckSchema = z.object({
   lastVersion: z.string(),
@@ -39,7 +39,7 @@ export async function getLatestVersion(): Promise<string | undefined> {
     fs,
     process,
     child_process,
-    env: parseEnv(process.env),
+    env: getParsedEnv(),
   };
 
   // Get the path to a file where we can store the last time we checked the version

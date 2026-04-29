@@ -36,14 +36,19 @@ const booleanEnvVar = z.preprocess(
 
 let parsedEnv: ParsedEnv | undefined = undefined;
 
-export function parseEnv(rawEnv: NodeJS.ProcessEnv): ParsedEnv {
+export function getParsedEnv(): ParsedEnv {
   // We store a global copy of the parsed env since we need to use this function
   // both in get-latest-version and when constructing the context object and we want to avoid
   // printing warnings for the parse erorrs multiple times.
   if (parsedEnv !== undefined) {
     return parsedEnv;
   }
+  const env = parseEnv(process.env);
+  parsedEnv = env;
+  return env;
+}
 
+function parseEnv(rawEnv: NodeJS.ProcessEnv): ParsedEnv {
   function parse<T>(key: keyof ParsedEnv, schema: z.ZodType<T>): T | undefined {
     if (rawEnv[key] === undefined) {
       return undefined;
@@ -80,7 +85,5 @@ export function parseEnv(rawEnv: NodeJS.ProcessEnv): ParsedEnv {
       console.error(rawEnv["NO_COLOR"] !== undefined ? msg : chalk.yellow(msg));
     }
   }
-
-  parsedEnv = env;
   return env;
 }
