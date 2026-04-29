@@ -65,8 +65,7 @@ export async function getLatestVersion(): Promise<string | undefined> {
   const latest = await npmGetLatestVersion(
     ctx,
     "@gamemaker/gm-cli",
-    // FIXME: Before release, replace with https://registry.npmjs.org
-    "https://gmpm-private.gamemaker.io",
+    "https://registry.npmjs.org",
   );
   if (latest) {
     try {
