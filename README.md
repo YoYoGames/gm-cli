@@ -88,7 +88,7 @@ gm-cli manual ask "data structures"
 Direct integration with [gx.games](https://gx.games) to share your games! 
 
 ### A library to make your own tools
-`gm-cli` will expose it's internals as a TypeScript library that you can use to more easily make your own editor tools. 
+`gm-cli` will expose its internals as a TypeScript library that you can use to more easily make your own editor tools. 
 
 ### Editor integration
 `gm-cli` will support opening projects in the IDE (or your preferred editor) and likely also help you download the IDE itself.  
