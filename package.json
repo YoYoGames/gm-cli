@@ -4,9 +4,10 @@
   "description": "The GameMaker command-line interface GM-CLI is a helpful tool to edit, compile, package, and run your GameMaker projects.",
   "license": "Apache-2.0",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "files": [
-    "dist"
+    "dist",
+    "NOTICE"
   ],
   "bin": {
     "gm-cli": "dist/cli.js"
