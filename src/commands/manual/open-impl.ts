@@ -15,7 +15,6 @@
  */
 import type { Context } from "~/context";
 import type { ManualLanguage } from "./command";
-import open from "tiny-open";
 import { searchManual } from "./search-manual";
 import { KnownError } from "~/error";
 import chalk from "chalk";
@@ -33,7 +32,7 @@ export default async function (
     throw new KnownError("No results found");
   }
 
-  await open(result.url);
+  await this.open(result.url);
 
   this.process.stdout.write(`Opening ${chalk.blue.underline(result.url)}\n`);
 }
