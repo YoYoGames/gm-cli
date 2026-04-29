@@ -25,7 +25,7 @@ import { KnownError } from "./error";
 /** The subset of the Context object that's used in the cache.
  * Needed because we make use of the cache in app.ts before the context object is constructed
  */
-type CacheCtx = Pick<Context, "path" | "fs" | "os" | "process">;
+type CacheCtx = Pick<Context, "path" | "fs" | "os" | "process" | "env">;
 
 export type CacheType =
   | { type: "absolute"; path: string }
@@ -65,7 +65,7 @@ export class Cache {
     this._localOnly =
       cacheType.type === "absolute" ||
       cacheType.type === "temporary" ||
-      !!ctx.process.env["CI"];
+      ctx.env.CI === true;
     this._sharedPath = this._localOnly
       ? { type: "not-allowed" }
       : { type: "not-initialized" };
@@ -109,11 +109,8 @@ export class Cache {
     let cachePath: string;
     if (cacheType.type === "absolute") {
       cachePath = cacheType.path;
-    } else if (
-      cacheType.type === "infer" &&
-      ctx.process.env["GAMEMAKER_CACHE_DIR"]
-    ) {
-      cachePath = ctx.process.env["GAMEMAKER_CACHE_DIR"];
+    } else if (cacheType.type === "infer" && ctx.env.GAMEMAKER_CLI_CACHE_DIR) {
+      cachePath = ctx.env.GAMEMAKER_CLI_CACHE_DIR;
     } else if (cacheType.type === "infer") {
       cachePath = ctx.path.join(cacheType.projectDir, ".gmcache");
     } else if (cacheType.type === "temporary") {
@@ -219,13 +216,11 @@ function resolveSharedCachePath(ctx: CacheCtx): string {
     return ctx.path.join(home, "Library", "Caches", "GameMakerCLI");
   } else if (platform === "win32") {
     const localAppData =
-      ctx.process.env["LOCALAPPDATA"] ??
-      ctx.path.join(home, "AppData", "Local");
+      ctx.env.LOCALAPPDATA ?? ctx.path.join(home, "AppData", "Local");
     return ctx.path.join(localAppData, "GameMakerCLI", "cache");
   } else {
     // Linux / other — respect XDG_CACHE_HOME
-    const xdgCache =
-      ctx.process.env["XDG_CACHE_HOME"] ?? ctx.path.join(home, ".cache");
+    const xdgCache = ctx.env.XDG_CACHE_HOME ?? ctx.path.join(home, ".cache");
     return ctx.path.join(xdgCache, "GameMakerCLI");
   }
 }

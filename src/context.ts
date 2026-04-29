@@ -23,6 +23,7 @@ import type { TaskLogger } from "./log";
 import { fancyTaskLogger, plainTaskLogger } from "./log";
 import open from "open";
 import http from "node:http";
+import { parseEnv, type ParsedEnv } from "./parse-env";
 
 export interface Context extends CommandContext {
   readonly process: NodeJS.Process;
@@ -34,6 +35,7 @@ export interface Context extends CommandContext {
   readonly open: typeof open;
   readonly http: typeof http;
   readonly makeTaskLogger: TaskLogger;
+  readonly env: ParsedEnv;
 }
 
 export async function exists(
@@ -49,9 +51,10 @@ export async function exists(
 }
 
 export function buildContext(process: NodeJS.Process): Context {
-  const noColor = "NO_COLOR" in process.env;
+  const env = parseEnv(process.env);
   return {
     process,
+    env,
     child_process,
     open,
     http,
@@ -59,6 +62,7 @@ export function buildContext(process: NodeJS.Process): Context {
     fs,
     path,
     fetch,
-    makeTaskLogger: noColor ? plainTaskLogger() : fancyTaskLogger(),
+    makeTaskLogger:
+      env.NO_COLOR === true ? plainTaskLogger() : fancyTaskLogger(),
   };
 }

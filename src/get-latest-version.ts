@@ -23,6 +23,7 @@ import fs from "node:fs/promises";
 import { version as myVersion } from "../package.json";
 import { z } from "zod";
 import semver from "semver";
+import { parseEnv } from "./parse-env";
 
 const versionCheckSchema = z.object({
   lastVersion: z.string(),
@@ -32,10 +33,17 @@ const versionCheckSchema = z.object({
 export async function getLatestVersion(): Promise<string | undefined> {
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
   // We have not constructed the full context object yet, so we have to build a partial one here
-  const ctx = { os, path: nodePath, fs, process, child_process };
+  const ctx = {
+    os,
+    path: nodePath,
+    fs,
+    process,
+    child_process,
+    env: parseEnv(process.env),
+  };
 
   // Get the path to a file where we can store the last time we checked the version
-  if (ctx.process.env["CI"]) {
+  if (ctx.env.CI === true) {
     // However, using a shared only cache will panic in CI since it does not allow shared partitions
     // so let's skip the version check altogether
     return;
