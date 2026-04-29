@@ -37,9 +37,9 @@ export async function restorePrefabs(
     verbose: boolean;
     gmpmPath: string;
   },
-): Promise<void> {
+): Promise<string> {
   const prefabsDir = await cache.getSubDirPath(ctx, "prefabs");
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     // TODO LATER: add options to pick registry etc.
     const args = [
       "PREFABS",
@@ -76,7 +76,7 @@ export async function restorePrefabs(
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0 || code === null) {
-        resolve();
+        resolve(prefabsDir);
       } else {
         reject(
           new KnownError(

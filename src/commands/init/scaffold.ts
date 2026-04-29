@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
+import { unzip } from "fflate";
 import type { Template } from "./types";
 import type { Cache } from "~/cache";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import { downloadProjectTool } from "~/gm-tools";
+import {
+  downloadProjectTool,
+  downloadGmpm,
+  downloadPackageTool,
+} from "~/gm-tools";
 import { noopLog } from "~/log";
+import { findProjectFile } from "~/project";
+import { restorePrefabs } from "~/restore-prefabs";
 
 export async function scaffoldProject(
   ctx: Context,
@@ -27,18 +34,35 @@ export async function scaffoldProject(
   project: { name: string; dir: string },
   cache: Cache,
 ) {
-  const response = await ctx.fetch(template.downloadUrl);
-  if (!response.ok) {
-    throw new KnownError(`Failed to download template: ${response.statusText}`);
+  const tempDir = await downloadAndUnpack(ctx, template.downloadUrl);
+
+  // The zip may place files at the top level or inside a single subdirectory.
+  const extractedYyp =
+    (await findProjectFile(ctx, tempDir)) ??
+    (await findProjectFileInSubdirs(ctx, tempDir));
+
+  if (!extractedYyp) {
+    await ctx.fs.rm(tempDir, { recursive: true });
+    throw new KnownError(
+      "Invariant broken: Template archive does not contain a .yyp project file",
+    );
   }
 
-  const buffer = await response.arrayBuffer();
-
-  const archivePath = project.dir + ".zip";
-  await ctx.fs.writeFile(archivePath, Buffer.from(buffer));
-
+  // Install tools
   const projectToolPath = await downloadProjectTool(ctx, cache, noopLog, {
     verbose: false,
+  });
+  const gmpmPath = await downloadGmpm(ctx, cache, noopLog, { verbose: false });
+  const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
+    verbose: false,
+  });
+
+  const prefabsDir = await restorePrefabs(ctx, cache, noopLog, {
+    projectToolPath,
+    projectPath: extractedYyp,
+    packageToolPath,
+    gmpmPath,
+    verbose: true,
   });
 
   const destinationYyp = ctx.path.join(project.dir, `${project.name}.yyp`);
@@ -47,8 +71,9 @@ export async function scaffoldProject(
     [
       "PROJECT",
       "SAVE",
-      `SOURCE=${archivePath}`,
+      `SOURCE=${extractedYyp}`,
       `DESTINATION=${destinationYyp}`,
+      `PREFABSFOLDER=${prefabsDir}`,
     ],
     {
       env:
@@ -58,5 +83,57 @@ export async function scaffoldProject(
     },
   );
 
-  await ctx.fs.unlink(archivePath);
+  await ctx.fs.rm(tempDir, { recursive: true });
+}
+
+async function downloadAndUnpack(ctx: Context, url: string) {
+  const response = await ctx.fetch(url);
+  if (!response.ok) {
+    throw new KnownError(`Failed to download template: ${response.statusText}`);
+  }
+
+  const data = new Uint8Array(await response.arrayBuffer());
+
+  const files = await new Promise<Record<string, Uint8Array>>(
+    (resolve, reject) => {
+      unzip(data, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    },
+  );
+
+  const tempDir = await ctx.fs.mkdtemp(
+    ctx.path.join(ctx.os.tmpdir(), "gm-scaffold-"),
+  );
+
+  for (const [name, content] of Object.entries(files)) {
+    if (name.endsWith("/")) {
+      continue;
+    }
+    const outPath = ctx.path.join(tempDir, name);
+    await ctx.fs.mkdir(ctx.path.dirname(outPath), { recursive: true });
+    await ctx.fs.writeFile(outPath, content);
+  }
+
+  return tempDir;
+}
+
+async function findProjectFileInSubdirs(ctx: Context, dir: string) {
+  const entries = await ctx.fs.readdir(dir);
+  for (const entry of entries) {
+    const entryPath = ctx.path.join(dir, entry);
+    try {
+      const found = await findProjectFile(ctx, entryPath);
+      if (found) {
+        return found;
+      }
+    } catch {
+      // entry is a file, not a directory — skip
+    }
+  }
+  return undefined;
 }
