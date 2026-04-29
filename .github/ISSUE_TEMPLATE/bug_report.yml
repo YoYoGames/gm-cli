@@ -1,0 +1,61 @@
+name: Bug Report
+description: File a bug report for issues with GameMaker CLI
+#type: 'Bug'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Always ensure you are using the latest versions of GameMaker CLI.
+
+        Search for existing reports for this bug first! If a report already exists, DO NOT send another report now - just leave a thumbs-up/comment on the other report instead.
+
+        Most fields need to be filled-in before you can click Submit, as everything is required information for us to confirm and fix this bug.
+
+        No coding advice/support is offered here - if you want to ask a coding question, please ask [the GameMaker Community](https://forum.gamemaker.io/index.php?forums/tech-support.24/) or [Discord](https://discord.com/invite/gamemaker) instead of using this form.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What Is The Bug?
+      description: Write a thorough description of the issue. Please include the full output of the command that failed. Additionally, you may paste screenshots and links at suitable locations in your text. (However, DO NOT add a web link and assume we will read an external discussion and guess at the bug ourselves - we will simply close the report.). If relevant to the issue, also specify which terminal emulator and shell (e.g. PowerShell, Zsh...) you are using.
+
+    validations:
+      required: true
+
+  - type: input
+    id: expected
+    attributes:
+      label: Expected Change
+      description: If it is not obvious from your Description text, what difference would you expect to see once this is fixed?
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps To Reproduce
+      description: Add detailed, ordered steps for someone else to recreate the issue (add as many steps into the gaps below as you require)
+      value: |
+        1. Run command ....
+        2.
+        3.
+        4. See the issue
+    validations:
+      required: true
+
+  - type: dropdown
+    id: repro-rate
+    attributes:
+      label: How reliably can you recreate this issue using your steps above?
+      options:
+        - Always
+        - Most Times
+        - Only Sometimes
+        - Rarely
+        - Only Ever Happened Once
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: Thank you very much for taking the time to fill out this bug report!
