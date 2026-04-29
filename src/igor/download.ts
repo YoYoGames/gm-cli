@@ -23,7 +23,9 @@ import type { Log } from "~/log";
 const IGOR_ZIPS: Record<string, Record<string, string>> = {
   win32: {
     x64: "https://gms.yoyogames.com/igor_win-x64.zip",
-    arm64: "https://gms.yoyogames.com/igor_win-arm64.zip",
+    // Igor has an ARM build but it seems like it's not in use?
+    // https://gms.yoyogames.com/igor_win-arm64.zip
+    arm64: "https://gms.yoyogames.com/igor_win-x64.zip",
   },
   linux: {
     x64: "https://gms.yoyogames.com/igor_linux-x64.zip",
