@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { buildCommand, buildRouteMap } from "@stricli/core";
+import { getParsedEnv } from "~/parse-env";
 
 const MANUAL_LANGUAGES = [
   "en",
@@ -77,7 +78,7 @@ export const manualCommand = buildRouteMap({
   },
   docs: {
     hideRoute: {
-      ask: !process.env["GAMEMAKER_CLI_UNSTABLE_FEATURES"],
+      ask: !getParsedEnv().GAMEMAKER_CLI_UNSTABLE_FEATURES,
     },
     brief: "Use the GameMaker manual",
   },

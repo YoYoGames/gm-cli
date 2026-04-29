@@ -23,7 +23,7 @@ import type { TaskLogger } from "./log";
 import { fancyTaskLogger, plainTaskLogger } from "./log";
 import open from "tiny-open";
 import http from "node:http";
-import { parseEnv, type ParsedEnv } from "./parse-env";
+import { getParsedEnv, type ParsedEnv } from "./parse-env";
 
 export interface Context extends CommandContext {
   readonly process: NodeJS.Process;
@@ -51,7 +51,7 @@ export async function exists(
 }
 
 export function buildContext(process: NodeJS.Process): Context {
-  const env = parseEnv(process.env);
+  const env = getParsedEnv();
   return {
     process,
     env,
