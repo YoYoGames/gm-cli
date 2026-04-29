@@ -17,7 +17,7 @@
 import * as p from "@clack/prompts";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import { authenticate } from "./auth";
+import { createAuthManager } from "./auth";
 import { getApiClient } from "./client";
 import { unwrapResponse } from "./api/helpers";
 import { writeLink } from "./link";
@@ -30,8 +30,7 @@ export default async function (
   let gameId = flags.gameid;
 
   if (!studioId || !gameId) {
-    const token = await authenticate(this);
-    const api = getApiClient(this, token);
+    const api = getApiClient(this, createAuthManager(this));
 
     if (!studioId) {
       const studiosRes = await unwrapResponse(

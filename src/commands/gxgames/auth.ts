@@ -91,6 +91,14 @@ async function exchangeCodeForToken(
   };
 }
 
+export interface AuthManager {
+  getAccessToken(): Promise<string>;
+}
+
+export function createAuthManager(ctx: Context): AuthManager {
+  return { getAccessToken: () => authenticate(ctx) };
+}
+
 export async function authenticate(ctx: Context): Promise<string> {
   const cached = await readAuth(ctx);
   if (cached && cached.expiresAt > Date.now()) {
