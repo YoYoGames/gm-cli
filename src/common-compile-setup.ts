@@ -84,9 +84,9 @@ async function getLicense(
     return flags.license;
   }
 
-  const envLicense = ctx.process.env["GAMEMAKER_LICENSE"];
+  const envLicense = ctx.env.GAMEMAKER_CLI_LICENSE;
   if (envLicense !== undefined) {
-    log.message(`Using GAMEMAKER_LICENSE="${envLicense}"`);
+    log.message(`Using GAMEMAKER_CLI_LICENSE="${envLicense}"`);
     return envLicense;
   }
 

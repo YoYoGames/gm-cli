@@ -32,7 +32,7 @@ export type GxGamesAuth = NonNullable<GxGamesStore["auth"]>;
 
 function resolveCacheDir(ctx: Context): string {
   return (
-    ctx.process.env["GAMEMAKER_CACHE_DIR"] ??
+    ctx.env.GAMEMAKER_CLI_CACHE_DIR ??
     ctx.path.join(ctx.process.cwd(), ".gmcache")
   );
 }

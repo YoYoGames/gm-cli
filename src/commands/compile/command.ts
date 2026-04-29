@@ -74,7 +74,7 @@ export const compileProjectCommand = buildCommand({
       license: {
         kind: "parsed",
         parse: String,
-        brief: "License .plist file (can also set env GAMEMAKER_LICENSE)",
+        brief: "License .plist file (can also set env GAMEMAKER_CLI_LICENSE)",
         optional: true,
       },
       cacheDir: {
