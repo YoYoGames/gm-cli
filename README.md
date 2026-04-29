@@ -3,17 +3,6 @@
 
 ![Demo video of `gm-cli init` command](recordings/init.gif)
 
-## Setup (first time)
-> [!NOTE]
->  These steps should not be needed at release!
-### Sign in to registry
-
-The GM CLI and parts of the underlying tools are only available internally in the https://gmpm-private.gamemaker.io registry. So start by signing in.
-
-```bash
-npm login --registry https://gmpm-private.gamemaker.io --scope @gamemaker
-```
-
 # Usage
 
 > [!IMPORTANT]
@@ -85,7 +74,7 @@ GameMaker CLI will have full support to manage more targets for the GMS2 runtime
 ### Faster & smarter caching and manifest files
 **Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
 
-Currently every project using `gm-cli` has it's own local `.gmcache` directory. This means it takes a long time to install a copy of the runtime for every project. This will be much improved with shared caches and manifest file format (similar to `pyprojects.toml` and `package.json`).
+Currently every project using `gm-cli` has its own local `.gmcache` directory. This means it takes a long time to install a copy of the runtime for every project. This will be much improved with shared caches and manifest file format (similar to `pyprojects.toml` and `package.json`).
 
 ### Read the GameMaker Manual inside the terminal
 **Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
@@ -115,5 +104,5 @@ pnpm link
 
 ## Publish
 ```sh
-pnpm publish --access restricted
+pnpm publish --access public
 ```

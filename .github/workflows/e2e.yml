@@ -57,14 +57,6 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
 
-      - name: Auth private registry (Bash)
-        if: runner.os != 'Windows'
-        run: echo "//gmpm-private.gamemaker.io/:_authToken=\${GAMEMAKER_AUTH_TOKEN}" >> ~/.npmrc
-
-      - name: Auth private registry (PowerShell)
-        if: runner.os == 'Windows'
-        run: Add-Content -Path "~/.npmrc" -Value '//gmpm-private.gamemaker.io/:_authToken=${GAMEMAKER_AUTH_TOKEN}'
-
       - name: E2E (Bash)
         if: runner.os != 'Windows'
         run: bash scripts/e2e.sh
