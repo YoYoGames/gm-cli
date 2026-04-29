@@ -83,7 +83,6 @@ gm-cli manual ask "data structures"
 ```
 
 ### Publishing games to the web
-**Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
 
 Direct integration with [gx.games](https://gx.games) to share your games! 
 
