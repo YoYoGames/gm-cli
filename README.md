@@ -1,10 +1,10 @@
 # GameMaker CLI
 **The GameMaker command-line interface `gm-cli` is a helpful tool to edit, compile, package, and run your GameMaker projects.**
 
-# Usage
+GameMaker CLI is open source and will soon be available at: [https://github.com/YoYoGames/gm-cli](https://github.com/YoYoGames/gm-cli).
 
-> [!IMPORTANT]
->  You must first install [nodeJS](https://nodejs.org/en) which comes with the tools `npm` and `npx`. 
+# Usage
+> IMPORTANT: You must first install [nodeJS](https://nodejs.org/en) which comes with the tools `npm` and `npx`. 
 
 Run:
 ```sh
@@ -62,8 +62,7 @@ gm-cli manual open "sprites" --language=es
 ```
 
 ## Near future
-> [!NOTE]
->  The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
+> Note: The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
 
 **Many features are planned to soon be added to `gm-cli`. These include:**
 ### GMRT and more targets
@@ -90,16 +89,4 @@ Direct integration with [gx.games](https://gx.games) to share your games!
 `gm-cli` will expose its internals as a TypeScript library that you can use to more easily make your own editor tools. 
 
 ### Editor integration
-`gm-cli` will support opening projects in the IDE (or your preferred editor) and likely also help you download the IDE itself.  
-
-# Development
-```sh
-pnpm install
-pnpm build
-pnpm link
-```
-
-## Publish
-```sh
-pnpm publish --access public
-```
+`gm-cli` will support opening projects in the IDE (or your preferred editor) and likely also help you download the IDE itself.
