@@ -251,7 +251,7 @@ export function installRuntime(
       "-rp",
       runtimeDir,
       ...(modules ? ["-m", modules.join(",")] : []),
-      ...(version ? [version.join(".")] : []), // FIXME: this won't work for partial versions I don't think!!
+      ...(version ? [version.join(".")] : []),
     ],
     label: "Igor Runtime Install",
   });
