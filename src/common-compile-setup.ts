@@ -225,8 +225,9 @@ export async function commonCompileSetup(
   });
 
   const prefabsLog = ctx.makeTaskLogger("Restoring prefabs");
+  let prefabsDir: string;
   try {
-    await restorePrefabs(ctx, cache, prefabsLog, {
+    prefabsDir = await restorePrefabs(ctx, cache, prefabsLog, {
       projectToolPath,
       projectPath,
       packageToolPath,
@@ -256,7 +257,7 @@ export async function commonCompileSetup(
       runtimeDir: runtimeLocation,
       target,
       cacheDir: buildCacheDir,
-      prefabsDir: await cache.getSubDirPath(ctx, "prefabs"),
+      prefabsDir,
       licenseFile,
       projectPath,
       projectToolPath,
