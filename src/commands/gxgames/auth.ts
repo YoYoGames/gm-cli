@@ -17,6 +17,7 @@
 import { KnownError } from "~/error";
 import crypto from "node:crypto";
 import type { Context } from "~/context";
+import { readAuth, writeAuth } from "./link";
 
 const CLIENT_ID = "gxe-gamemaker-cli";
 const REDIRECT_PORT = 53784;
@@ -59,7 +60,7 @@ function waitForAuthCode(ctx: Context): Promise<string> {
 async function exchangeCodeForToken(
   code: string,
   state: string,
-): Promise<string> {
+): Promise<{ accessToken: string; expiresAt: number }> {
   const res = await fetch(new URL("/oauth2/v1/token/", AUTH_BASE), {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -75,15 +76,27 @@ async function exchangeCodeForToken(
   if (!res.ok) {
     throw new KnownError(`Token exchange failed: ${res.statusText}`);
   }
-  const json = (await res.json()) as { access_token?: string };
+  const json = (await res.json()) as {
+    access_token?: string;
+    expires_in?: number;
+  };
   if (!json.access_token) {
     throw new KnownError("No access_token in response");
   }
-  return json.access_token;
+  const expiresIn = json.expires_in ?? 3600;
+  return {
+    accessToken: json.access_token,
+    // 60s buffer so we re-auth before the token actually expires
+    expiresAt: Date.now() + (expiresIn - 60) * 1000,
+  };
 }
 
-// TODO: Needs to be stateful. No need to authenticate if already authenticated
 export async function authenticate(ctx: Context): Promise<string> {
+  const cached = await readAuth(ctx);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.accessToken;
+  }
+
   const state = crypto.randomBytes(16).toString("hex");
 
   const authUrl = new URL("/oauth2/v1/authorize/", AUTH_BASE);
@@ -101,8 +114,9 @@ export async function authenticate(ctx: Context): Promise<string> {
   const log = ctx.makeTaskLogger("Authenticating");
   log.message("Waiting for browser login...");
   const code = await codePromise;
-  const token = await exchangeCodeForToken(code, state);
+  const { accessToken, expiresAt } = await exchangeCodeForToken(code, state);
+  await writeAuth(ctx, { accessToken, expiresAt });
   log.success("Authenticated");
 
-  return token;
+  return accessToken;
 }
