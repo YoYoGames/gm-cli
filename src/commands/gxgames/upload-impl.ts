@@ -17,7 +17,7 @@
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import { getApiClient } from "./client";
-import { authenticate } from "./auth";
+import { createAuthManager } from "./auth";
 import { unwrapResponse } from "./api/helpers";
 import { KnownError } from "~/error";
 import { readLink } from "./link";
@@ -29,8 +29,7 @@ export default async function (
 ): Promise<void> {
   const link = await readLink(this);
 
-  const token = await authenticate(this);
-  const api = getApiClient(this, token);
+  const api = getApiClient(this, createAuthManager(this));
 
   const gamesRes = await unwrapResponse(
     api.getUserGames({

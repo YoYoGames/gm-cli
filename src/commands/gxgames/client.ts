@@ -16,15 +16,13 @@
 
 import type { Context } from "~/context";
 import { Gamedev } from "./api/Gamedev";
+import type { AuthManager } from "./auth";
 
-// TODO: We need to decide how to deal with the tokens. Where to store them? Do we need refresh
-// tokens? There is also api.setSecurityData(), so maybe this getter is excessive.
-// Will look into that later.
-export const getApiClient = (ctx: Context, accessToken: string) =>
+export const getApiClient = (ctx: Context, auth: AuthManager) =>
   new Gamedev({
     customFetch: ctx.fetch,
     baseUrl: "https://api.gx.games",
-    securityWorker: () => ({
-      headers: { Authorization: `Bearer ${accessToken}` },
+    securityWorker: async () => ({
+      headers: { Authorization: `Bearer ${await auth.getAccessToken()}` },
     }),
   });
