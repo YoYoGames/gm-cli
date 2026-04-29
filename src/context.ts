@@ -21,7 +21,7 @@ import os from "node:os";
 import path from "node:path";
 import type { TaskLogger } from "./log";
 import { fancyTaskLogger, plainTaskLogger } from "./log";
-import open from "open";
+import open from "tiny-open";
 import http from "node:http";
 import { parseEnv, type ParsedEnv } from "./parse-env";
 

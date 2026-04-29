@@ -15,7 +15,7 @@
  */
 import type { Context } from "~/context";
 import type { ManualLanguage } from "./command";
-import open from "open";
+import open from "tiny-open";
 import { searchManual } from "./search-manual";
 import { KnownError } from "~/error";
 import chalk from "chalk";
