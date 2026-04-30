@@ -54,7 +54,13 @@ export async function downloadIgor(
   const arch = ctx.process.arch;
   const platformDir = IGOR_PLATFORM_DIRS[platform] ?? platform;
   const exeName = platform === "win32" ? "Igor.exe" : "Igor";
-  const igorPath = ctx.path.join(destDir, platformDir, arch, exeName);
+  const igorPath = ctx.path.join(
+    destDir,
+    platformDir,
+    // We currently use x64 builds even on ARM windows
+    platform === "win32" ? "x64" : arch,
+    exeName,
+  );
 
   if (await exists(ctx, igorPath)) {
     return igorPath;
