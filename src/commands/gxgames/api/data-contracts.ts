@@ -234,7 +234,7 @@ export interface GameDevUserResponse {
 
 export type GetGameDetailsCodeEnum = "game_access_denied" | "game_not_found";
 
-export type GetProfileEnum = "DO_NOT_USE_NOT_SUPPORTED";
+export type GetProfileCodeEnum = "DO_NOT_USE_NOT_SUPPORTED";
 
 export type GetUserGamesCodeEnum =
   | "page_invalid"

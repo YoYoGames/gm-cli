@@ -107,8 +107,24 @@ for (const path of Object.keys(schema.paths)) {
         content: {
           "application/json": {
             schema: {
-              type: "string",
-              enum: ["DO_NOT_USE_NOT_SUPPORTED"],
+              type: "object",
+              required: ["data", "errors"],
+              properties: {
+                data: { enum: [null] },
+                errors: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    required: ["code"],
+                    properties: {
+                      code: {
+                        type: "string",
+                        enum: ["DO_NOT_USE_NOT_SUPPORTED"],
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
