@@ -47,15 +47,26 @@ const gxgamesUploadCommand = buildCommand({
       kind: "tuple",
       parameters: [
         {
-          brief: "File",
+          brief: "Path to the zip file to upload",
           placeholder: "file",
           parse: String,
         },
       ],
     },
+    flags: {
+      version: {
+        kind: "parsed",
+        parse: String,
+        brief: "Version in X.Y.Z.B format (e.g. 1.0.0.0)",
+        optional: true,
+      },
+    },
   },
   docs: {
-    brief: "Upload to GX.Games",
+    brief: "Upload a game bundle to GX.Games",
+    fullDescription:
+      "Uploads a zip bundle to GX.Games. " +
+      "Prompts for the version number if --version is not provided.",
   },
 });
 
@@ -63,9 +74,52 @@ const gxgamesMetaCommand = buildCommand({
   loader: async () => import("./meta-impl"),
   parameters: {
     positional: { kind: "tuple", parameters: [] },
+    flags: {
+      title: {
+        kind: "parsed",
+        parse: String,
+        brief: "Game title",
+        optional: true,
+      },
+      agerating: {
+        kind: "parsed",
+        parse: String,
+        brief:
+          "Age rating: NOT_SET, EVERYONE, CHILDREN, EARLY_TEENS, TEENS, ADULTS, MATURE",
+        optional: true,
+      },
+      description: {
+        kind: "parsed",
+        parse: String,
+        brief: "Short description shown on the game page",
+        optional: true,
+      },
+      platforms: {
+        kind: "parsed",
+        parse: String,
+        brief: "Comma-separated platforms: DESKTOP,MOBILE",
+        optional: true,
+      },
+      cover: {
+        kind: "parsed",
+        parse: String,
+        brief: "Path to a 16:9 cover image (PNG or JPG)",
+        optional: true,
+      },
+      graphic: {
+        kind: "parsed",
+        parse: String,
+        brief: "Path to a screenshot or graphic to upload (PNG or JPG)",
+        optional: true,
+      },
+    },
   },
   docs: {
-    brief: "Update GX.Games metadata",
+    brief: "Set or update game metadata required for publishing",
+    fullDescription:
+      "Set or update metadata for your GX.Games game. " +
+      "Run without flags for an interactive prompt, or pass flags to set specific fields. " +
+      "All flags are optional — omit any flag to be prompted for it interactively.",
   },
 });
 
@@ -75,7 +129,11 @@ const gxgamesPublishCommand = buildCommand({
     positional: { kind: "tuple", parameters: [] },
   },
   docs: {
-    brief: "Publish to GX.Games",
+    brief: "Make the game public on GX.Games",
+    fullDescription:
+      "Publishes the game by promoting the internal release to public. " +
+      "Requires a bundle (upload), cover image, screenshot, description, age rating, and platforms to be set. " +
+      "Opens the published game page in the browser on success.",
   },
 });
 
