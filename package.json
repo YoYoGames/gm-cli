@@ -8,7 +8,7 @@
     "url": "https://github.com/YoYoGames/gm-cli"
   },
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "files": [
     "dist",
     "NOTICE"
