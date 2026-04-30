@@ -15,13 +15,29 @@
  */
 
 import type { Context } from "~/context";
+import * as p from "@clack/prompts";
 import { KnownError } from "~/error";
 import { readLink } from "./link";
+import { createAuthManager } from "./auth";
+import { getApiClient } from "./client";
+import { unwrapResponse } from "./api/helpers";
 
 export default async function (
   this: Context,
   _flags: Record<never, never>,
 ): Promise<void> {
-  throw new KnownError("Not implemented yet.");
-  await readLink(this);
+  const link = await readLink(this);
+  const api = getApiClient(this, createAuthManager(this));
+
+  const publishLog = this.makeTaskLogger("Publishing game");
+  const res = await unwrapResponse(api.publishGame(link.gameId));
+
+  if (!res.success) {
+    publishLog.error("Publish failed");
+    throw new KnownError(res.errors);
+  }
+
+  publishLog.success("Game published!");
+  p.log.info(`Opening game page...`);
+  await this.open(`https://gx.games/games/${link.gameId}`);
 }

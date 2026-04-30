@@ -24,7 +24,7 @@ import { readLink } from "./link";
 
 export default async function (
   this: Context,
-  _flags: Record<never, never>,
+  flags: { version?: string },
   file: string,
 ): Promise<void> {
   const link = await readLink(this);
@@ -46,13 +46,19 @@ export default async function (
     (g) => g.gameId === link.gameId,
   )?.version;
 
-  const version = await p.text({
-    message: "Version",
-    placeholder: "0.0.1.0",
-    defaultValue: previousVersion,
-  });
-  if (p.isCancel(version)) {
-    return process.exit(0);
+  let version: string;
+  if (flags.version != null) {
+    version = flags.version;
+  } else {
+    const v = await p.text({
+      message: "Version",
+      placeholder: "0.0.1.0",
+      defaultValue: previousVersion,
+    });
+    if (p.isCancel(v)) {
+      return process.exit(0);
+    }
+    version = v;
   }
 
   const uploadLog = this.makeTaskLogger("Uploading bundle");
