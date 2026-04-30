@@ -18,15 +18,13 @@ import { KnownError } from "~/error";
 import crypto from "node:crypto";
 import type { Context } from "~/context";
 import { readAuth, writeAuth } from "./link";
-
-const CLIENT_ID = "gxe-gamemaker-cli";
-const REDIRECT_PORT = 53784;
-const REDIRECT_URI = "http://localhost:53784/";
-const AUTH_BASE = "https://oauth2.opera-api.com/oauth2/v1";
-const SCOPE = [
-  "https://api.gx.games/gamedev:write",
-  "https://api.gx.games/gamedev:read",
-].join("+");
+import {
+  AUTH_BASE,
+  CLIENT_ID,
+  REDIRECT_PORT,
+  REDIRECT_URI,
+  SCOPE,
+} from "./config";
 
 function waitForAuthCode(ctx: Context): Promise<string> {
   return new Promise((resolve, reject) => {

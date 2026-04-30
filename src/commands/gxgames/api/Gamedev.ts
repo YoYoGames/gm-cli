@@ -24,7 +24,7 @@ import {
   GameDevUpdateGameRequest,
   GameDevUserResponse,
   GetGameDetailsCodeEnum,
-  GetProfileEnum,
+  GetProfileCodeEnum,
   GetUserGamesCodeEnum,
   GetUserStudiosCodeEnum,
   PublishGameCodeEnum,
@@ -171,7 +171,12 @@ export class Gamedev<
         data: GameDevUserResponse;
         errors: null;
       },
-      GetProfileEnum
+      {
+        data: null;
+        errors: {
+          code: GetProfileCodeEnum;
+        }[];
+      }
     >({
       path: `/gamedev/profile`,
       method: "GET",

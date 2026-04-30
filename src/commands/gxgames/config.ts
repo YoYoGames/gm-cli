@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import type { Context } from "~/context";
-import { Gamedev } from "./api/Gamedev";
-import type { AuthManager } from "./auth";
-import { GG_API } from "./config";
+export const CLIENT_ID = "gxe-gamemaker-cli";
+export const REDIRECT_PORT = 53784;
+// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+export const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/`;
+export const AUTH_BASE = "https://oauth2.opera-api.com";
+export const SCOPE = [
+  "https://api.gx.games/gamedev:write",
+  "https://api.gx.games/gamedev:read",
+].join("+");
 
-export const getApiClient = (ctx: Context, auth: AuthManager) =>
-  new Gamedev({
-    customFetch: ctx.fetch,
-    baseUrl: GG_API,
-    securityWorker: async () => ({
-      headers: { Authorization: `Bearer ${await auth.getAccessToken()}` },
-    }),
-  });
+export const GG_API = "https://api.gx.games";
