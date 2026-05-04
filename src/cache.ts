@@ -172,11 +172,11 @@ export class Cache {
   async getSubDirPath(
     ctx: CacheCtx,
     name: string,
-    { allowedToBeShared }: { allowedToBeShared: boolean } = {
-      allowedToBeShared: false,
+    { preferShared }: { preferShared: boolean } = {
+      preferShared: false,
     },
   ): Promise<string> {
-    if (allowedToBeShared && !this._localOnly) {
+    if (preferShared && !this._localOnly) {
       return this.getSubDirPathShared(ctx, name);
     }
     return this.getSubDirPathLocal(ctx, name);

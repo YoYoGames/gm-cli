@@ -50,7 +50,7 @@ export async function getLatestVersion(): Promise<string | undefined> {
   }
   const cache = new Cache(ctx, { type: "shared-only" });
   const dir = await cache.getSubDirPath(ctx, "version-check", {
-    allowedToBeShared: true,
+    preferShared: true,
   });
   const checkFile = nodePath.join(dir, "check.json");
 
