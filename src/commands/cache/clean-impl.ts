@@ -38,8 +38,8 @@ export default async function (
 ): Promise<void> {
   validateFlags(flags);
   const cache = await setupCache(this, flags);
-  const localPath = await cache.getLocalPathStrict(this);
-  const sharedPath = await cache.getSharedPathStrict(this);
+  const localPath = await cache._getInternalLocalPath(this);
+  const sharedPath = await cache._getInternalSharedPath(this);
   await cleanPath(this, "Shared cache", sharedPath);
   await cleanPath(this, "Local cache", localPath);
 }

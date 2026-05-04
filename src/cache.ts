@@ -142,7 +142,9 @@ export class Cache {
   }
 
   /** Initializes and returns the local path, or undefined if local access is not allowed for this cache type. */
-  public async getLocalPathStrict(ctx: CacheCtx): Promise<string | undefined> {
+  public async _getInternalLocalPath(
+    ctx: CacheCtx,
+  ): Promise<string | undefined> {
     if (!(await this.initLocal(ctx))) {
       // Not allowed to use shared cache
       return undefined;
@@ -154,7 +156,9 @@ export class Cache {
   }
 
   /** Initializes and returns the shared path, or undefined if shared access is not allowed for this cache. */
-  public async getSharedPathStrict(ctx: CacheCtx): Promise<string | undefined> {
+  public async _getInternalSharedPath(
+    ctx: CacheCtx,
+  ): Promise<string | undefined> {
     if (!(await this.initShared(ctx))) {
       // Not allowed to use shared cache
       return undefined;

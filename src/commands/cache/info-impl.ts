@@ -31,8 +31,8 @@ export default async function (
 ): Promise<void> {
   validateFlags(flags);
   const cache = await setupCache(this, flags);
-  const localPath = await cache.getLocalPathStrict(this);
-  const sharedPath = await cache.getSharedPathStrict(this);
+  const localPath = await cache._getInternalLocalPath(this);
+  const sharedPath = await cache._getInternalSharedPath(this);
   this.process.stdout.write(chalk.bold("Shared cache\n"));
   this.process.stdout.write(
     `${sharedPath ?? "Not used when explicit --cache-dir is set"}\n`,
