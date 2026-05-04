@@ -161,7 +161,7 @@ export async function installRuntimeIfNeeded(
   },
 ): Promise<string> {
   const runtimeDir = await cache.getSubDirPath(ctx, "runtimes-gms2", {
-    allowedToBeShared: ctx.env.GAMEMAKER_CLI_UNSTABLE_FEATURES === true,
+    preferShared: ctx.env.GAMEMAKER_CLI_UNSTABLE_FEATURES === true,
   });
   let runtimeLocation = await findRuntimeLocation(ctx, runtimeDir, version);
 
