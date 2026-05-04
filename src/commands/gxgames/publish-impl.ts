@@ -34,6 +34,13 @@ export default async function (
 
   if (!res.success) {
     publishLog.error("Publish failed");
+    if (res.errors.some((e) => e.code === "sign_up_not_completed")) {
+      throw new KnownError(
+        new Error(
+          "Finish onboarding at https://dev.gx.games/ before publishing.",
+        ),
+      );
+    }
     throw new KnownError(res.errors);
   }
 
