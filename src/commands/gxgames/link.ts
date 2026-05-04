@@ -52,7 +52,7 @@ async function writeStore(ctx: Context, store: GxGamesStore): Promise<void> {
     type: "infer",
     projectDir: ctx.process.cwd(),
   });
-  const cacheDir = await cache.getLocalPathStrict(ctx);
+  const cacheDir = await cache._getInternalLocalPath(ctx);
   if (!cacheDir) {
     throw new KnownError("Failed to initialize cache directory.");
   }
