@@ -48,7 +48,7 @@ async function readStore(ctx: Context): Promise<GxGamesStore> {
 }
 
 async function writeStore(ctx: Context, store: GxGamesStore): Promise<void> {
-  const cache = new Cache(ctx, {
+  const cache = await Cache.initLazy(ctx, {
     type: "infer",
     projectDir: ctx.process.cwd(),
   });

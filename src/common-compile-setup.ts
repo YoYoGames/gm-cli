@@ -174,7 +174,7 @@ export async function commonCompileSetup(
     );
   }
 
-  const cache = new Cache(
+  const cache = await Cache.initLazy(
     ctx,
     flags.cacheDir
       ? { type: "absolute", path: flags.cacheDir }

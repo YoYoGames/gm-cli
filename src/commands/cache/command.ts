@@ -92,7 +92,7 @@ export async function setupCache(
     }
   }
 
-  return new Cache(ctx, cacheType);
+  return Cache.initLazy(ctx, cacheType);
 }
 
 export function validateFlags(flags: CacheFlags): void {

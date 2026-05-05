@@ -27,7 +27,7 @@ export function parseProjectPath(s: string): ProjectPath {
 }
 
 export async function findProjectFile(
-  ctx: Context,
+  ctx: Pick<Context, "path" | "fs">,
   dir: string,
 ): Promise<undefined | ProjectPath> {
   const files = await ctx.fs.readdir(dir);

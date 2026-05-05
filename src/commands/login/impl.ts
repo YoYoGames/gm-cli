@@ -34,9 +34,10 @@ export default async function (
     ? { type: "absolute", path: flags.cacheDir }
     : projectPath
       ? { type: "infer", projectDir: this.path.dirname(projectPath) }
-      : { type: "temporary" };
+      : // It's fine not to use the cache in a project dir, if so we just use a temporary one
+        { type: "temporary" };
 
-  const cache = new Cache(this, cacheType);
+  const cache = await Cache.initLazy(this, cacheType);
 
   if (cacheType.type === "temporary" && !flags.print) {
     throw new KnownError(

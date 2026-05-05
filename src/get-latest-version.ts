@@ -48,7 +48,7 @@ export async function getLatestVersion(): Promise<string | undefined> {
     // so let's skip the version check altogether
     return;
   }
-  const cache = new Cache(ctx, { type: "shared-only" });
+  const cache = await Cache.initLazy(ctx, { type: "shared-only" });
   const dir = await cache.getSubDirPath(ctx, "version-check", {
     preferShared: true,
   });

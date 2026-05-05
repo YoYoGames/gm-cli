@@ -47,7 +47,7 @@ export async function run(
     );
   }
 
-  const cache = new Cache(
+  const cache = await Cache.initLazy(
     ctx,
     flags.cacheDir
       ? { type: "absolute", path: flags.cacheDir }
