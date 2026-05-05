@@ -1,7 +1,7 @@
 # GameMaker CLI
 **The GameMaker command-line interface `gm-cli` is a helpful tool to edit, compile, package, and run your GameMaker projects.**
 
-![Recording of the gm-cli init command](https://raw.githubusercontent.com/YoYoGames/gm-cli/refs/heads/main/recordings/init.gif)
+![Recording of the gm-cli run command](https://raw.githubusercontent.com/YoYoGames/gm-cli/refs/heads/main/recordings/run.gif)
 
 # Usage
 > IMPORTANT: You must first install [nodeJS](https://nodejs.org/en) which comes with the tools `npm` and `npx`. 
