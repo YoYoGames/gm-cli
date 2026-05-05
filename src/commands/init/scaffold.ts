@@ -52,7 +52,9 @@ export async function scaffoldProject(
   const projectToolPath = await downloadProjectTool(ctx, cache, noopLog, {
     verbose: false,
   });
-  const gmpmPath = await downloadGmpm(ctx, cache, noopLog, { verbose: false });
+  const { gmpmDllPath } = await downloadGmpm(ctx, cache, noopLog, {
+    verbose: false,
+  });
   const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
     verbose: false,
   });
@@ -61,7 +63,7 @@ export async function scaffoldProject(
     projectToolPath,
     projectPath: extractedYyp,
     packageToolPath,
-    gmpmPath,
+    gmpmDllPath,
     verbose: true,
   });
 

@@ -28,14 +28,14 @@ export async function restorePrefabs(
     projectToolPath,
     projectPath,
     packageToolPath,
-    gmpmPath,
+    gmpmDllPath,
     verbose,
   }: {
     projectToolPath: string;
     projectPath: ProjectPath;
     packageToolPath: string;
     verbose: boolean;
-    gmpmPath: string;
+    gmpmDllPath: string;
   },
 ): Promise<string> {
   const prefabsDir = await cache.getSubDirPath(ctx, "prefabs");
@@ -46,7 +46,7 @@ export async function restorePrefabs(
       "RESTORE",
       `SOURCE=${projectPath}`,
       `PACKAGETOOL=${packageToolPath}`,
-      `GMPM_DLL=${gmpmPath}`,
+      `GMPM_DLL=${gmpmDllPath}`,
       `PACKAGETOOLVERBOSE=${verbose ? "TRUE" : "FALSE"}`,
       `PREFABSFOLDER=${prefabsDir}`,
     ];

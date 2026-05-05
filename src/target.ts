@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Context } from "~/context";
 import { z } from "zod";
 
 // From Zeus/Igor/Modules.cs and Zeus/Igor/Targets.cs in GameMaker repo
@@ -46,6 +45,22 @@ export const TargetSchema = z
 
 export type Target = z.infer<typeof TargetSchema>;
 
+/**
+ * Currently, GMRT only includes a subset of the targets that's supported by the GMS2 toolchain
+ */
+const TARGETS_GMRT = [
+  "mac",
+  "windows",
+  "linux",
+  "operagx",
+] as const satisfies readonly Target[];
+
+export type GmrtTarget = (typeof TARGETS_GMRT)[number];
+
+export function supportedInGmrt(target: Target): target is GmrtTarget {
+  return (TARGETS_GMRT as readonly string[]).includes(target);
+}
+
 export function targetForPlatform(platform: NodeJS.Platform): Target {
   switch (platform) {
     case "win32":
@@ -56,46 +71,5 @@ export function targetForPlatform(platform: NodeJS.Platform): Target {
       return "linux";
     default:
       throw new Error(`No default target for platform: ${platform}`);
-  }
-}
-
-/**
- * Modules are more or less just the targets + the base module for your host platform
- */
-const ModuleSchema = z.union([
-  TargetSchema,
-  z.literal("base"),
-  z
-    .string()
-    .regex(/^base-module-.+-.+$/)
-    .transform((s) => s as `base-module-${string}-${string}`),
-]);
-
-export type Module = z.infer<typeof ModuleSchema>;
-
-export async function getInstalledRuntimeModules(
-  ctx: Context,
-  runtimeLocation: string,
-): Promise<Module[]> {
-  const receiptPath = ctx.path.join(runtimeLocation, "receipt.json");
-  const content = await ctx.fs.readFile(receiptPath, "utf-8");
-  const receipt = z.record(z.string(), z.unknown()).parse(JSON.parse(content));
-
-  return Object.keys(receipt)
-    .map((key) => ModuleSchema.safeParse(key))
-    .filter((result) => result.success)
-    .map((result) => result.data);
-}
-
-export function packageExtension(target: Target): string | undefined {
-  switch (target) {
-    case "windows":
-    case "linux":
-    case "mac":
-    case "operagx":
-      return ".zip";
-    default:
-      // FIXME: implement for all platforms
-      return;
   }
 }

@@ -19,17 +19,21 @@ import type { Cache } from "~/cache";
 import { exists, type Context } from "~/context";
 import type { Log } from "~/log";
 import { KnownError } from "~/error";
-import type { Target } from "./target";
-import { getInstalledRuntimeModules } from "./target";
-import { installRuntime, listRuntimes } from "./spawn";
+import type { Target } from "~/target";
+import {
+  installRuntime,
+  listRuntimes,
+  ModuleSchema,
+  type Module,
+} from "~/igor";
 import { z } from "zod";
 import {
   gms2VersionSchema,
   gms2VersionSatisfies,
   gms2VersionCompare,
-  type Gms2Version,
+  type Gms2VersionRange,
   gms2VersionToString,
-  type Gms2VersionComplete,
+  type Gms2Version,
 } from "~/toolchain";
 
 const receiptSchema = z.record(z.string(), z.unknown());
@@ -107,7 +111,9 @@ async function chmodRecursive(ctx: Context, dir: string) {
   }
 }
 
-function parseRuntimeVersionFromDirName(name: string): Gms2Version | undefined {
+function parseRuntimeVersionFromDirName(
+  name: string,
+): Gms2VersionRange | undefined {
   const versionStr = name.replace(/^runtime-/, "");
   const result = gms2VersionSchema.safeParse(versionStr);
   return result.success ? result.data : undefined;
@@ -116,13 +122,14 @@ function parseRuntimeVersionFromDirName(name: string): Gms2Version | undefined {
 async function findRuntimeLocation(
   ctx: Context,
   runtimeDir: string,
-  version?: Gms2Version,
+  version?: Gms2VersionRange,
 ): Promise<string | undefined> {
   const entries = await ctx.fs.readdir(runtimeDir);
   const candidates = entries
     .flatMap((name) => {
       // Ignore directories that we fail to parse
       const dirVersion = parseRuntimeVersionFromDirName(name);
+      // TODO: log warning!
       if (dirVersion === undefined) {
         return [];
       }
@@ -157,7 +164,7 @@ export async function installRuntimeIfNeeded(
     igorPath: string;
     cache: Cache;
     target: Target;
-    version?: Gms2Version;
+    version?: Gms2VersionRange;
   },
 ): Promise<string> {
   const runtimeDir = await cache.getSubDirPath(ctx, "runtimes-gms2", {
@@ -178,7 +185,7 @@ export async function installRuntimeIfNeeded(
   // Looks like we need to actually download the runtime!
 
   // let us start by ensuring the version (if provided) actually exists in Igor's RSS feed
-  let completeVersion: Gms2VersionComplete | undefined;
+  let completeVersion: Gms2Version | undefined;
   if (version) {
     const allVersions = await listRuntimes(ctx, { igorPath });
     const suitableVersions = allVersions
@@ -259,4 +266,18 @@ export async function installRuntimeIfNeeded(
   }
   await installationFixup(ctx, runtimeLocation);
   return runtimeLocation;
+}
+
+export async function getInstalledRuntimeModules(
+  ctx: Context,
+  runtimeLocation: string,
+): Promise<Module[]> {
+  const receiptPath = ctx.path.join(runtimeLocation, "receipt.json");
+  const content = await ctx.fs.readFile(receiptPath, "utf-8");
+  const receipt = z.record(z.string(), z.unknown()).parse(JSON.parse(content));
+
+  return Object.keys(receipt)
+    .map((key) => ModuleSchema.safeParse(key))
+    .filter((result) => result.success)
+    .map((result) => result.data);
 }

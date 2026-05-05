@@ -15,6 +15,7 @@
  */
 
 import { z } from "zod";
+import { Range, SemVer } from "semver";
 
 const toolchainTypeSchema = z
   .string()
@@ -26,7 +27,7 @@ export const gms2VersionSchema = z
   .string()
   .regex(
     /^\d+(\.\d+){0,3}$/,
-    "Expected version in format X.Y.Z.Z (fewer digits allowed too)",
+    "Expected version in format A.B.C.D (fewer digits allowed too)",
   )
   .transform((s) => {
     const parts = s.split(".").map(Number);
@@ -38,16 +39,13 @@ export const gms2VersionSchema = z
     ];
   });
 
-const gmrtVersionSchema = z
+export const gmrtVersionSchema = z
   .string()
   .regex(
-    /^\d+(\.\d+)?$/,
-    "Expected version in format X.Y (allowed to only have one digit too)",
+    /^\d+(\.\d+){0,2}$/,
+    "Expected version in format X.Y.Z (fewer digits allowed too)",
   )
-  .transform((s) => {
-    const parts = s.split(".").map(Number);
-    return [parts[0], parts[1]] as [number, number | undefined];
-  });
+  .transform((s) => new Range(s));
 
 export function parseToolchainVersion(s: string): ToolchainVersion {
   const [rawType, rawVersion] = s.split("@", 2);
@@ -83,8 +81,8 @@ export function parseToolchainVersion(s: string): ToolchainVersion {
  * so a prefix of [2024] matches any 2024.x.x.x version.
  */
 export function gms2VersionSatisfies(
-  version: Gms2Version,
-  prefix: Gms2Version,
+  version: Gms2VersionRange,
+  prefix: Gms2VersionRange,
 ): boolean {
   for (let i = 0; i < 4; i++) {
     const p = prefix[i];
@@ -102,7 +100,10 @@ export function gms2VersionSatisfies(
  * Compare two GMS2 versions for sorting.
  * Returns a positive number if `a` is newer than `b`, negative if older, 0 if equal.
  */
-export function gms2VersionCompare(a: Gms2Version, b: Gms2Version): number {
+export function gms2VersionCompare(
+  a: Gms2VersionRange,
+  b: Gms2VersionRange,
+): number {
   for (let i = 0; i < 4; i++) {
     const diff = (a[i] ?? 0) - (b[i] ?? 0);
     if (diff !== 0) {
@@ -112,24 +113,30 @@ export function gms2VersionCompare(a: Gms2Version, b: Gms2Version): number {
   return 0;
 }
 
-export function gms2VersionToString(version: Gms2Version): string {
+export function gms2VersionToString(version: Gms2VersionRange): string {
   return version.map((v) => v?.toString() ?? "*").join(".");
 }
 
-export type GmrtVersion = z.infer<typeof gmrtVersionSchema>;
+export function gmrtVersionToString(version: GmrtVersionRange): string {
+  return version.raw;
+}
 
-export type Gms2Version = z.infer<typeof gms2VersionSchema>;
+export type GmrtVersionRange = z.infer<typeof gmrtVersionSchema>;
 
-export type Gms2VersionComplete = [number, number, number, number];
+export type GmrtVersion = SemVer;
+
+export type Gms2VersionRange = z.infer<typeof gms2VersionSchema>;
+
+export type Gms2Version = [number, number, number, number];
 
 export type ToolchainType = z.infer<typeof toolchainTypeSchema>;
 
 export type ToolchainVersion =
   | {
       type: "GMS2";
-      version?: Gms2Version;
+      version?: Gms2VersionRange;
     }
   | {
       type: "GMRT";
-      version?: GmrtVersion;
+      version?: GmrtVersionRange;
     };

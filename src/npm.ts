@@ -124,7 +124,16 @@ export async function npmGetLatestVersion(
       registry,
     ]);
     const { stdout } = await execFile(command, args);
-    return stdout.trim() || undefined;
+    const trimmed = stdout.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    // When a version range matches multiple packages, npm prints one line per
+    // match: `@scope/pkg@x.y.z 'x.y.z'`. Extract the last (highest) version.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const lastLine = trimmed.split("\n").at(-1)!;
+    const quoted = /'([^']+)'/.exec(lastLine);
+    return quoted ? quoted[1] : lastLine;
   } catch {
     return undefined;
   }

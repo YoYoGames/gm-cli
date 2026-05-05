@@ -73,8 +73,8 @@ export async function downloadGmpm(
   cache: Cache,
   log: Log,
   { verbose }: { verbose: boolean },
-) {
-  return download(
+): Promise<{ gmpmDllPath: string; gmpmExecutablePath: string }> {
+  const dir = await download(
     ctx,
     "gmpm",
     cache,
@@ -97,21 +97,18 @@ export async function downloadGmpm(
           "bundle",
           "Contents",
           "MacOS",
-          "gmpm.dll",
         );
       }
       if (ctx.process.platform === "win32") {
-        return ctx.path.join(destDir, "node_modules", packageName, "gmpm.dll");
+        return ctx.path.join(destDir, "node_modules", packageName);
       }
-      return ctx.path.join(
-        destDir,
-        "lib",
-        "node_modules",
-        packageName,
-        "gmpm.dll",
-      );
+      return ctx.path.join(destDir, "lib", "node_modules", packageName);
     },
   );
+  return {
+    gmpmDllPath: ctx.path.join(dir, "gmpm.dll"),
+    gmpmExecutablePath: ctx.path.join(dir, "gmpm"),
+  };
 }
 
 export async function downloadPackageTool(
