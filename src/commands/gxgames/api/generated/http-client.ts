@@ -10,6 +10,8 @@
  * ---------------------------------------------------------------
  */
 
+import { ApiErrorCodes } from "./error-codes";
+
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
@@ -263,5 +265,30 @@ export class HttpClient<SecurityDataType = unknown> {
 
       return data;
     });
+  };
+
+  public unwrap = async <
+    TData extends { errors: null; data?: unknown },
+    TError extends { errors: { code: keyof typeof ApiErrorCodes }[] },
+  >(
+    response: Promise<HttpResponse<TData, TError>>,
+  ) => {
+    const r = await response;
+    if (r.error) {
+      return {
+        success: false as const,
+        errors: r.error.errors.map(({ code }) => ({
+          code,
+          description: ApiErrorCodes[code],
+        })) as {
+          code: TError["errors"][number]["code"];
+          description: string;
+        }[],
+      };
+    }
+    return {
+      success: true as const,
+      data: r.data.data as TData["data"],
+    };
   };
 }

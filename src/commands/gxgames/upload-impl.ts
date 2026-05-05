@@ -18,7 +18,6 @@ import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import { getApiClient } from "./client";
 import { createAuthManager } from "./auth";
-import { unwrapResponse } from "./api/helpers";
 import { KnownError } from "~/error";
 import { readLink } from "./link";
 
@@ -31,13 +30,11 @@ export default async function (
 
   const api = getApiClient(this, createAuthManager(this));
 
-  const gamesRes = await unwrapResponse(
-    api.getUserGames({
-      studioId: [link.studioId],
-      pageSize: 999,
-      gameEngine: ["game-maker"],
-    }),
-  );
+  const gamesRes = await api.getUserGames({
+    studioId: [link.studioId],
+    pageSize: 999,
+    gameEngine: ["game-maker"],
+  });
   if (!gamesRes.success) {
     throw new KnownError(gamesRes.errors);
   }
@@ -63,12 +60,10 @@ export default async function (
 
   const uploadLog = this.makeTaskLogger("Uploading bundle");
   const fileBuffer = await this.fs.readFile(file);
-  const res = await unwrapResponse(
-    api.uploadGameBundle(
-      link.gameId,
-      { version },
-      { file: new File([fileBuffer], this.path.basename(file)) },
-    ),
+  const res = await api.uploadGameBundle(
+    link.gameId,
+    { version },
+    { file: new File([fileBuffer], this.path.basename(file)) },
   );
   if (!res.success) {
     throw new KnownError(res.errors);

@@ -20,7 +20,6 @@ import { KnownError } from "~/error";
 import { readLink } from "./link";
 import { createAuthManager } from "./auth";
 import { getApiClient } from "./client";
-import { unwrapResponse } from "./api/helpers";
 
 export default async function (
   this: Context,
@@ -30,7 +29,7 @@ export default async function (
   const api = getApiClient(this, createAuthManager(this));
 
   const publishLog = this.makeTaskLogger("Publishing game");
-  const res = await unwrapResponse(api.publishGame(link.gameId));
+  const res = await api.publishGame(link.gameId);
 
   if (!res.success) {
     publishLog.error("Publish failed");
