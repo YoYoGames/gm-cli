@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import path from "path";
 import { z } from "zod";
 import type { Context } from "~/context";
 import type { Log } from "~/log";
-import { type Module, type Target } from "./target";
-import { getProjectName, type ProjectPath } from "~/project";
-import type { Gms2VersionComplete } from "~/toolchain";
+import type { Gms2Version } from "~/toolchain";
 import { KnownError } from "~/error";
+import type { Module } from "./module";
 
 const RunnerErrorSchema = z.object({
   source: z.literal("Runner"),
@@ -206,10 +204,10 @@ export function fetchLicense(
 export async function listRuntimes(
   ctx: Context,
   { igorPath }: { igorPath: string },
-): Promise<Gms2VersionComplete[]> {
+): Promise<Gms2Version[]> {
   const output = await execIgor(ctx, igorPath, ["Runtime", "List"]);
 
-  const versions: Gms2VersionComplete[] = [];
+  const versions: Gms2Version[] = [];
   for (const match of output.matchAll(
     /Version\s+(\d+)\.(\d+)\.(\d+)\.(\d+)/g,
   )) {
@@ -238,7 +236,7 @@ export function installRuntime(
     igorPath: string;
     runtimeDir: string;
     licenseFile: string;
-    version?: Gms2VersionComplete;
+    version?: Gms2Version;
   },
 ): Promise<void> {
   return spawnIgor(ctx, log, {
@@ -255,55 +253,4 @@ export function installRuntime(
     ],
     label: "Igor Runtime Install",
   });
-}
-
-export interface CommonIgorBuildArgs {
-  igorPath: string;
-  licenseFile: string;
-  prefabsDir: string;
-  runtimeDir: string;
-  target: Target;
-  cacheDir: string;
-  projectPath: ProjectPath;
-  projectToolPath: string;
-  verbose: boolean;
-  runtime: "YYC" | "VM";
-}
-
-export function constructIgorBuildArgs(
-  ctx: Context,
-  commonArgs: CommonIgorBuildArgs,
-  action: string,
-  extraArgs: string[] = [],
-): string[] {
-  // Seems like -of argument is ignored on Windows
-  const outputFileName =
-    ctx.process.platform === "win32"
-      ? `${getProjectName(ctx, commonArgs.projectPath)}.win`
-      : "outputFile";
-  const outputFile = path.join(commonArgs.cacheDir, "output", outputFileName);
-  return [
-    "-rp",
-    commonArgs.runtimeDir,
-    "-cache",
-    commonArgs.cacheDir,
-    "-project",
-    commonArgs.projectPath,
-    "-runtime",
-    commonArgs.runtime,
-    "-of",
-    outputFile,
-    "-lf",
-    commonArgs.licenseFile,
-    "-prefabs",
-    commonArgs.prefabsDir,
-    ...(commonArgs.verbose ? ["-v"] : []),
-    "-projectool",
-    commonArgs.projectToolPath,
-    "-jsonErrors",
-    ...extraArgs,
-    "--",
-    commonArgs.target,
-    action,
-  ];
 }

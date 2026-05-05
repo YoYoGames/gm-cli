@@ -15,7 +15,7 @@
  */
 
 import { buildCommand } from "@stricli/core";
-import { TARGETS, TargetSchema } from "~/igor";
+import { TARGETS, TargetSchema } from "~/target";
 import { parseProjectPath } from "~/project";
 import { parseToolchainVersion } from "~/toolchain";
 

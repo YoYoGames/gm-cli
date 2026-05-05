@@ -60,7 +60,7 @@ export async function run(
   });
 
   if (projectPath !== undefined) {
-    const gmpmPath = await downloadGmpm(ctx, cache, noopLog, {
+    const { gmpmDllPath } = await downloadGmpm(ctx, cache, noopLog, {
       verbose: false,
     });
     const packageToolPath = await downloadPackageTool(ctx, cache, noopLog, {
@@ -71,7 +71,7 @@ export async function run(
       projectToolPath,
       projectPath,
       packageToolPath,
-      gmpmPath,
+      gmpmDllPath: gmpmDllPath,
       verbose: false,
     });
   }
