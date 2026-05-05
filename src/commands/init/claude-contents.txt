@@ -11,7 +11,7 @@ Make changes to `.gml` files using your built-in tools, if you so wish.
 ## GML Naming conventions
 
 - Use `snake_case` for all variables and functions
-- Prefix arguments with `_` (e.g., `_speed`, `_message`)
+- Prefix local variables with `_` (e.g., `var _temp_value`, `var _effect`)
 - Prefix resource names based on their type, e.g. obj_player, spr_player, etc.
 
 ## GML reserved names
