@@ -14,5 +14,9 @@ export default defineConfig({
     options.alias = {
       "~": "./src",
     };
+    options.loader = {
+      ...options.loader,
+      ".html": "text",
+    };
   },
 });

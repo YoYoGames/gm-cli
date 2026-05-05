@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import type { Context } from "~/context";
-import { Gamedev } from "./api/generated/Gamedev";
-import type { AuthManager } from "./auth";
-import { GG_API } from "./config";
-
-export const getApiClient = (ctx: Context, auth: AuthManager) =>
-  new Gamedev({
-    customFetch: ctx.fetch,
-    baseUrl: GG_API,
-    securityWorker: async () => ({
-      headers: { Authorization: `Bearer ${await auth.getAccessToken()}` },
-    }),
-  });
+declare module "*.html" {
+  const content: string;
+  export default content;
+}

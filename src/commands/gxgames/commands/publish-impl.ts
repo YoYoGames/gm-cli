@@ -17,17 +17,16 @@
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import { KnownError } from "~/error";
-import { Cache } from "~/cache";
-import { readLink } from "../link";
+
+import { LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
-import { getApiClient } from "../client";
+import { getApiClient } from "../api";
 
 export default async function (
   this: Context,
   _flags: Record<never, never>,
 ): Promise<void> {
-  const cache = await Cache.initLazy(this, { type: "infer" });
-  const link = await readLink(this, cache);
+  const link = await new LinkStorage(this).read();
   const api = getApiClient(this, createAuthManager(this));
 
   const publishLog = this.makeTaskLogger("Publishing game");

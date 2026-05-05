@@ -17,10 +17,10 @@
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import { KnownError } from "~/error";
-import { Cache } from "~/cache";
-import { readLink } from "../link";
+
+import { LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
-import { getApiClient } from "../client";
+import { getApiClient } from "../api";
 import type {
   GameDevUpdateGameRequestAgeRatingEnum,
   GameDevUpdateGameRequestPlatformsEnum,
@@ -57,8 +57,7 @@ interface MetaFlags {
 }
 
 export default async function (this: Context, flags: MetaFlags): Promise<void> {
-  const cache = await Cache.initLazy(this, { type: "infer" });
-  const link = await readLink(this, cache);
+  const link = await new LinkStorage(this).read();
   const api = getApiClient(this, createAuthManager(this));
 
   const gameRes = await api.getGameDetails(link.gameId);

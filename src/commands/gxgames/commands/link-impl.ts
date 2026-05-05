@@ -17,10 +17,10 @@
 import * as p from "@clack/prompts";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import { Cache } from "~/cache";
+
 import { createAuthManager } from "../auth";
-import { getApiClient } from "../client";
-import { writeLink } from "../link";
+import { getApiClient } from "../api";
+import { LinkStorage } from "../api";
 
 export default async function (
   this: Context,
@@ -97,7 +97,6 @@ export default async function (
     }
   }
 
-  const cache = await Cache.initLazy(this, { type: "infer" });
-  await writeLink(this, { studioId, gameId }, cache);
+  await new LinkStorage(this).write({ studioId, gameId });
   p.log.success(`Linked to studio ${studioId}, game ${gameId}`);
 }
