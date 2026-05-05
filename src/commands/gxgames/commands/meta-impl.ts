@@ -17,14 +17,14 @@
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import { KnownError } from "~/error";
-import { readLink } from "./link";
-import { createAuthManager } from "./auth";
-import { getApiClient } from "./client";
 import { Cache } from "~/cache";
+import { readLink } from "../link";
+import { createAuthManager } from "../auth";
+import { getApiClient } from "../client";
 import type {
   GameDevUpdateGameRequestAgeRatingEnum,
   GameDevUpdateGameRequestPlatformsEnum,
-} from "./api/generated/data-contracts";
+} from "../api/generated/data-contracts";
 
 const AGE_RATING_OPTIONS: {
   value: GameDevUpdateGameRequestAgeRatingEnum;

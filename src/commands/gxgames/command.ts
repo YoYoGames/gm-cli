@@ -17,7 +17,7 @@
 import { buildCommand, buildRouteMap } from "@stricli/core";
 
 const gxgamesLinkCommand = buildCommand({
-  loader: async () => import("./link-impl"),
+  loader: async () => import("./commands/link-impl"),
   parameters: {
     positional: { kind: "tuple", parameters: [] },
     flags: {
@@ -41,7 +41,7 @@ const gxgamesLinkCommand = buildCommand({
 });
 
 const gxgamesUploadCommand = buildCommand({
-  loader: async () => import("./upload-impl"),
+  loader: async () => import("./commands/upload-impl"),
   parameters: {
     positional: {
       kind: "tuple",
@@ -71,7 +71,7 @@ const gxgamesUploadCommand = buildCommand({
 });
 
 const gxgamesMetaCommand = buildCommand({
-  loader: async () => import("./meta-impl"),
+  loader: async () => import("./commands/meta-impl"),
   parameters: {
     positional: { kind: "tuple", parameters: [] },
     flags: {
@@ -124,7 +124,7 @@ const gxgamesMetaCommand = buildCommand({
 });
 
 const gxgamesPublishCommand = buildCommand({
-  loader: async () => import("./publish-impl"),
+  loader: async () => import("./commands/publish-impl"),
   parameters: {
     positional: { kind: "tuple", parameters: [] },
   },
