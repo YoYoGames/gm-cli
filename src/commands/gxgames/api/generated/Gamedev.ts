@@ -50,26 +50,28 @@ export class Gamedev<
    * @secure
    */
   createGame = (data: GameDevCreateGameRequest, params: RequestParams = {}) =>
-    this.request<
-      {
-        data: GameDevGameResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: CreateGameCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games`,
-      method: "POST",
-      body: data,
-      secure: true,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevGameResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: CreateGameCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -80,23 +82,25 @@ export class Gamedev<
    * @secure
    */
   deleteCover = (gameId: string, coverId: string, params: RequestParams = {}) =>
-    this.request<
-      {
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: DeleteCoverCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}/covers/${coverId}`,
-      method: "DELETE",
-      secure: true,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: DeleteCoverCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}/covers/${coverId}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -111,23 +115,25 @@ export class Gamedev<
     graphicId: string,
     params: RequestParams = {},
   ) =>
-    this.request<
-      {
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: DeleteGraphicCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}/graphics/${graphicId}`,
-      method: "DELETE",
-      secure: true,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: DeleteGraphicCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}/graphics/${graphicId}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -138,24 +144,26 @@ export class Gamedev<
    * @secure
    */
   getGameDetails = (gameId: string, params: RequestParams = {}) =>
-    this.request<
-      {
-        data: GameDevGameDetailsResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: GetGameDetailsCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}`,
-      method: "GET",
-      secure: true,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevGameDetailsResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: GetGameDetailsCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -166,24 +174,26 @@ export class Gamedev<
    * @secure
    */
   getProfile = (params: RequestParams = {}) =>
-    this.request<
-      {
-        data: GameDevUserResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: GetProfileCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/profile`,
-      method: "GET",
-      secure: true,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevUserResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: GetProfileCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/profile`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -224,25 +234,27 @@ export class Gamedev<
     },
     params: RequestParams = {},
   ) =>
-    this.request<
-      {
-        data: GameDevGamesResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: GetUserGamesCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games`,
-      method: "GET",
-      query: query,
-      secure: true,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevGamesResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: GetUserGamesCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -271,25 +283,27 @@ export class Gamedev<
     },
     params: RequestParams = {},
   ) =>
-    this.request<
-      {
-        data: GameDevStudiosResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: GetUserStudiosCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/studios`,
-      method: "GET",
-      query: query,
-      secure: true,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevStudiosResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: GetUserStudiosCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/studios`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -300,23 +314,25 @@ export class Gamedev<
    * @secure
    */
   publishGame = (gameId: string, params: RequestParams = {}) =>
-    this.request<
-      {
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: PublishGameCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}/publish`,
-      method: "POST",
-      secure: true,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: PublishGameCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}/publish`,
+        method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -331,26 +347,28 @@ export class Gamedev<
     data: GameDevUpdateGameRequest,
     params: RequestParams = {},
   ) =>
-    this.request<
-      {
-        data: GameDevGameDetailsResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: UpdateGameCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}`,
-      method: "PATCH",
-      body: data,
-      secure: true,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevGameDetailsResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: UpdateGameCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -383,27 +401,29 @@ export class Gamedev<
     },
     params: RequestParams = {},
   ) =>
-    this.request<
-      {
-        data: GameDevCoverResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: UploadCoverCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}/covers`,
-      method: "POST",
-      query: query,
-      body: data,
-      secure: true,
-      type: ContentType.FormData,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevCoverResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: UploadCoverCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}/covers`,
+        method: "POST",
+        query: query,
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -428,27 +448,29 @@ export class Gamedev<
     },
     params: RequestParams = {},
   ) =>
-    this.request<
-      {
-        data: GameDevGameResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: UploadGameBundleCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}/bundles`,
-      method: "POST",
-      query: query,
-      body: data,
-      secure: true,
-      type: ContentType.FormData,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevGameResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: UploadGameBundleCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}/bundles`,
+        method: "POST",
+        query: query,
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+    );
   /**
    * No description
    *
@@ -468,24 +490,26 @@ export class Gamedev<
     },
     params: RequestParams = {},
   ) =>
-    this.request<
-      {
-        data: GameDevGraphicResponse;
-        errors: null;
-      },
-      {
-        data: null;
-        errors: {
-          code: UploadGraphicCodeEnum;
-        }[];
-      }
-    >({
-      path: `/gamedev/games/${gameId}/graphics`,
-      method: "POST",
-      body: data,
-      secure: true,
-      type: ContentType.FormData,
-      format: "json",
-      ...params,
-    });
+    this.unwrap(
+      this.request<
+        {
+          data: GameDevGraphicResponse;
+          errors: null;
+        },
+        {
+          data: null;
+          errors: {
+            code: UploadGraphicCodeEnum;
+          }[];
+        }
+      >({
+        path: `/gamedev/games/${gameId}/graphics`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+    );
 }

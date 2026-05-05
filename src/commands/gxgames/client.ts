@@ -15,7 +15,7 @@
  */
 
 import type { Context } from "~/context";
-import { Gamedev } from "./api/Gamedev";
+import { Gamedev } from "./api/generated/Gamedev";
 import type { AuthManager } from "./auth";
 import { GG_API } from "./config";
 
