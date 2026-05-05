@@ -146,10 +146,10 @@ export default async function (
         JSON.stringify(
           {
             permissions: {
-              allow: ["mcp__gamemaker-mcp"],
+              allow: ["mcp__gamemaker-resource-tool"],
               deny: ["Edit(*.yy)", "Edit(*.yyp)"],
             },
-            enabledMcpjsonServers: ["gamemaker-mcp"],
+            enabledMcpjsonServers: ["gamemaker-resource-tool"],
             enableAllProjectMcpServers: true,
           },
           null,
@@ -162,7 +162,7 @@ export default async function (
         JSON.stringify(
           {
             mcpServers: {
-              "gamemaker-mcp": {
+              "gamemaker-resource-tool": {
                 type: "stdio",
                 ...(isWin
                   ? {
