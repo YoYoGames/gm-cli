@@ -1,8 +1,8 @@
 # Editing GameMaker project files
 
-Do not make changes to `.yy` or `.yyp` files yourself. 
+Do not make changes to `.yy` or `.yyp` files yourself.
 It's very hard to correctly edit these manually!
-You MUST use commands exposed by the `resource-tool` MCP server. 
+You MUST use commands exposed by the `gamemaker-resource-tool` MCP server.
 
 # GameMaker Language (GML) Guidance
 
