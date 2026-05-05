@@ -21,6 +21,7 @@ import { readLink } from "./link";
 import { createAuthManager } from "./auth";
 import { getApiClient } from "./client";
 import { unwrapResponse } from "./api/helpers";
+import { Cache } from "~/cache";
 import type {
   GameDevUpdateGameRequestAgeRatingEnum,
   GameDevUpdateGameRequestPlatformsEnum,
@@ -57,7 +58,8 @@ interface MetaFlags {
 }
 
 export default async function (this: Context, flags: MetaFlags): Promise<void> {
-  const link = await readLink(this);
+  const cache = await Cache.initLazy(this, { type: "infer" });
+  const link = await readLink(this, cache);
   const api = getApiClient(this, createAuthManager(this));
 
   const gameRes = await unwrapResponse(api.getGameDetails(link.gameId));

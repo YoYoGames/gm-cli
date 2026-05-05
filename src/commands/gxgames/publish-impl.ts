@@ -21,12 +21,14 @@ import { readLink } from "./link";
 import { createAuthManager } from "./auth";
 import { getApiClient } from "./client";
 import { unwrapResponse } from "./api/helpers";
+import { Cache } from "~/cache";
 
 export default async function (
   this: Context,
   _flags: Record<never, never>,
 ): Promise<void> {
-  const link = await readLink(this);
+  const cache = await Cache.initLazy(this, { type: "infer" });
+  const link = await readLink(this, cache);
   const api = getApiClient(this, createAuthManager(this));
 
   const publishLog = this.makeTaskLogger("Publishing game");
