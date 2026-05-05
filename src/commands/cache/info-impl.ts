@@ -31,6 +31,7 @@ export default async function (
 ): Promise<void> {
   validateFlags(flags);
   const cache = await setupCache(this, flags);
+  // TODO: we may want to use lazy versions of these functions here instead
   const localPath = await cache._getInternalLocalPath(this);
   const sharedPath = await cache._getInternalSharedPath(this);
   this.process.stdout.write(chalk.bold("Shared cache\n"));

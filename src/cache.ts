@@ -21,6 +21,7 @@ import { version } from "../package.json";
 import { z } from "zod";
 import semver from "semver";
 import { KnownError } from "./error";
+import { findProjectFile } from "./project";
 
 /** The subset of the Context object that's used in the cache.
  * Needed because we make use of the cache in app.ts before the context object is constructed
@@ -28,13 +29,20 @@ import { KnownError } from "./error";
 type CacheCtx = Pick<Context, "path" | "fs" | "os" | "process" | "env">;
 
 export type CacheType =
+  /** Use a caller-specified absolute path as the local cache directory. Disables the shared cache. */
   | { type: "absolute"; path: string }
-  | { type: "infer"; projectDir: string }
+  /**
+   * Infer the cache directory from GAMEMAKER_CLI_CACHE_DIR or current working dir.
+   * Shared cache is allowed unless GAMEMAKER_CLI_CACHE_DIR or CI env vars are set. projectDir can be set if
+   * the project is not in the working directory.
+   */
+  | { type: "infer"; projectDir?: string }
+  /** Use a throwaway directory under the OS temp dir. Disables the shared cache. */
   | { type: "temporary" }
+  /** Skip the local cache entirely and use only the shared system-wide cache. */
   | { type: "shared-only" };
 
 export class Cache {
-  private _localOnly: boolean;
   private _sharedPath:
     | {
         type: "not-allowed";
@@ -45,30 +53,45 @@ export class Cache {
       }
     | {
         type: "not-initialized";
+        intendedPath: string;
       };
 
-  // Local .gmcache directory
   private _localPath:
     | {
-        initialized: true;
+        type: "initialized";
         path: string;
       }
     | {
-        initialized: false;
-        cacheType: CacheType;
-      };
+        type: "not-initialized";
+        intendedPath: string;
+      }
+    | { type: "not-allowed" };
 
-  constructor(ctx: CacheCtx, cacheType: CacheType) {
-    this._localPath = { initialized: false, cacheType };
-    // We don't allow using the shared cache if a user has specified an absolute or temporary
-    // path or if inside a CI runner.
-    this._localOnly =
-      cacheType.type === "absolute" ||
-      cacheType.type === "temporary" ||
-      ctx.env.CI === true;
-    this._sharedPath = this._localOnly
-      ? { type: "not-allowed" }
-      : { type: "not-initialized" };
+  static async initLazy(ctx: CacheCtx, cacheType: CacheType): Promise<Cache> {
+    const { path: localPath, allowShared } = await resolveLocalCachePath(
+      ctx,
+      cacheType,
+    );
+    return new Cache(
+      localPath,
+      allowShared ? resolveSharedCachePath(ctx) : undefined,
+    );
+  }
+
+  private constructor(
+    localPath: string | undefined,
+    sharedPath: string | undefined,
+  ) {
+    if (localPath) {
+      this._localPath = { type: "not-initialized", intendedPath: localPath };
+    } else {
+      this._localPath = { type: "not-allowed" };
+    }
+    if (sharedPath) {
+      this._sharedPath = { type: "not-initialized", intendedPath: sharedPath };
+    } else {
+      this._sharedPath = { type: "not-allowed" };
+    }
   }
 
   private async initCachePath(ctx: CacheCtx, cachePath: string): Promise<void> {
@@ -100,30 +123,15 @@ export class Cache {
   }
 
   private async initLocal(ctx: CacheCtx): Promise<boolean> {
-    if (this._localPath.initialized) {
+    if (this._localPath.type === "initialized") {
       return true;
     }
-
-    // Resolve the path based on the cache type
-    const cacheType = this._localPath.cacheType;
-    let cachePath: string;
-    if (cacheType.type === "absolute") {
-      cachePath = cacheType.path;
-    } else if (cacheType.type === "infer" && ctx.env.GAMEMAKER_CLI_CACHE_DIR) {
-      cachePath = ctx.env.GAMEMAKER_CLI_CACHE_DIR;
-    } else if (cacheType.type === "infer") {
-      cachePath = ctx.path.join(cacheType.projectDir, ".gmcache");
-    } else if (cacheType.type === "temporary") {
-      cachePath = ctx.path.join(ctx.os.tmpdir(), "gm-cli-cache");
-    } else if (cacheType.type === "shared-only") {
+    if (this._localPath.type === "not-allowed") {
       return false;
-    } else {
-      cacheType satisfies never;
-      throw new Error("unreachable");
     }
-
-    await this.initCachePath(ctx, cachePath);
-    this._localPath = { initialized: true, path: cachePath };
+    const path = this._localPath.intendedPath;
+    await this.initCachePath(ctx, path);
+    this._localPath = { type: "initialized", path };
     return true;
   }
 
@@ -149,7 +157,7 @@ export class Cache {
       // Not allowed to use shared cache
       return undefined;
     }
-    if (!this._localPath.initialized) {
+    if (this._localPath.type !== "initialized") {
       throw new Error("Unreachable: local cache should be initialized");
     }
     return this._localPath.path;
@@ -176,7 +184,7 @@ export class Cache {
       preferShared: false,
     },
   ): Promise<string> {
-    if (preferShared && !this._localOnly) {
+    if (preferShared && this._sharedPath.type !== "not-allowed") {
       return this.getSubDirPathShared(ctx, name);
     }
     return this.getSubDirPathLocal(ctx, name);
@@ -187,8 +195,12 @@ export class Cache {
     name: string,
   ): Promise<string> {
     // lazily create the cache directory if needed
-    await this.initLocal(ctx);
-    if (!this._localPath.initialized) {
+    if (!(await this.initLocal(ctx))) {
+      throw new Error(
+        "Invariant broken: getSubDirPathLocal should only be called when we know that it's allowed to use a local cache",
+      );
+    }
+    if (this._localPath.type !== "initialized") {
       throw Error("Unreachable: local cache should be initialized.");
     }
 
@@ -201,7 +213,11 @@ export class Cache {
     ctx: CacheCtx,
     name: string,
   ): Promise<string> {
-    await this.initShared(ctx);
+    if (!(await this.initShared(ctx))) {
+      throw new Error(
+        "Invariant broken: getSubDirPathShared should only be called when we know that it's allowed to use a shared cache",
+      );
+    }
     if (this._sharedPath.type !== "initialized") {
       throw Error("Unreachable: shared cache should be initialized.");
     }
@@ -210,6 +226,56 @@ export class Cache {
     await ctx.fs.mkdir(dir, { recursive: true });
     return dir;
   }
+}
+
+/** Resolve the path based on the cache type and decide if we are allowed to
+ * used the shared cache as well.
+ */
+async function resolveLocalCachePath(
+  ctx: CacheCtx,
+  cacheType: CacheType,
+): Promise<{ path?: string; allowShared: boolean }> {
+  const isCi = ctx.env.CI;
+  if (cacheType.type === "absolute") {
+    return { path: cacheType.path, allowShared: false };
+  }
+  if (cacheType.type === "infer" && ctx.env.GAMEMAKER_CLI_CACHE_DIR) {
+    return { path: ctx.env.GAMEMAKER_CLI_CACHE_DIR, allowShared: false };
+  }
+  if (cacheType.type === "infer" && cacheType.projectDir !== undefined) {
+    return {
+      path: ctx.path.join(cacheType.projectDir, ".gmcache"),
+      allowShared: !isCi,
+    };
+  }
+  // Try using cwd if we can find a .yyp file
+  if (cacheType.type === "infer") {
+    const cwd = ctx.process.cwd();
+    const projectPath = await findProjectFile(ctx, cwd);
+    if (projectPath === undefined) {
+      throw new KnownError(
+        "No .yyp project file found in the current directory",
+      );
+    }
+    return { path: ctx.path.join(cwd, ".gmcache"), allowShared: !isCi };
+  }
+  if (cacheType.type === "temporary") {
+    return {
+      path: ctx.path.join(ctx.os.tmpdir(), "gm-cli-cache"),
+      allowShared: false,
+    };
+  }
+  if (cacheType.type === "shared-only") {
+    if (isCi) {
+      throw new Error(
+        "Invariant broken: Can't use a shared-only cache in CI since it does not allow shared caches",
+      );
+    }
+    return { path: undefined, allowShared: !isCi };
+  }
+
+  cacheType satisfies never;
+  throw new Error("unreachable");
 }
 
 function resolveSharedCachePath(ctx: CacheCtx): string {
