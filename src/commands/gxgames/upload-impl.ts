@@ -21,13 +21,15 @@ import { createAuthManager } from "./auth";
 import { unwrapResponse } from "./api/helpers";
 import { KnownError } from "~/error";
 import { readLink } from "./link";
+import { Cache } from "~/cache";
 
 export default async function (
   this: Context,
   flags: { version?: string },
   file: string,
 ): Promise<void> {
-  const link = await readLink(this);
+  const cache = await Cache.initLazy(this, { type: "infer" });
+  const link = await readLink(this, cache);
 
   const api = getApiClient(this, createAuthManager(this));
 

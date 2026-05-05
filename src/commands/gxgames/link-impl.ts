@@ -21,6 +21,7 @@ import { createAuthManager } from "./auth";
 import { getApiClient } from "./client";
 import { unwrapResponse } from "./api/helpers";
 import { writeLink } from "./link";
+import { Cache } from "~/cache";
 
 export default async function (
   this: Context,
@@ -103,6 +104,7 @@ export default async function (
     }
   }
 
-  await writeLink(this, { studioId, gameId });
+  const cache = await Cache.initLazy(this, { type: "infer" });
+  await writeLink(this, { studioId, gameId }, cache);
   p.log.success(`Linked to studio ${studioId}, game ${gameId}`);
 }

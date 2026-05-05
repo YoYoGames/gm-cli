@@ -18,6 +18,7 @@ import { KnownError } from "~/error";
 import crypto from "node:crypto";
 import type { Context } from "~/context";
 import { readAuth, writeAuth } from "./link";
+import { Cache } from "~/cache";
 import {
   AUTH_BASE,
   CLIENT_ID,
@@ -98,7 +99,8 @@ export function createAuthManager(ctx: Context): AuthManager {
 }
 
 export async function authenticate(ctx: Context): Promise<string> {
-  const cached = await readAuth(ctx);
+  const cache = await Cache.initLazy(ctx, { type: "infer" });
+  const cached = await readAuth(ctx, cache);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.accessToken;
   }
@@ -121,7 +123,7 @@ export async function authenticate(ctx: Context): Promise<string> {
   log.message("Waiting for browser login...");
   const code = await codePromise;
   const { accessToken, expiresAt } = await exchangeCodeForToken(code, state);
-  await writeAuth(ctx, { accessToken, expiresAt });
+  await writeAuth(ctx, { accessToken, expiresAt }, cache);
   log.success("Authenticated");
 
   return accessToken;
