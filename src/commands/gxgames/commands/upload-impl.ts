@@ -16,11 +16,11 @@
 
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
-import { getApiClient } from "./client";
-import { createAuthManager } from "./auth";
+import { getApiClient } from "../client";
+import { createAuthManager } from "../auth";
 import { KnownError } from "~/error";
-import { readLink } from "./link";
 import { Cache } from "~/cache";
+import { readLink } from "../link";
 
 export default async function (
   this: Context,

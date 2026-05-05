@@ -17,10 +17,10 @@
 import * as p from "@clack/prompts";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import { createAuthManager } from "./auth";
-import { getApiClient } from "./client";
-import { writeLink } from "./link";
 import { Cache } from "~/cache";
+import { createAuthManager } from "../auth";
+import { getApiClient } from "../client";
+import { writeLink } from "../link";
 
 export default async function (
   this: Context,
