@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GX.games — Authentication Failed</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #050305;
+        color: #e8e8e8;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      .card {
+        background: #111011;
+        border: 1px solid #222022;
+        border-top: 3px solid #6b7ff7;
+        border-radius: 6px;
+        padding: 40px 48px;
+        max-width: 380px;
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      p {
+        font-size: 0.875rem;
+        color: #888;
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+
+      .error-detail {
+        background: #050305;
+        border: 1px solid #222022;
+        border-radius: 4px;
+        padding: 10px 14px;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 0.8rem;
+        color: #aaa;
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Authentication failed</h1>
+      <p>Something went wrong. You can close this tab and try again.</p>
+      <div class="error-detail">{{ERROR_MESSAGE}}</div>
+    </div>
+  </body>
+</html>

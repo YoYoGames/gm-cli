@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-export const CLIENT_ID = "gxe-gamemaker-cli";
-export const REDIRECT_PORT = 53784;
-// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-export const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/`;
-export const AUTH_BASE = "https://oauth2.opera-api.com";
-export const SCOPE = [
-  "https://api.gx.games/gamedev:write",
-  "https://api.gx.games/gamedev:read",
-].join("+");
-export const CACHE_SUBDIR = "gxgames";
+import type { Context } from "~/context";
+import { Gamedev } from "./generated/Gamedev";
+import { GG_API } from "../config";
 
-export const GG_API = "https://api.gx.games";
+export { LinkStorage, type GxGamesLink } from "./storage";
+
+export function getApiClient(
+  ctx: Context,
+  auth: {
+    getAccessToken(): Promise<string>;
+  },
+) {
+  return new Gamedev({
+    customFetch: ctx.fetch,
+    baseUrl: GG_API,
+    securityWorker: async () => ({
+      headers: { Authorization: `Bearer ${await auth.getAccessToken()}` },
+    }),
+  });
+}
