@@ -20,12 +20,11 @@ import { KnownError } from "~/error";
 import { readLink } from "./link";
 import { createAuthManager } from "./auth";
 import { getApiClient } from "./client";
-import { unwrapResponse } from "./api/helpers";
 import { Cache } from "~/cache";
 import type {
   GameDevUpdateGameRequestAgeRatingEnum,
   GameDevUpdateGameRequestPlatformsEnum,
-} from "./api/data-contracts";
+} from "./api/generated/data-contracts";
 
 const AGE_RATING_OPTIONS: {
   value: GameDevUpdateGameRequestAgeRatingEnum;
@@ -62,7 +61,7 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
   const link = await readLink(this, cache);
   const api = getApiClient(this, createAuthManager(this));
 
-  const gameRes = await unwrapResponse(api.getGameDetails(link.gameId));
+  const gameRes = await api.getGameDetails(link.gameId);
   if (!gameRes.success) {
     throw new KnownError(gameRes.errors);
   }
@@ -135,14 +134,12 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
   }
 
   const updateLog = this.makeTaskLogger("Updating metadata");
-  const updateRes = await unwrapResponse(
-    api.updateGame(link.gameId, {
-      title,
-      shortDescription: description,
-      ageRating,
-      platforms,
-    }),
-  );
+  const updateRes = await api.updateGame(link.gameId, {
+    title,
+    shortDescription: description,
+    ageRating,
+    platforms,
+  });
   if (!updateRes.success) {
     updateLog.error("Failed");
     throw new KnownError(updateRes.errors);
@@ -168,12 +165,10 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
   if (coverPath) {
     const coverLog = this.makeTaskLogger("Uploading cover");
     const fileBuffer = await this.fs.readFile(coverPath);
-    const coverRes = await unwrapResponse(
-      api.uploadCover(
-        link.gameId,
-        { aspectRatio: "16:9", coverType: "IMAGE" },
-        { file: new File([fileBuffer], this.path.basename(coverPath)) },
-      ),
+    const coverRes = await api.uploadCover(
+      link.gameId,
+      { aspectRatio: "16:9", coverType: "IMAGE" },
+      { file: new File([fileBuffer], this.path.basename(coverPath)) },
     );
     if (!coverRes.success) {
       coverLog.error("Failed");
@@ -201,11 +196,9 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
   if (graphicPath) {
     const graphicLog = this.makeTaskLogger("Uploading graphic");
     const fileBuffer = await this.fs.readFile(graphicPath);
-    const graphicRes = await unwrapResponse(
-      api.uploadGraphic(link.gameId, {
-        file: new File([fileBuffer], this.path.basename(graphicPath)),
-      }),
-    );
+    const graphicRes = await api.uploadGraphic(link.gameId, {
+      file: new File([fileBuffer], this.path.basename(graphicPath)),
+    });
     if (!graphicRes.success) {
       graphicLog.error("Failed");
       throw new KnownError(graphicRes.errors);

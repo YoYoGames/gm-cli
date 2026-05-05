@@ -30,7 +30,7 @@
     "fix:eslint": "eslint --fix --max-warnings 0",
     "fix:prettier": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
     "fix": "run-p fix:*",
-    "gen:ggbe-api": "node ./scripts/gen-ggbe-api.ts"
+    "gen:ggbe-api": "node ./src/commands/gxgames/api/gen.ts"
   },
   "devDependencies": {
     "@clack/prompts": "^1.1.0",

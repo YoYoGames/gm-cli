@@ -19,7 +19,6 @@ import type { Context } from "~/context";
 import { KnownError } from "~/error";
 import { createAuthManager } from "./auth";
 import { getApiClient } from "./client";
-import { unwrapResponse } from "./api/helpers";
 import { writeLink } from "./link";
 import { Cache } from "~/cache";
 
@@ -34,9 +33,7 @@ export default async function (
     const api = getApiClient(this, createAuthManager(this));
 
     if (!studioId) {
-      const studiosRes = await unwrapResponse(
-        api.getUserStudios({ pageSize: 999 }),
-      );
+      const studiosRes = await api.getUserStudios({ pageSize: 999 });
       if (!studiosRes.success) {
         throw new KnownError(studiosRes.errors);
       }
@@ -55,13 +52,11 @@ export default async function (
     }
 
     if (!gameId) {
-      const gamesRes = await unwrapResponse(
-        api.getUserGames({
-          studioId: [studioId],
-          pageSize: 999,
-          gameEngine: ["game-maker"],
-        }),
-      );
+      const gamesRes = await api.getUserGames({
+        studioId: [studioId],
+        pageSize: 999,
+        gameEngine: ["game-maker"],
+      });
       if (!gamesRes.success) {
         throw new KnownError(gamesRes.errors);
       }
@@ -86,13 +81,11 @@ export default async function (
           return process.exit(0);
         }
         const createLog = this.makeTaskLogger("Creating game");
-        const res = await unwrapResponse(
-          api.createGame({
-            name: gameName,
-            studioId,
-            gameEngine: "game-maker",
-          }),
-        );
+        const res = await api.createGame({
+          name: gameName,
+          studioId,
+          gameEngine: "game-maker",
+        });
         if (!res.success) {
           throw new KnownError(res.errors);
         }

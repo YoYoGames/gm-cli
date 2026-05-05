@@ -1,3 +1,5 @@
+/* eslint-disable */
+// @ts-nocheck
 import { generateApi } from "swagger-typescript-api";
 import path from "node:path";
 import { writeFile } from "node:fs/promises";
@@ -149,8 +151,8 @@ for (const path of Object.keys(schema.paths)) {
 }
 
 writeFile(
-  path.resolve("./src/commands/gxgames/api", "error-codes.ts"),
-  `export const ApiErrorCodes = {
+  path.resolve("./src/commands/gxgames/api/generated", "error-codes.ts"),
+  `/* eslint-disable */\nexport const ApiErrorCodes = {
 ${Object.entries(errorCodes)
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([key, value]) => `  ${key}: "${value}",\n`)
@@ -160,7 +162,7 @@ ${Object.entries(errorCodes)
 
 await generateApi({
   spec: schema,
-  output: path.resolve("./src/commands/gxgames/api"),
+  output: path.resolve("./src/commands/gxgames/api/generated"),
   fileName: "api.ts",
   httpClientType: "fetch",
   disableThrowOnError: true,
@@ -171,4 +173,5 @@ await generateApi({
   modular: true,
   sortRoutes: true,
   sortTypes: true,
+  templates: path.resolve("./src/commands/gxgames/api/templates"),
 });
