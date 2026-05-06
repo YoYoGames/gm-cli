@@ -118,10 +118,15 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
   };
   const updateRes = await api.updateGame(link.gameId, updateData);
   if (!updateRes.success) {
-    updateLog.error("Failed");
-    throw new KnownError(updateRes.errors);
+    if (updateRes.errors.every((e) => e.code === "no_changes")) {
+      updateLog.success("Metadata unchanged");
+    } else {
+      updateLog.error("Failed");
+      throw new KnownError(updateRes.errors);
+    }
+  } else {
+    updateLog.success("Metadata updated");
   }
-  updateLog.success("Metadata updated");
 
   // --- Cover ---
 
