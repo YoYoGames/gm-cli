@@ -15,37 +15,16 @@
  */
 
 import type { Context } from "~/context";
-import * as p from "@clack/prompts";
 import { KnownError } from "~/error";
 
 import { LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
 import { getApiClient } from "../api";
 import type {
+  GameDevUpdateGameRequest,
   GameDevUpdateGameRequestAgeRatingEnum,
   GameDevUpdateGameRequestPlatformsEnum,
 } from "../api/generated/data-contracts";
-
-const AGE_RATING_OPTIONS: {
-  value: GameDevUpdateGameRequestAgeRatingEnum;
-  label: string;
-}[] = [
-  { value: "NOT_SET", label: "Not set" },
-  { value: "EVERYONE", label: "Everyone" },
-  { value: "CHILDREN", label: "Children" },
-  { value: "EARLY_TEENS", label: "Early teens (10+)" },
-  { value: "TEENS", label: "Teens (13+)" },
-  { value: "ADULTS", label: "Adults (18+)" },
-  { value: "MATURE", label: "Mature (21+)" },
-];
-
-const PLATFORM_OPTIONS: {
-  value: GameDevUpdateGameRequestPlatformsEnum;
-  label: string;
-}[] = [
-  { value: "DESKTOP", label: "Desktop" },
-  { value: "MOBILE", label: "Mobile" },
-];
 
 interface MetaFlags {
   title?: string;
@@ -67,78 +46,28 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
   const game = gameRes.data;
 
   // --- Metadata ---
-
-  let title: string;
-  if (flags.title != null) {
-    title = flags.title;
-  } else {
-    const v = await p.text({ message: "Title", initialValue: game.title });
-    if (p.isCancel(v)) {
-      return process.exit(0);
-    }
-    title = v;
-  }
-
-  let description: string | undefined;
-  if (flags.description != null) {
-    description = flags.description || undefined;
-  } else {
-    const v = await p.text({
-      message: "Short description (leave empty to skip)",
-      initialValue: game.shortDescription ?? "",
-    });
-    if (p.isCancel(v)) {
-      return process.exit(0);
-    }
-    description = v || undefined;
-  }
-
-  let ageRating: GameDevUpdateGameRequestAgeRatingEnum;
-  if (flags.agerating != null) {
-    ageRating =
-      flags.agerating.toUpperCase() as GameDevUpdateGameRequestAgeRatingEnum;
-  } else {
-    const v = await p.select({
-      message: "Age rating",
-      options: AGE_RATING_OPTIONS,
-      initialValue: game.ageRating as
-        | GameDevUpdateGameRequestAgeRatingEnum
-        | undefined,
-    });
-    if (p.isCancel(v)) {
-      return process.exit(0);
-    }
-    ageRating = v;
-  }
-
-  let platforms: GameDevUpdateGameRequestPlatformsEnum[];
-  if (flags.platforms != null) {
-    platforms = flags.platforms
-      .split(",")
-      .map(
-        (s) => s.trim().toUpperCase() as GameDevUpdateGameRequestPlatformsEnum,
-      )
-      .filter(Boolean);
-  } else {
-    const v = await p.multiselect({
-      message: "Platforms",
-      options: PLATFORM_OPTIONS,
-      initialValues: game.platforms as GameDevUpdateGameRequestPlatformsEnum[],
-      required: false,
-    });
-    if (p.isCancel(v)) {
-      return process.exit(0);
-    }
-    platforms = v;
-  }
+  // Per field: flag overrides server value; otherwise keep server value as-is.
 
   const updateLog = this.makeTaskLogger("Updating metadata");
-  const updateRes = await api.updateGame(link.gameId, {
-    title,
-    shortDescription: description,
-    ageRating,
-    platforms,
-  });
+  const updateData: GameDevUpdateGameRequest = {
+    title: flags.title ?? game.title,
+    shortDescription: flags.description ?? game.shortDescription,
+    ageRating:
+      (flags.agerating?.toUpperCase() as
+        | GameDevUpdateGameRequestAgeRatingEnum
+        | undefined) ??
+      (game.ageRating as GameDevUpdateGameRequestAgeRatingEnum),
+    platforms:
+      flags.platforms
+        ?.split(",")
+        .map(
+          (s) =>
+            s.trim().toUpperCase() as GameDevUpdateGameRequestPlatformsEnum,
+        )
+        .filter(Boolean) ??
+      (game.platforms as GameDevUpdateGameRequestPlatformsEnum[]),
+  };
+  const updateRes = await api.updateGame(link.gameId, updateData);
   if (!updateRes.success) {
     updateLog.error("Failed");
     throw new KnownError(updateRes.errors);
@@ -147,27 +76,13 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
 
   // --- Cover ---
 
-  let coverPath: string | undefined;
-  if (flags.cover != null) {
-    coverPath = flags.cover || undefined;
-  } else {
-    const v = await p.text({
-      message: "Cover image path (16:9 PNG/JPG — leave empty to skip)",
-      placeholder: "/path/to/cover.png",
-    });
-    if (p.isCancel(v)) {
-      return process.exit(0);
-    }
-    coverPath = v || undefined;
-  }
-
-  if (coverPath) {
+  if (flags.cover) {
     const coverLog = this.makeTaskLogger("Uploading cover");
-    const fileBuffer = await this.fs.readFile(coverPath);
+    const fileBuffer = await this.fs.readFile(flags.cover);
     const coverRes = await api.uploadCover(
       link.gameId,
       { aspectRatio: "16:9", coverType: "IMAGE" },
-      { file: new File([fileBuffer], this.path.basename(coverPath)) },
+      { file: new File([fileBuffer], this.path.basename(flags.cover)) },
     );
     if (!coverRes.success) {
       coverLog.error("Failed");
@@ -178,25 +93,11 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
 
   // --- Graphic ---
 
-  let graphicPath: string | undefined;
-  if (flags.graphic != null) {
-    graphicPath = flags.graphic || undefined;
-  } else {
-    const v = await p.text({
-      message: "Screenshot/graphic path (PNG/JPG — leave empty to skip)",
-      placeholder: "/path/to/screenshot.png",
-    });
-    if (p.isCancel(v)) {
-      return process.exit(0);
-    }
-    graphicPath = v || undefined;
-  }
-
-  if (graphicPath) {
+  if (flags.graphic) {
     const graphicLog = this.makeTaskLogger("Uploading graphic");
-    const fileBuffer = await this.fs.readFile(graphicPath);
+    const fileBuffer = await this.fs.readFile(flags.graphic);
     const graphicRes = await api.uploadGraphic(link.gameId, {
-      file: new File([fileBuffer], this.path.basename(graphicPath)),
+      file: new File([fileBuffer], this.path.basename(flags.graphic)),
     });
     if (!graphicRes.success) {
       graphicLog.error("Failed");
