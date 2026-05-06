@@ -136,7 +136,8 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
       ? undefined
       : (await prompt(
           p.text({
-            message: "Cover image path (16:9 PNG/JPG — leave empty to skip)",
+            message:
+              "Cover image path (exact 16:9 PNG/JPG, e.g. 1920x1080 — leave empty to skip)",
             placeholder: "/path/to/cover.png",
           }),
         )) || undefined))();
@@ -164,7 +165,8 @@ export default async function (this: Context, flags: MetaFlags): Promise<void> {
       ? undefined
       : (await prompt(
           p.text({
-            message: "Screenshot/graphic path (PNG/JPG — leave empty to skip)",
+            message:
+              "Screenshot/graphic path (exact 16:9 PNG/JPG, e.g. 1920x1080 — leave empty to skip)",
             placeholder: "/path/to/screenshot.png",
           }),
         )) || undefined))();
