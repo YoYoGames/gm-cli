@@ -103,13 +103,15 @@ const gxgamesMetaCommand = buildCommand({
       cover: {
         kind: "parsed",
         parse: String,
-        brief: "Path to a 16:9 cover image (PNG or JPG)",
+        brief:
+          "Path to a 16:9 cover image, exact ratio required (e.g. 1920x1080 PNG/JPG)",
         optional: true,
       },
       graphic: {
         kind: "parsed",
         parse: String,
-        brief: "Path to a screenshot or graphic to upload (PNG or JPG)",
+        brief:
+          "Path to a 16:9 screenshot/graphic, exact ratio required (e.g. 1920x1080 PNG/JPG)",
         optional: true,
       },
     },
