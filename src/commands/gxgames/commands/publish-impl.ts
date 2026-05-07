@@ -15,7 +15,7 @@
  */
 
 import type { Context } from "~/context";
-import * as p from "@clack/prompts";
+import chalk from "chalk";
 import { KnownError } from "~/error";
 import type { ProjectPath } from "~/project";
 
@@ -48,6 +48,8 @@ export default async function (
   }
 
   publishLog.success("Game published!");
-  p.log.info(`Opening game page...`);
-  await this.open(`https://gx.games/games/${link.gameId}`);
+
+  const url = `https://gx.games/games/${link.gameId}`;
+  await this.open(url);
+  this.process.stdout.write(`Opening ${chalk.blue.underline(url)}\n`);
 }
