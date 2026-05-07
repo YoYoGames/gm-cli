@@ -16,6 +16,7 @@
 
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
+import chalk from "chalk";
 import { getApiClient } from "../api";
 import { createAuthManager } from "../auth";
 import { KnownError } from "~/error";
@@ -72,5 +73,8 @@ export default async function (
     throw new KnownError(res.errors);
   }
   uploadLog.success("Bundle uploaded");
-  await this.open(`https://dev.gx.games/games/${link.gameId}/publish-updates`);
+
+  const url = `https://dev.gx.games/games/${link.gameId}/publish-updates`;
+  await this.open(url);
+  this.process.stdout.write(`Opening ${chalk.blue.underline(url)}\n`);
 }

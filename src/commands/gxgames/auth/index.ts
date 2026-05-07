@@ -15,6 +15,7 @@
  */
 
 import { KnownError } from "~/error";
+import chalk from "chalk";
 import crypto from "node:crypto";
 import type { Context } from "~/context";
 import type { TaskLogger } from "~/log";
@@ -130,10 +131,11 @@ class Auth {
       server.listen(this.redirectPort);
     });
 
-    await this.config.open(authUrl.toString());
+    const authUrlStr = authUrl.toString();
+    await this.config.open(authUrlStr);
 
     const log = this.config.makeTaskLogger("Authenticating");
-    log.message("Waiting for browser login...");
+    log.message(`Opening ${chalk.blue.underline(authUrlStr)}`);
 
     const { code, sendPage } = await codePromise;
 
