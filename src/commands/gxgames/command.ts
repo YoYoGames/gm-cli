@@ -15,11 +15,19 @@
  */
 
 import { buildCommand, buildRouteMap } from "@stricli/core";
+import { parseProjectPath } from "~/project";
+
+const projectParam = {
+  brief: "Path to the project .yyp file (defaults to current directory)",
+  placeholder: "project",
+  parse: parseProjectPath,
+  optional: true as const,
+};
 
 const gxgamesLinkCommand = buildCommand({
   loader: async () => import("./commands/link-impl"),
   parameters: {
-    positional: { kind: "tuple", parameters: [] },
+    positional: { kind: "tuple", parameters: [projectParam] },
     flags: {
       studioid: {
         kind: "parsed",
@@ -43,17 +51,13 @@ const gxgamesLinkCommand = buildCommand({
 const gxgamesUploadCommand = buildCommand({
   loader: async () => import("./commands/upload-impl"),
   parameters: {
-    positional: {
-      kind: "tuple",
-      parameters: [
-        {
-          brief: "Path to the zip file to upload",
-          placeholder: "file",
-          parse: String,
-        },
-      ],
-    },
+    positional: { kind: "tuple", parameters: [projectParam] },
     flags: {
+      file: {
+        kind: "parsed",
+        parse: String,
+        brief: "Path to the zip file to upload",
+      },
       version: {
         kind: "parsed",
         parse: String,
@@ -73,7 +77,7 @@ const gxgamesUploadCommand = buildCommand({
 const gxgamesMetaCommand = buildCommand({
   loader: async () => import("./commands/meta-impl"),
   parameters: {
-    positional: { kind: "tuple", parameters: [] },
+    positional: { kind: "tuple", parameters: [projectParam] },
     flags: {
       title: {
         kind: "parsed",
@@ -128,7 +132,7 @@ const gxgamesMetaCommand = buildCommand({
 const gxgamesPublishCommand = buildCommand({
   loader: async () => import("./commands/publish-impl"),
   parameters: {
-    positional: { kind: "tuple", parameters: [] },
+    positional: { kind: "tuple", parameters: [projectParam] },
   },
   docs: {
     brief: "Make the game public on GX.Games",

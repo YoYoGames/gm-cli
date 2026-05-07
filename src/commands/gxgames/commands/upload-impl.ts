@@ -19,15 +19,17 @@ import * as p from "@clack/prompts";
 import { getApiClient } from "../api";
 import { createAuthManager } from "../auth";
 import { KnownError } from "~/error";
+import type { ProjectPath } from "~/project";
 
 import { LinkStorage } from "../api";
 
 export default async function (
   this: Context,
-  flags: { version?: string },
-  file: string,
+  flags: { file: string; version?: string },
+  project?: ProjectPath,
 ): Promise<void> {
-  const link = await new LinkStorage(this).read();
+  const projectDir = project ? this.path.dirname(project) : undefined;
+  const link = await new LinkStorage(this, projectDir).read();
 
   const api = getApiClient(this, createAuthManager(this));
 
@@ -60,11 +62,11 @@ export default async function (
   }
 
   const uploadLog = this.makeTaskLogger("Uploading bundle");
-  const fileBuffer = await this.fs.readFile(file);
+  const fileBuffer = await this.fs.readFile(flags.file);
   const res = await api.uploadGameBundle(
     link.gameId,
     { version },
-    { file: new File([fileBuffer], this.path.basename(file)) },
+    { file: new File([fileBuffer], this.path.basename(flags.file)) },
   );
   if (!res.success) {
     throw new KnownError(res.errors);

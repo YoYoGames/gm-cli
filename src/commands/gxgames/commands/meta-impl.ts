@@ -16,6 +16,7 @@
 
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
+import type { ProjectPath } from "~/project";
 
 import { LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
@@ -35,8 +36,13 @@ interface MetaFlags {
   graphic?: string;
 }
 
-export default async function (this: Context, flags: MetaFlags): Promise<void> {
-  const link = await new LinkStorage(this).read();
+export default async function (
+  this: Context,
+  flags: MetaFlags,
+  project?: ProjectPath,
+): Promise<void> {
+  const projectDir = project ? this.path.dirname(project) : undefined;
+  const link = await new LinkStorage(this, projectDir).read();
   const api = getApiClient(this, createAuthManager(this));
 
   const gameRes = await api.getGameDetails(link.gameId);
