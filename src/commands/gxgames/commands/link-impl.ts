@@ -17,6 +17,7 @@
 import * as p from "@clack/prompts";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
+import type { ProjectPath } from "~/project";
 
 import { createAuthManager } from "../auth";
 import { getApiClient } from "../api";
@@ -25,6 +26,7 @@ import { LinkStorage } from "../api";
 export default async function (
   this: Context,
   flags: { studioid?: string; gameid?: string },
+  project?: ProjectPath,
 ): Promise<void> {
   let studioId = flags.studioid;
   let gameId = flags.gameid;
@@ -97,6 +99,7 @@ export default async function (
     }
   }
 
-  await new LinkStorage(this).write({ studioId, gameId });
+  const projectDir = project ? this.path.dirname(project) : undefined;
+  await new LinkStorage(this, projectDir).write({ studioId, gameId });
   p.log.success(`Linked to studio ${studioId}, game ${gameId}`);
 }

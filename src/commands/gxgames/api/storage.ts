@@ -30,11 +30,13 @@ const LinkSchema = z.object({
 export type GxGamesLink = z.infer<typeof LinkSchema>;
 
 export class LinkStorage {
-  constructor(private readonly ctx: Context) {}
+  constructor(
+    private readonly ctx: Context,
+    private readonly projectDir?: string,
+  ) {}
 
   async read(): Promise<GxGamesLink> {
-    const cache = await Cache.initLazy(this.ctx, { type: "infer" });
-    const dir = await cache.getSubDirPath(this.ctx, CACHE_SUBDIR);
+    const dir = await this.cacheDir();
     try {
       const raw = await this.ctx.fs.readFile(
         this.ctx.path.join(dir, LINK_FILENAME),
@@ -50,11 +52,18 @@ export class LinkStorage {
 
   async write(link: GxGamesLink): Promise<void> {
     // TODO: later, we may want to store this as part of the "manifest" file instead under a "tools.gxgames" key.
-    const cache = await Cache.initLazy(this.ctx, { type: "infer" });
-    const dir = await cache.getSubDirPath(this.ctx, CACHE_SUBDIR);
+    const dir = await this.cacheDir();
     await this.ctx.fs.writeFile(
       this.ctx.path.join(dir, LINK_FILENAME),
       JSON.stringify(link, null, 2),
     );
+  }
+
+  private async cacheDir(): Promise<string> {
+    const cache = await Cache.initLazy(this.ctx, {
+      type: "infer",
+      projectDir: this.projectDir,
+    });
+    return cache.getSubDirPath(this.ctx, CACHE_SUBDIR);
   }
 }

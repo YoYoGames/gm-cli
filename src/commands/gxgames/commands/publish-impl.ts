@@ -17,6 +17,7 @@
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import { KnownError } from "~/error";
+import type { ProjectPath } from "~/project";
 
 import { LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
@@ -25,8 +26,10 @@ import { getApiClient } from "../api";
 export default async function (
   this: Context,
   _flags: Record<never, never>,
+  project?: ProjectPath,
 ): Promise<void> {
-  const link = await new LinkStorage(this).read();
+  const projectDir = project ? this.path.dirname(project) : undefined;
+  const link = await new LinkStorage(this, projectDir).read();
   const api = getApiClient(this, createAuthManager(this));
 
   const publishLog = this.makeTaskLogger("Publishing game");
