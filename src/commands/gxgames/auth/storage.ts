@@ -17,7 +17,7 @@
 import type { Context } from "~/context";
 import { Cache } from "~/cache";
 import { z } from "zod";
-import { CACHE_SUBDIR } from "../config";
+import { AUTH_CACHE_SUBDIR } from "../config";
 
 const AUTH_FILENAME = "auth.json";
 
@@ -61,6 +61,8 @@ export class AuthStorage {
       type: "infer",
       projectDir: this.projectDir,
     });
-    return cache.getSubDirPath(this.ctx, CACHE_SUBDIR, { preferShared: true });
+    return cache.getSubDirPath(this.ctx, AUTH_CACHE_SUBDIR, {
+      preferShared: true,
+    });
   }
 }

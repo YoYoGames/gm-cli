@@ -18,7 +18,7 @@ import type { Context } from "~/context";
 import { KnownError } from "~/error";
 import { Cache } from "~/cache";
 import { z } from "zod";
-import { CACHE_SUBDIR } from "../config";
+import { LINK_CACHE_SUBDIR } from "../config";
 
 const LINK_FILENAME = "link.json";
 
@@ -64,6 +64,6 @@ export class LinkStorage {
       type: "infer",
       projectDir: this.projectDir,
     });
-    return cache.getSubDirPath(this.ctx, CACHE_SUBDIR);
+    return cache.getSubDirPath(this.ctx, LINK_CACHE_SUBDIR);
   }
 }
