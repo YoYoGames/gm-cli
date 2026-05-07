@@ -124,8 +124,7 @@ const gxgamesMetaCommand = buildCommand({
     brief: "Set or update game metadata required for publishing",
     fullDescription:
       "Set or update metadata for your GX.Games game. " +
-      "Run without flags for an interactive prompt, or pass flags to set specific fields. " +
-      "All flags are optional — omit any flag to be prompted for it interactively.",
+      "Each flag overrides the corresponding field; omitted flags keep their current server value.",
   },
 });
 
