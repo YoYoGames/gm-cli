@@ -70,6 +70,7 @@ const gxgamesUploadCommand = buildCommand({
     brief: "Upload a game bundle to GX.Games",
     fullDescription:
       "Uploads a zip bundle to GX.Games. " +
+      "Produce the zip with `gm-cli package --target operagx`. " +
       "Prompts for the version number if --version is not provided.",
   },
 });
@@ -85,7 +86,7 @@ const gxgamesMetaCommand = buildCommand({
         brief: "Game title",
         optional: true,
       },
-      agerating: {
+      ageRating: {
         kind: "parsed",
         parse: String,
         brief:
