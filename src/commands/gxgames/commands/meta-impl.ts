@@ -18,7 +18,7 @@ import type { Context } from "~/context";
 import { KnownError } from "~/error";
 import type { ProjectPath } from "~/project";
 
-import { LinkStorage } from "../api";
+import { apiUserErrorMessage, LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
 import { getApiClient } from "../api";
 import type {
@@ -47,7 +47,7 @@ export default async function (
 
   const gameRes = await api.getGameDetails(link.gameId);
   if (!gameRes.success) {
-    throw new KnownError(gameRes.errors);
+    throw new KnownError(apiUserErrorMessage(gameRes.errors));
   }
   const game = gameRes.data;
 
@@ -79,7 +79,7 @@ export default async function (
       updateLog.success("Metadata unchanged");
     } else {
       updateLog.error("Failed");
-      throw new KnownError(updateRes.errors);
+      throw new KnownError(apiUserErrorMessage(updateRes.errors));
     }
   } else {
     updateLog.success("Metadata updated");
@@ -97,7 +97,7 @@ export default async function (
     );
     if (!coverRes.success) {
       coverLog.error("Failed");
-      throw new KnownError(coverRes.errors);
+      throw new KnownError(apiUserErrorMessage(coverRes.errors));
     }
     coverLog.success("Cover uploaded");
   }
@@ -112,7 +112,7 @@ export default async function (
     });
     if (!graphicRes.success) {
       graphicLog.error("Failed");
-      throw new KnownError(graphicRes.errors);
+      throw new KnownError(apiUserErrorMessage(graphicRes.errors));
     }
     graphicLog.success("Graphic uploaded");
   }

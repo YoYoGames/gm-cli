@@ -19,7 +19,7 @@ import chalk from "chalk";
 import { KnownError } from "~/error";
 import type { ProjectPath } from "~/project";
 
-import { LinkStorage } from "../api";
+import { apiUserErrorMessage, LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
 import { getApiClient } from "../api";
 
@@ -44,7 +44,7 @@ export default async function (
         ),
       );
     }
-    throw new KnownError(res.errors);
+    throw new KnownError(apiUserErrorMessage(res.errors));
   }
 
   publishLog.success("Game published!");

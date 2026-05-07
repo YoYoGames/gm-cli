@@ -17,7 +17,7 @@
 import type { Context } from "~/context";
 import * as p from "@clack/prompts";
 import chalk from "chalk";
-import { getApiClient } from "../api";
+import { apiUserErrorMessage, getApiClient } from "../api";
 import { createAuthManager } from "../auth";
 import { KnownError } from "~/error";
 import type { ProjectPath } from "~/project";
@@ -40,7 +40,7 @@ export default async function (
     gameEngine: ["game-maker"],
   });
   if (!gamesRes.success) {
-    throw new KnownError(gamesRes.errors);
+    throw new KnownError(apiUserErrorMessage(gamesRes.errors));
   }
 
   const previousVersion = gamesRes.data.games.find(
@@ -70,7 +70,7 @@ export default async function (
     { file: new File([fileBuffer], this.path.basename(flags.file)) },
   );
   if (!res.success) {
-    throw new KnownError(res.errors);
+    throw new KnownError(apiUserErrorMessage(res.errors));
   }
   uploadLog.success("Bundle uploaded");
 

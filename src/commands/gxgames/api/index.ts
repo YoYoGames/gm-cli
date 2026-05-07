@@ -20,6 +20,15 @@ import { GG_API } from "../config";
 
 export { LinkStorage, type GxGamesLink } from "./storage";
 
+export const apiUserErrorMessage = (
+  errors: readonly { description: string }[],
+): string =>
+  errors
+    .map(
+      (e) => e.description.slice(0, 1).toUpperCase() + e.description.slice(1),
+    )
+    .join(".\n");
+
 export function getApiClient(
   ctx: Context,
   auth: {
