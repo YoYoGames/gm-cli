@@ -30,9 +30,10 @@ export default async function (
 ): Promise<void> {
   let studioId = flags.studioid;
   let gameId = flags.gameid;
+  const projectDir = project ? this.path.dirname(project) : undefined;
 
   if (!studioId || !gameId) {
-    const api = getApiClient(this, createAuthManager(this));
+    const api = getApiClient(this, createAuthManager(this, projectDir));
 
     if (!studioId) {
       const studiosRes = await api.getUserStudios({ pageSize: 999 });
@@ -99,7 +100,6 @@ export default async function (
     }
   }
 
-  const projectDir = project ? this.path.dirname(project) : undefined;
   await new LinkStorage(this, projectDir).write({ studioId, gameId });
   p.log.success(`Linked to studio ${studioId}, game ${gameId}`);
 }

@@ -30,13 +30,13 @@ const AuthSchema = z.object({
 export type GxGamesAuth = z.infer<typeof AuthSchema>;
 
 export class AuthStorage {
-  constructor(private readonly ctx: Context) {}
+  constructor(
+    private readonly ctx: Context,
+    private readonly projectDir?: string,
+  ) {}
 
   async read(): Promise<GxGamesAuth | undefined> {
-    const cache = await Cache.initLazy(this.ctx, { type: "infer" });
-    const dir = await cache.getSubDirPath(this.ctx, CACHE_SUBDIR, {
-      preferShared: true,
-    });
+    const dir = await this.cacheDir();
     try {
       const raw = await this.ctx.fs.readFile(
         this.ctx.path.join(dir, AUTH_FILENAME),
@@ -49,13 +49,18 @@ export class AuthStorage {
   }
 
   async write(auth: GxGamesAuth): Promise<void> {
-    const cache = await Cache.initLazy(this.ctx, { type: "infer" });
-    const dir = await cache.getSubDirPath(this.ctx, CACHE_SUBDIR, {
-      preferShared: true,
-    });
+    const dir = await this.cacheDir();
     await this.ctx.fs.writeFile(
       this.ctx.path.join(dir, AUTH_FILENAME),
       JSON.stringify(auth, null, 2),
     );
+  }
+
+  private async cacheDir(): Promise<string> {
+    const cache = await Cache.initLazy(this.ctx, {
+      type: "infer",
+      projectDir: this.projectDir,
+    });
+    return cache.getSubDirPath(this.ctx, CACHE_SUBDIR, { preferShared: true });
   }
 }
