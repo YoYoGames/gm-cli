@@ -20,7 +20,7 @@ import { KnownError } from "~/error";
 import type { ProjectPath } from "~/project";
 
 import { createAuthManager } from "../auth";
-import { getApiClient } from "../api";
+import { apiUserErrorMessage, getApiClient } from "../api";
 import { LinkStorage } from "../api";
 
 export default async function (
@@ -38,7 +38,7 @@ export default async function (
     if (!studioId) {
       const studiosRes = await api.getUserStudios({ pageSize: 999 });
       if (!studiosRes.success) {
-        throw new KnownError(studiosRes.errors);
+        throw new KnownError(apiUserErrorMessage(studiosRes.errors));
       }
 
       const selected = await p.select({
@@ -61,7 +61,7 @@ export default async function (
         gameEngine: ["game-maker"],
       });
       if (!gamesRes.success) {
-        throw new KnownError(gamesRes.errors);
+        throw new KnownError(apiUserErrorMessage(gamesRes.errors));
       }
 
       const selected = await p.select({
@@ -90,7 +90,7 @@ export default async function (
           gameEngine: "game-maker",
         });
         if (!res.success) {
-          throw new KnownError(res.errors);
+          throw new KnownError(apiUserErrorMessage(res.errors));
         }
         gameId = res.data.gameId;
         createLog.success(`Game created: ${gameId}`);

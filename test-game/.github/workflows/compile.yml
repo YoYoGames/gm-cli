@@ -1,0 +1,52 @@
+name: Compile
+
+# This job triggers when opening/updating a pull request or merging to the main branch
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # You can pin a particular version by replacing latest. E.g., @gamemaker/gm-cli@1.0.2
+  GM_COMMAND: "@gamemaker/gm-cli@latest"
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the git branch to build against
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Save a cache that can be reused between runs.
+      # This will future runs faster, just like when you build the game locally
+      - name: Cache
+        uses: actions/cache@v5
+        with:
+          path: .gmcache
+          key: ${{ runner.os }}-gmcache
+
+      # ffmpeg is needed for linux: https://github.com/YoYoGames/GameMaker-Bugs/issues/4977
+      - name: Set up ffmpeg
+        if: ${{ runner.os == 'Linux' }}
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: "6.1.0"
+
+      # You can create an access token at https://gamemaker.io/en/account/access-keys
+      # Then, in github, set a Repository Secret named GAMEMAKER_PAT with that value
+      # in you repository Settings/Secrets and Varibles/Actions/New repository secret
+      - run: npx "$GM_COMMAND" login "$GAMEMAKER_PAT"
+        if: ${{ env.GAMEMAKER_PAT != '' }}
+
+      # "Test compile" the game. Does not produce a bundle, but rather checks that it
+      # possible to compile the game
+      - run: npx "$GM_COMMAND" compile
+        env:
+          NO_COLOR: 1
