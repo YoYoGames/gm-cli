@@ -43,7 +43,7 @@ export default async function (
 ): Promise<void> {
   const projectDir = project ? this.path.dirname(project) : undefined;
   const link = await new LinkStorage(this, projectDir).read();
-  const api = getApiClient(this, createAuthManager(this));
+  const api = getApiClient(this, createAuthManager(this, projectDir));
 
   const gameRes = await api.getGameDetails(link.gameId);
   if (!gameRes.success) {

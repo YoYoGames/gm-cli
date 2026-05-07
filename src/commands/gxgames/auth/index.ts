@@ -183,12 +183,12 @@ class Auth {
   }
 }
 
-export function createAuthManager(ctx: Context) {
+export function createAuthManager(ctx: Context, projectDir?: string) {
   return new Auth({
     fetch: ctx.fetch,
     http: ctx.http,
     open: ctx.open,
     makeTaskLogger: ctx.makeTaskLogger,
-    storage: new AuthStorage(ctx),
+    storage: new AuthStorage(ctx, projectDir),
   });
 }
