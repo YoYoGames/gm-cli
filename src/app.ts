@@ -27,7 +27,6 @@ import { KnownError } from "./error";
 import { getLatestVersion } from "./get-latest-version";
 import { manualCommand } from "./commands/manual/command";
 import { cacheCommand } from "./commands/cache/command";
-import { getParsedEnv } from "./parse-env";
 
 const routes = buildRouteMap({
   routes: {
@@ -42,9 +41,6 @@ const routes = buildRouteMap({
     cache: cacheCommand,
   },
   docs: {
-    hideRoute: {
-      gxgames: !getParsedEnv().GAMEMAKER_CLI_UNSTABLE_FEATURES,
-    },
     brief: description,
   },
 });
