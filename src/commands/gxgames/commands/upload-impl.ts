@@ -24,6 +24,12 @@ import type { ProjectPath } from "~/project";
 
 import { LinkStorage } from "../api";
 
+const VERSION_RE = /^\d+\.\d+\.\d+\.\d+$/;
+const validateVersion = (v: string | undefined): string | undefined =>
+  v && VERSION_RE.test(v)
+    ? undefined
+    : "Version must be X.Y.Z.B (e.g. 1.0.0.0)";
+
 export default async function (
   this: Context,
   flags: { file: string; version?: string },
@@ -49,12 +55,17 @@ export default async function (
 
   let version: string;
   if (flags.version != null) {
+    const err = validateVersion(flags.version);
+    if (err) {
+      throw new KnownError(err);
+    }
     version = flags.version;
   } else {
     const v = await p.text({
       message: "Version",
       placeholder: "0.0.1.0",
       defaultValue: previousVersion,
+      validate: validateVersion,
     });
     if (p.isCancel(v)) {
       return process.exit(0);
