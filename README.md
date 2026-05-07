@@ -61,6 +61,40 @@ npx @gamemaker/gm-cli@latest login <my key>
 gm-cli manual open "sprites" --language=es
 ```
 
+### Publish to GX.Games
+Use `gm-cli gxgames` to publish a game to [gx.games](https://gx.games). Run `gm-cli gxgames --help` for the full list of subcommands.
+
+The flow:
+
+1. **Package** the game as an OperaGX zip:
+   ```sh
+   npx @gamemaker/gm-cli@latest package --target=operagx --output=game.zip
+   ```
+2. **Link** the project to a studio and game (opens the browser to sign in on first use):
+   ```sh
+   npx @gamemaker/gm-cli@latest gxgames link --studioid=<id> --gameid=<id>
+   ```
+   Omit the flags to pick interactively.
+3. **Upload** the zip (prompts for a `X.Y.Z.B` version if `--version` is omitted):
+   ```sh
+   npx @gamemaker/gm-cli@latest gxgames upload --file=game.zip --version=1.0.0.0
+   ```
+4. **Set metadata** required for publishing — title (must be unique across GX.Games), description, age rating, platforms, 16:9 cover, and 16:9 screenshot. Cover and graphic must have an **exact** 16:9 aspect ratio (e.g. 1920×1080):
+   ```sh
+   npx @gamemaker/gm-cli@latest gxgames meta \
+     --title="My Game" \
+     --description="A short description" \
+     --age-rating=EVERYONE \
+     --platforms=DESKTOP,MOBILE \
+     --cover=cover_1920x1080.png \
+     --graphic=screenshot_1920x1080.png
+   ```
+   Each flag overrides one field; omitted flags keep the current server value.
+5. **Publish** to make the game public (opens the published page on success):
+   ```sh
+   npx @gamemaker/gm-cli@latest gxgames publish
+   ```
+
 ## Near future
 > Note: The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
 
@@ -80,10 +114,6 @@ The `ask` subcommand displays an article directly in your terminal,
 ```sh
 gm-cli manual ask "data structures"
 ```
-
-### Publishing games to the web
-
-Direct integration with [gx.games](https://gx.games) to share your games! 
 
 ### A library to make your own tools
 `gm-cli` will expose its internals as a TypeScript library that you can use to more easily make your own editor tools. 
