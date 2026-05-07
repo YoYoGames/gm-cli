@@ -87,10 +87,17 @@ const gxgamesMetaCommand = buildCommand({
         optional: true,
       },
       ageRating: {
-        kind: "parsed",
-        parse: String,
-        brief:
-          "Age rating: NOT_SET, EVERYONE, CHILDREN, EARLY_TEENS, TEENS, ADULTS, MATURE",
+        kind: "enum",
+        values: [
+          "NOT_SET",
+          "EVERYONE",
+          "CHILDREN",
+          "EARLY_TEENS",
+          "TEENS",
+          "ADULTS",
+          "MATURE",
+        ],
+        brief: "Age rating",
         optional: true,
       },
       description: {
