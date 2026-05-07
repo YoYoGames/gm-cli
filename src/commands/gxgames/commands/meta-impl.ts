@@ -29,7 +29,7 @@ import type {
 
 interface MetaFlags {
   title?: string;
-  ageRating?: string;
+  ageRating?: GameDevUpdateGameRequestAgeRatingEnum;
   description?: string;
   platforms?: string;
   cover?: string;
@@ -58,11 +58,7 @@ export default async function (
   const updateData: GameDevUpdateGameRequest = {
     title: flags.title ?? game.title,
     shortDescription: flags.description ?? game.shortDescription,
-    ageRating:
-      (flags.ageRating?.toUpperCase() as
-        | GameDevUpdateGameRequestAgeRatingEnum
-        | undefined) ??
-      (game.ageRating as GameDevUpdateGameRequestAgeRatingEnum),
+    ageRating: flags.ageRating ?? game.ageRating,
     platforms:
       flags.platforms
         ?.split(",")
