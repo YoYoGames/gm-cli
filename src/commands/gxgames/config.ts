@@ -23,6 +23,7 @@ export const SCOPE = [
   "https://api.gx.games/gamedev:write",
   "https://api.gx.games/gamedev:read",
 ].join("+");
-export const CACHE_SUBDIR = "gxgames";
+export const LINK_CACHE_SUBDIR = "gxgames-link";
+export const AUTH_CACHE_SUBDIR = "gxgames-auth";
 
 export const GG_API = "https://api.gx.games";
