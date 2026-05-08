@@ -18,30 +18,9 @@ import { z } from "zod";
 import type { Context } from "~/context";
 import type { GmrtTarget } from "~/target";
 
-function hostPlatformOption<T extends z.ZodType>(schema: T) {
-  return z.object({ macos: schema, windows: schema, linux: schema });
-}
-
-function targetOption<T extends z.ZodType>(schema: T) {
-  return z.object({
-    mac: schema,
-    windows: schema,
-    linux: schema,
-    operagx: schema,
-  });
-}
-
-const jobSchema = z.object({ native: z.string(), vm: z.string() });
-
-/**
- * Compilation options that are unique to GMRT.
- * There are more options that are shared with the GMS2 toolchain
- */
 export const gmrtToolchainOptionsSchema = z.object({
-  buildGraph: hostPlatformOption(z.string()),
-  runJob: targetOption(jobSchema),
-  compileJob: targetOption(jobSchema),
-  packageJob: targetOption(jobSchema),
+  buildGraph: z.string(),
+  job: z.string(),
   scriptBuildType: z.enum(["Release", "Debug"]),
   // TODO later: target-preferences
   // TODO later: gmrt-preferences
@@ -49,59 +28,16 @@ export const gmrtToolchainOptionsSchema = z.object({
   // TODO later: buildType: "Release" | "Debug"; // Maybe not needed to expose since we only ship release builds...
 });
 
+export const gmrtToolchainOptionsSchemaPartial =
+  gmrtToolchainOptionsSchema.partial();
+
 export type GmrtToolchainOptions = z.infer<typeof gmrtToolchainOptionsSchema>;
 
-// Used when given by user
-export const gmrtToolchainOptionsPartial = gmrtToolchainOptionsSchema.partial();
-
 export type GmrtToolchainOptionsPartial = z.infer<
-  typeof gmrtToolchainOptionsPartial
+  typeof gmrtToolchainOptionsSchemaPartial
 >;
 
-export type HostPlatform = "macos" | "windows" | "linux";
-
-const platformToHost: Partial<Record<NodeJS.Platform, HostPlatform>> = {
-  darwin: "macos",
-  win32: "windows",
-  linux: "linux",
-};
-
-export function pickHostOption<T>(
-  options: Record<HostPlatform, T>,
-  platform: NodeJS.Platform,
-): T {
-  const key = platformToHost[platform];
-  if (!key) {
-    throw new Error(`Unsupported host platform: ${platform}`);
-  }
-  return options[key];
-}
-
-export function pickTargetJob(
-  jobs: GmrtToolchainOptions["runJob"],
-  target: GmrtTarget,
-  runtime: "native" | "vm",
-): string {
-  return jobs[target][runtime];
-}
-
-export function resolveOptions(
-  defaults: GmrtToolchainOptions,
-  overrides: GmrtToolchainOptionsPartial,
-): GmrtToolchainOptions {
-  return {
-    buildGraph: overrides.buildGraph ?? defaults.buildGraph,
-    runJob: overrides.runJob ?? defaults.runJob,
-    compileJob: overrides.compileJob ?? defaults.compileJob,
-    packageJob: overrides.packageJob ?? defaults.packageJob,
-    scriptBuildType: overrides.scriptBuildType ?? defaults.scriptBuildType,
-  };
-}
-
-export function defaultOptions(
-  ctx: Context,
-  runtimeDir: string,
-): GmrtToolchainOptions {
+export function defaultBuildGraph(ctx: Context, runtimeDir: string): string {
   const targetsDir = ctx.path.join(
     runtimeDir,
     "package",
@@ -109,64 +45,57 @@ export function defaultOptions(
     "bin",
     "targets",
   );
+  const platform = ctx.os.platform();
+  switch (platform) {
+    case "darwin":
+      return ctx.path.join(targetsDir, "buildgraph-macarm64-prod.xml");
+    case "win32":
+      return ctx.path.join(targetsDir, "buildgraph-win64-prod.xml");
+    case "linux":
+      return ctx.path.join(targetsDir, "buildgraph-linux64-prod.xml");
+    default:
+      throw new Error(`Unsupported host platform: ${platform}`);
+  }
+}
 
-  return {
-    buildGraph: {
-      macos: ctx.path.join(targetsDir, "buildgraph-macarm64-prod.xml"),
-      windows: ctx.path.join(targetsDir, "buildgraph-win64-prod.xml"),
-      linux: ctx.path.join(targetsDir, "buildgraph-linux64-prod.xml"),
-    },
-    compileJob: {
-      mac: {
-        native: "Build-native-macos-arm64",
-        vm: "Build-interpreter-macos-arm64",
-      },
-      windows: {
-        native: "Build-native-windows-x64",
-        vm: "Build-interpreter-windows-x64",
-      },
-      linux: { native: "Build-native-linux-x64", vm: "Build-native-linux-x64" },
-      operagx: {
-        native: "Build-native-wasm32-browser",
-        vm: "Build-native-wasm32-browser",
-      },
-    },
-    runJob: {
-      mac: {
-        native: "Build-native-macos-arm64;Run-macos-arm64",
-        vm: "Build-interpreter-macos-arm64;Run-macos-arm64",
-      },
-      windows: {
-        native: "Build-native-windows-x64;Run-windows-x64",
-        vm: "Build-interpreter-windows-x64;Run-windows-x64",
-      },
-      linux: {
-        native: "Build-native-linux-x64;Run-linux-x64",
-        vm: "Build-native-linux-x64;Run-linux-x64",
-      },
-      operagx: {
-        native: "Build-native-wasm32-browser;Run-wasm32-browser",
-        vm: "Build-native-wasm32-browser;Run-wasm32-browser",
-      },
-    },
-    packageJob: {
-      mac: {
-        native: "Build-native-macos-arm64;Package-macos-arm64",
-        vm: "Build-interpreter-macos-arm64;Package-macos-arm64",
-      },
-      windows: {
-        native: "Build-native-windows-x64;Package-windows-x64",
-        vm: "Build-interpreter-windows-x64;Package-windows-x64",
-      },
-      linux: {
-        native: "Build-native-linux-x64;Package-linux-x64",
-        vm: "Build-native-linux-x64;Package-linux-x64",
-      },
-      operagx: {
-        native: "Build-native-wasm32-browser;Package-wasm32-browser",
-        vm: "Build-native-wasm32-browser;Package-wasm32-browser",
-      },
-    },
-    scriptBuildType: "Debug",
-  };
+export function defaultJob(
+  target: GmrtTarget,
+  runtime: "native" | "vm",
+  commandType: "run" | "compile" | "package",
+): string {
+  const buildStep: Record<GmrtTarget, string> =
+    runtime === "native"
+      ? {
+          mac: "Build-native-macos-arm64",
+          windows: "Build-native-windows-x64",
+          linux: "Build-native-linux-x64",
+          operagx: "Build-native-wasm32-browser",
+        }
+      : {
+          mac: "Build-interpreter-macos-arm64",
+          windows: "Build-interpreter-windows-x64",
+          linux: "Build-native-linux-x64",
+          operagx: "Build-native-wasm32-browser",
+        };
+
+  if (commandType === "compile") {
+    return buildStep[target];
+  }
+
+  const secondStep: Record<GmrtTarget, string> =
+    commandType === "run"
+      ? {
+          mac: "Run-macos-arm64",
+          windows: "Run-windows-x64",
+          linux: "Run-linux-x64",
+          operagx: "Run-wasm32-browser",
+        }
+      : {
+          mac: "Package-macos-arm64",
+          windows: "Package-windows-x64",
+          linux: "Package-linux-x64",
+          operagx: "Package-wasm32-browser",
+        };
+
+  return `${buildStep[target]};${secondStep[target]}`;
 }

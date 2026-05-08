@@ -23,9 +23,11 @@ import { getProjectName, type ProjectPath } from "~/project";
 import type { Target } from "~/target";
 import type { Gms2VersionRange } from "~/toolchain";
 import { installRuntimeIfNeeded } from "./install-runtime";
-
-// FIXME: populate this one!
-interface Gms2ToolchainOptions {}
+import {
+  defaultGms2ToolchainOptions,
+  type Gms2ToolchainOptions,
+  type Gms2ToolchainOptionsPartial,
+} from "./options";
 
 export async function useGms2(
   ctx: Context,
@@ -45,14 +47,15 @@ export async function useGms2(
     licenseFile: string;
     verbose: boolean;
     version?: Gms2VersionRange;
-  } & Gms2ToolchainOptions,
+    toolchainOptions: Gms2ToolchainOptionsPartial;
+  },
   tools: {
     igorPath: string;
     projectToolPath: string;
   },
 ) {
   // FIXME: Add full support for configuring YYC, currently the underlying tooling in Gms2ToolchainOptions
-  // expects to be given a user directory with a local_settings.json file. (At least on windows/operagx)
+  // For example, here it expects to be given a user directory with a local_settings.json file. (At least on windows/operagx)
   if (
     options.runtime === "native" &&
     (options.target === "windows" || options.target === "operagx")
@@ -77,6 +80,11 @@ export async function useGms2(
     ctx,
     `build-gms2-${options.target}-${runtime}`,
   );
+
+  const defaults = defaultGms2ToolchainOptions();
+  const toolchainOptions: Gms2ToolchainOptions = {
+    operagx: options.toolchainOptions.operagx ?? defaults.operagx,
+  };
 
   let label: string;
   let igorAction: string;
@@ -107,9 +115,11 @@ export async function useGms2(
     extraArgs = [
       "-tf",
       targetFile,
-      // FIXME: make this configurable between "OperaGXPackage_Zip" | "OperaGXPackage_Gamestrip" | "OperaGXPackage_Wallpaper"
       ...(options.target === "operagx"
-        ? ["-packagetype", "OperaGXPackage_Zip"]
+        ? [
+            "-packagetype",
+            gxPackageTypeArg(toolchainOptions.operagx.packageType),
+          ]
         : []),
     ];
     successMessage = `Package created: ${targetFile}`;
@@ -152,6 +162,19 @@ export async function useGms2(
   }
 
   actionLog.success(successMessage);
+}
+
+function gxPackageTypeArg(
+  packageType: Gms2ToolchainOptions["operagx"]["packageType"],
+): string {
+  switch (packageType) {
+    case "zip":
+      return "OperaGXPackage_Zip";
+    case "gamestrip":
+      return "OperaGXPackage_Gamestrip";
+    case "wallpaper":
+      return "OperaGXPackage_Wallpaper";
+  }
 }
 
 function getPackageAction(target: Target): string {
