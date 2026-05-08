@@ -26,7 +26,6 @@ import { installRuntimeIfNeeded } from "./install-runtime";
 import {
   defaultGms2ToolchainOptions,
   type Gms2ToolchainOptions,
-  type Gms2ToolchainOptionsPartial,
 } from "./options";
 
 export async function useGms2(
@@ -47,7 +46,7 @@ export async function useGms2(
     licenseFile: string;
     verbose: boolean;
     version?: Gms2VersionPartial;
-    toolchainOptions: Gms2ToolchainOptionsPartial;
+    toolchainOptions: Partial<Gms2ToolchainOptions>;
   },
   tools: {
     igorPath: string;
@@ -168,12 +167,16 @@ function gxPackageTypeArg(
   packageType: Gms2ToolchainOptions["operagx"]["packageType"],
 ): string {
   switch (packageType) {
+    case undefined:
     case "zip":
       return "OperaGXPackage_Zip";
     case "gamestrip":
       return "OperaGXPackage_Gamestrip";
     case "wallpaper":
       return "OperaGXPackage_Wallpaper";
+    default:
+      packageType satisfies never;
+      throw new Error("Unreachable");
   }
 }
 

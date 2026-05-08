@@ -22,14 +22,6 @@ import {
   downloadProjectTool,
 } from "./gm-tools";
 import { KnownError } from "./error";
-import {
-  gms2ToolchainOptionsSchemaPartial,
-  type Gms2ToolchainOptionsPartial,
-} from "./gms2/options";
-import {
-  gmrtToolchainOptionsSchemaPartial,
-  type GmrtToolchainOptionsPartial,
-} from "./gmrt/options";
 import { LICENSE_FILENAME } from "./commands/login/impl";
 import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
@@ -39,6 +31,13 @@ import { restorePrefabs } from "./restore-prefabs";
 import { supportedInGmrt, targetForPlatform, type Target } from "./target";
 import { useGmrt } from "./gmrt/use-gmrt";
 import { useGms2 } from "./gms2/use-gms2";
+import {
+  gmrtSchema,
+  gms2Schema,
+  readGmOptions,
+  resolveGmrtToolchainOptions,
+} from "./gm-options";
+import { z } from "zod";
 
 /**
  * Command flags exposed in package/run/compile
@@ -79,6 +78,20 @@ export async function runBuildPipeline(
     throw new KnownError("No .yyp project file found in the current directory");
   }
 
+  const cache = await Cache.initLazy(
+    ctx,
+    flags.cacheDir
+      ? { type: "absolute", path: flags.cacheDir }
+      : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
+  );
+
+  // TODO: would be nicer if this was depedency injected into all commands
+  const gmOptions = await readGmOptions(
+    ctx,
+    cache,
+    ctx.path.dirname(projectPath),
+  );
+
   // FIXME: Add full support for all platforms
   if (!["mac", "windows", "linux", "operagx"].includes(target)) {
     throw new KnownError(
@@ -86,24 +99,17 @@ export async function runBuildPipeline(
     );
   }
 
-  const toolchainType = flags.toolchain?.type === "GMRT" ? "GMRT" : "GMS2";
+  const toolchain = flags.toolchain ?? gmOptions?.toolchain ?? { type: "GMS2" };
 
-  if (toolchainType === "GMRT" && !ctx.env.GAMEMAKER_CLI_UNSTABLE_FEATURES) {
+  if (toolchain.type === "GMRT" && !ctx.env.GAMEMAKER_CLI_UNSTABLE_FEATURES) {
     throw new KnownError(
       "To use GMRT, please set the env variable 'GAMEMAKER_CLI_UNSTABLE_FEATURES'",
     );
   }
 
-  const toolchainOptions = flags.toolchainOptions
-    ? parseToolchainOptions(flags.toolchainOptions, toolchainType)
+  const toolchainOptionsParsed = flags.toolchainOptions
+    ? parseToolchainOptions(flags.toolchainOptions, toolchain.type)
     : {};
-
-  const cache = await Cache.initLazy(
-    ctx,
-    flags.cacheDir
-      ? { type: "absolute", path: flags.cacheDir }
-      : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
-  );
 
   const gmToolLog = ctx.makeTaskLogger("Downloading tools");
   let projectToolPath: string;
@@ -158,10 +164,23 @@ export async function runBuildPipeline(
   }
   prefabsLog.success("Prefabs restored");
 
-  if (toolchainType === "GMRT") {
+  if (toolchain.type === "GMRT") {
     if (!supportedInGmrt(target)) {
       throw new KnownError(`Target '${target}' not supported by GMRT`);
     }
+    // Use --toolchain-options flag if set, or fall back to gm-options file
+    const gmrtOptionsFull = toolchainOptionsParsed.GMRT ?? gmOptions?.gmrt;
+    // Resolve the options for our specific platform, host and job type
+    const toolchainOptions = gmrtOptionsFull
+      ? resolveGmrtToolchainOptions(
+          ctx,
+          gmrtOptionsFull,
+          command.type,
+          target,
+          runtime,
+        )
+      : {};
+
     await useGmrt(
       ctx,
       cache,
@@ -173,11 +192,8 @@ export async function runBuildPipeline(
         runtime,
         verbose,
         licenseFile,
-        version:
-          flags.toolchain?.type === "GMRT"
-            ? flags.toolchain.version
-            : undefined,
-        toolchainOptions: toolchainOptions.GMRT ?? {},
+        version: toolchain.type === "GMRT" ? toolchain.version : undefined,
+        toolchainOptions,
       },
       {
         gmpmExecutablePath,
@@ -186,6 +202,7 @@ export async function runBuildPipeline(
     );
     return;
   }
+
   await useGms2(
     ctx,
     cache,
@@ -197,9 +214,8 @@ export async function runBuildPipeline(
       runtime,
       verbose,
       licenseFile,
-      version:
-        flags.toolchain?.type === "GMS2" ? flags.toolchain.version : undefined,
-      toolchainOptions: toolchainOptions.GMS2 ?? {},
+      version: toolchain?.type === "GMS2" ? toolchain.version : undefined,
+      toolchainOptions: toolchainOptionsParsed.GMS2 ?? gmOptions?.gms2 ?? {},
     },
     {
       igorPath,
@@ -284,8 +300,8 @@ function parseToolchainOptions(
   raw: string,
   toolchainType: "GMS2" | "GMRT",
 ): {
-  GMS2?: Gms2ToolchainOptionsPartial;
-  GMRT?: GmrtToolchainOptionsPartial;
+  GMS2?: z.infer<typeof gms2Schema>;
+  GMRT?: z.infer<typeof gmrtSchema>;
 } {
   let json: unknown;
   try {
@@ -295,20 +311,19 @@ function parseToolchainOptions(
   }
 
   // FIXME: when encountering errors we should print info about where the full JSON schema can be found.
+  const formatError = (issues: z.core.$ZodIssue[]) =>
+    `Invalid --toolchain-options for ${toolchainType}:\n${issues.map((i) => `  - ${i.path.length ? `${i.path.join(".")}: ` : ""}${i.message}`).join("\n")}`;
+
   if (toolchainType === "GMRT") {
-    const result = gmrtToolchainOptionsSchemaPartial.strict().safeParse(json);
+    const result = gmrtSchema.strict().safeParse(json);
     if (!result.success) {
-      throw new KnownError(
-        `Invalid --toolchain-options for GMRT:\n${result.error.issues.map((i) => `  - ${i.path.length ? `${i.path.join(".")}: ` : ""}${i.message}`).join("\n")}`,
-      );
+      throw new KnownError(formatError(result.error.issues));
     }
     return { GMRT: result.data };
   }
-  const result = gms2ToolchainOptionsSchemaPartial.strict().safeParse(json);
+  const result = gms2Schema.strict().safeParse(json);
   if (!result.success) {
-    throw new KnownError(
-      `Invalid --toolchain-options for GMS2:\n${result.error.issues.map((i) => `  - ${i.path.length ? `${i.path.join(".")}: ` : ""}${i.message}`).join("\n")}`,
-    );
+    throw new KnownError(formatError(result.error.issues));
   }
   return { GMS2: result.data };
 }

@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-import { z } from "zod";
-
-export const gms2ToolchainOptionsSchema = z.object({
-  operagx: z.object({
-    packageType: z.enum(["zip", "wallpaper", "gamestrip"]),
-  }),
-  // FIXME later: extend this with options for SDKs needed for YYC comoilation etc.
-});
-
-export const gms2ToolchainOptionsSchemaPartial =
-  gms2ToolchainOptionsSchema.partial();
-
-export type Gms2ToolchainOptions = z.infer<typeof gms2ToolchainOptionsSchema>;
-
-export type Gms2ToolchainOptionsPartial = z.infer<
-  typeof gms2ToolchainOptionsSchemaPartial
->;
+export interface Gms2ToolchainOptions {
+  operagx: {
+    packageType?: "zip" | "wallpaper" | "gamestrip";
+  };
+  // TODO: extend with more options to configure YYC etc.
+}
 
 export function defaultGms2ToolchainOptions(): Gms2ToolchainOptions {
   return {

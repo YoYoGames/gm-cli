@@ -27,6 +27,8 @@ import { validateProjectName, findTemplate } from "./validation";
 import type { ProjectConfig } from "./types";
 // @ts-expect-error — bundled as text by tsup/esbuild
 import claudeContents from "./claude-contents.txt";
+import { writeGmOptions } from "~/gm-options";
+import type { ToolchainVersion } from "~/toolchain";
 
 interface InitCommandFlags {
   interactive: boolean;
@@ -34,6 +36,7 @@ interface InitCommandFlags {
   template?: string;
   ai: boolean;
   actions: boolean;
+  toolchain?: ToolchainVersion;
   cacheDir?: string;
 }
 
@@ -68,6 +71,7 @@ export default async function (
       template: matchedTemplate.id,
       useAi: flags.ai,
       useActions: flags.actions,
+      toolchain: flags.toolchain ?? { type: "GMS2" },
     };
 
     this.process.stdout.write("Creating project...\n");
@@ -90,6 +94,13 @@ export default async function (
 
   const s = p.spinner();
 
+  const cache = await Cache.initLazy(
+    this,
+    flags.cacheDir
+      ? { type: "absolute", path: flags.cacheDir }
+      : { type: "infer", projectDir },
+  );
+
   try {
     if (selectedTemplate.kind === "blank") {
       s.start("Creating blank project");
@@ -104,12 +115,6 @@ export default async function (
     } else {
       s.start("Downloading template");
       s.message("Extracting template");
-      const cache = await Cache.initLazy(
-        this,
-        flags.cacheDir
-          ? { type: "absolute", path: flags.cacheDir }
-          : { type: "infer", projectDir },
-      );
       await scaffoldProject(
         this,
         selectedTemplate,
@@ -197,6 +202,10 @@ export default async function (
         packageYml({ name: config.projectName }),
       );
     }
+    await writeGmOptions(this, cache, projectDir, {
+      toolchain: config.toolchain,
+    });
+
     s.stop(`Project created at ${projectDir}`);
 
     if (flags.interactive) {

@@ -63,6 +63,21 @@ export async function runInteractive(
           })),
         });
       },
+      toolchain: () => {
+        return p.select({
+          message: "Toolchain",
+          options: [
+            {
+              value: { type: "GMS2" as const },
+              label: "GMS2",
+            },
+            {
+              value: { type: "GMRT" as const },
+              label: "GMRT (Experimental)",
+            },
+          ],
+        });
+      },
       useAi: () =>
         p.confirm({
           message: "Set up AI scaffolding (MCP, CLAUDE.md, etc.)",
@@ -86,5 +101,6 @@ export async function runInteractive(
     template: answers.template as string,
     useAi: answers.useAi,
     useActions: answers.useActions,
+    toolchain: answers.toolchain,
   };
 }

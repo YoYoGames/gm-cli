@@ -15,6 +15,7 @@
  */
 
 import { buildCommand } from "@stricli/core";
+import { parseToolchainVersion } from "~/toolchain";
 
 export const initCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -51,6 +52,12 @@ export const initCommand = buildCommand({
         kind: "boolean",
         brief: "Set up GitHub Actions workflows",
         default: true,
+      },
+      toolchain: {
+        kind: "parsed",
+        parse: parseToolchainVersion,
+        brief: "Toolchain to use, e.g. GMS2, GMS2@2024.14.4, or GMRT@0.18",
+        optional: true,
       },
       cacheDir: {
         kind: "parsed",

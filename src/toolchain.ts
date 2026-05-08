@@ -121,6 +121,19 @@ export function gmrtVersionToString(version: GmrtVersionRange): string {
   return version.raw;
 }
 
+export function toolchainVersionToString(toolchain: ToolchainVersion): string {
+  if (toolchain.version === undefined) {
+    return toolchain.type;
+  }
+  if (toolchain.type === "GMS2") {
+    const versionStr = toolchain.version
+      .filter((v) => v !== undefined)
+      .join(".");
+    return `${toolchain.type}@${versionStr}`;
+  }
+  return `${toolchain.type}@${gmrtVersionToString(toolchain.version)}`;
+}
+
 export type GmrtVersionRange = z.infer<typeof gmrtVersionSchema>;
 
 export type GmrtVersion = SemVer;
