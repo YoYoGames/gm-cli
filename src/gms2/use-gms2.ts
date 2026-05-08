@@ -21,7 +21,7 @@ import { spawnIgor } from "~/igor/spawn";
 import { stopProcesses } from "~/kill-process";
 import { getProjectName, type ProjectPath } from "~/project";
 import type { Target } from "~/target";
-import type { Gms2VersionRange } from "~/toolchain";
+import type { Gms2VersionPartial } from "~/toolchain";
 import { installRuntimeIfNeeded } from "./install-runtime";
 import {
   defaultGms2ToolchainOptions,
@@ -46,7 +46,7 @@ export async function useGms2(
     runtime: "native" | "vm";
     licenseFile: string;
     verbose: boolean;
-    version?: Gms2VersionRange;
+    version?: Gms2VersionPartial;
     toolchainOptions: Gms2ToolchainOptionsPartial;
   },
   tools: {
