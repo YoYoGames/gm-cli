@@ -89,6 +89,12 @@ export const packageCommand = buildCommand({
         brief: "Output file path",
         optional: true,
       },
+      toolchainOptions: {
+        kind: "parsed",
+        parse: String,
+        brief: "JSON string of toolchain-specific options",
+        optional: true,
+      },
     },
     aliases: {
       o: "output",

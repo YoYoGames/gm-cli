@@ -17,17 +17,16 @@ import type { Cache } from "~/cache";
 import type { Context } from "~/context";
 import { spawnGmrt } from "./spawn";
 import { installGmrtIfNeeded } from "~/gmrt/install-runtime";
-import {
-  defaultOptions,
-  pickHostOption,
-  pickTargetJob,
-  resolveOptions,
-  type GmrtToolchainOptionsPartial,
-} from "./options";
 import type { GmrtTarget } from "~/target";
 import type { GmrtVersionRange } from "~/toolchain";
 import type { ProjectPath } from "~/project";
 import { stopProcesses } from "~/kill-process";
+import {
+  defaultBuildGraph,
+  defaultJob,
+  type GmrtToolchainOptions,
+  type GmrtToolchainOptionsPartial,
+} from "./options";
 
 export async function useGmrt(
   ctx: Context,
@@ -47,7 +46,8 @@ export async function useGmrt(
     licenseFile: string;
     verbose: boolean;
     version?: GmrtVersionRange;
-  } & GmrtToolchainOptionsPartial, // TODO: should this be partial or not at this point?
+    toolchainOptions: GmrtToolchainOptionsPartial;
+  },
   tools: {
     gmpmExecutablePath: string;
     projectToolPath: string;
@@ -78,22 +78,15 @@ export async function useGmrt(
     `build-gmrt-${options.target}-${options.runtime}`,
   );
 
-  const toolchainOptions = resolveOptions(
-    defaultOptions(ctx, runtimeDir),
-    options,
-  );
-  const scriptBuildType = toolchainOptions.scriptBuildType;
-  const buildGraph = pickHostOption(
-    toolchainOptions.buildGraph,
-    ctx.process.platform,
-  );
-  const jobOptions =
-    command.type === "run"
-      ? toolchainOptions.runJob
-      : command.type === "compile"
-        ? toolchainOptions.compileJob
-        : toolchainOptions.packageJob;
-  const buildJob = pickTargetJob(jobOptions, options.target, options.runtime);
+  // Use defaults if options where not specified
+  const { buildGraph, job, scriptBuildType }: GmrtToolchainOptions = {
+    buildGraph:
+      options.toolchainOptions.buildGraph ?? defaultBuildGraph(ctx, runtimeDir),
+    job:
+      options.toolchainOptions.job ??
+      defaultJob(options.target, options.runtime, command.type),
+    scriptBuildType: options.toolchainOptions.scriptBuildType ?? "Debug",
+  };
 
   const gmrtInvokeLog = ctx.makeTaskLogger(`GMRT ${command.type}`, {
     noCollapse: true,
@@ -111,7 +104,7 @@ export async function useGmrt(
       "-bg",
       buildGraph,
       "-bj",
-      buildJob,
+      job,
       ...(options.verbose ? ["-v"] : []),
       "--script-build-type",
       scriptBuildType,

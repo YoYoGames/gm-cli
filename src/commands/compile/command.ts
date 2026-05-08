@@ -83,6 +83,12 @@ export const compileProjectCommand = buildCommand({
         brief: "Cache directory",
         optional: true,
       },
+      toolchainOptions: {
+        kind: "parsed",
+        parse: String,
+        brief: "JSON string of toolchain-specific options",
+        optional: true,
+      },
     },
   },
   docs: {
