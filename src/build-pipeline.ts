@@ -45,7 +45,7 @@ export interface CommonCliBuildFlags {
   errorsOnly?: boolean;
 }
 
-export async function commonCompileSetup(
+export async function runBuildPipeline(
   ctx: Context,
   flags: CommonCliBuildFlags,
   project: ProjectPath | undefined,
@@ -136,7 +136,6 @@ export async function commonCompileSetup(
   prefabsLog.success("Prefabs restored");
 
   if (flags.toolchain?.type === "GMRT") {
-    console.log(target, supportedInGmrt(target));
     if (!supportedInGmrt(target)) {
       throw new Error(`Target '${target}' not supported by GMRT`);
     }
@@ -151,6 +150,10 @@ export async function commonCompileSetup(
         runtime,
         verbose,
         licenseFile,
+        version:
+          flags.toolchain?.type === "GMRT"
+            ? flags.toolchain.version
+            : undefined,
       },
       {
         gmpmExecutablePath,
