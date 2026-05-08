@@ -81,8 +81,8 @@ export function parseToolchainVersion(s: string): ToolchainVersion {
  * so a prefix of [2024] matches any 2024.x.x.x version.
  */
 export function gms2VersionSatisfies(
-  version: Gms2VersionRange,
-  prefix: Gms2VersionRange,
+  version: Gms2VersionPartial,
+  prefix: Gms2VersionPartial,
 ): boolean {
   for (let i = 0; i < 4; i++) {
     const p = prefix[i];
@@ -101,8 +101,8 @@ export function gms2VersionSatisfies(
  * Returns a positive number if `a` is newer than `b`, negative if older, 0 if equal.
  */
 export function gms2VersionCompare(
-  a: Gms2VersionRange,
-  b: Gms2VersionRange,
+  a: Gms2VersionPartial,
+  b: Gms2VersionPartial,
 ): number {
   for (let i = 0; i < 4; i++) {
     const diff = (a[i] ?? 0) - (b[i] ?? 0);
@@ -113,7 +113,7 @@ export function gms2VersionCompare(
   return 0;
 }
 
-export function gms2VersionToString(version: Gms2VersionRange): string {
+export function gms2VersionToString(version: Gms2VersionPartial): string {
   return version.map((v) => v?.toString() ?? "*").join(".");
 }
 
@@ -125,7 +125,7 @@ export type GmrtVersionRange = z.infer<typeof gmrtVersionSchema>;
 
 export type GmrtVersion = SemVer;
 
-export type Gms2VersionRange = z.infer<typeof gms2VersionSchema>;
+export type Gms2VersionPartial = z.infer<typeof gms2VersionSchema>;
 
 export type Gms2Version = [number, number, number, number];
 
@@ -134,7 +134,7 @@ export type ToolchainType = z.infer<typeof toolchainTypeSchema>;
 export type ToolchainVersion =
   | {
       type: "GMS2";
-      version?: Gms2VersionRange;
+      version?: Gms2VersionPartial;
     }
   | {
       type: "GMRT";

@@ -107,8 +107,8 @@ export async function runBuildPipeline(
 
   const gmToolLog = ctx.makeTaskLogger("Downloading tools");
   let projectToolPath: string;
-  let gmpmDllPath;
-  let gmpmExecutablePath;
+  let gmpmDllPath: string;
+  let gmpmExecutablePath: string;
   let packageToolPath: string;
   try {
     projectToolPath = await downloadProjectTool(ctx, cache, gmToolLog, {
@@ -160,7 +160,7 @@ export async function runBuildPipeline(
 
   if (toolchainType === "GMRT") {
     if (!supportedInGmrt(target)) {
-      throw new Error(`Target '${target}' not supported by GMRT`);
+      throw new KnownError(`Target '${target}' not supported by GMRT`);
     }
     await useGmrt(
       ctx,

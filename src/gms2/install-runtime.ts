@@ -31,7 +31,7 @@ import {
   gms2VersionSchema,
   gms2VersionSatisfies,
   gms2VersionCompare,
-  type Gms2VersionRange,
+  type Gms2VersionPartial,
   gms2VersionToString,
   type Gms2Version,
 } from "~/toolchain";
@@ -113,7 +113,7 @@ async function chmodRecursive(ctx: Context, dir: string) {
 
 function parseRuntimeVersionFromDirName(
   name: string,
-): Gms2VersionRange | undefined {
+): Gms2VersionPartial | undefined {
   const versionStr = name.replace(/^runtime-/, "");
   const result = gms2VersionSchema.safeParse(versionStr);
   return result.success ? result.data : undefined;
@@ -122,7 +122,7 @@ function parseRuntimeVersionFromDirName(
 async function findRuntimeLocation(
   ctx: Context,
   runtimeDir: string,
-  version?: Gms2VersionRange,
+  version?: Gms2VersionPartial,
 ): Promise<string | undefined> {
   const entries = await ctx.fs.readdir(runtimeDir);
   const candidates = entries
@@ -164,7 +164,7 @@ export async function installRuntimeIfNeeded(
     igorPath: string;
     cache: Cache;
     target: Target;
-    version?: Gms2VersionRange;
+    version?: Gms2VersionPartial;
   },
 ): Promise<string> {
   const runtimeDir = await cache.getSubDirPath(ctx, "runtimes-gms2", {

@@ -74,8 +74,8 @@ export function defaultJob(
       : {
           mac: "Build-interpreter-macos-arm64",
           windows: "Build-interpreter-windows-x64",
-          linux: "Build-native-linux-x64",
-          operagx: "Build-native-wasm32-browser",
+          linux: "Build-interpreter-linux-x64",
+          operagx: "Build-interpreter-wasm32-browser",
         };
 
   if (commandType === "compile") {

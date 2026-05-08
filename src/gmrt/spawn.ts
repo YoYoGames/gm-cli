@@ -77,7 +77,7 @@ export async function spawnGmrt(
       }
 
       const stderrOutput = Buffer.concat(stderrChunks).toString().trim();
-      if (!stderrOutput && (code === 0 || code === null)) {
+      if (code === 0 || code === null) {
         resolve();
       } else {
         reject(
