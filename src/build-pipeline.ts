@@ -51,40 +51,9 @@ export interface CommonCliBuildFlags {
   cacheDir?: string;
   runtime?: "native" | "vm";
   errorsOnly?: boolean;
+  // See gms2/options.ts or gmrt/options.ts,
+  // this is the main place for options that are seldom set manually or toolchain/target specific.
   toolchainOptions?: string;
-}
-
-function parseToolchainOptions(
-  raw: string,
-  toolchainType: "GMS2" | "GMRT",
-): {
-  GMS2?: Gms2ToolchainOptionsPartial;
-  GMRT?: GmrtToolchainOptionsPartial;
-} {
-  let json: unknown;
-  try {
-    json = JSON.parse(raw);
-  } catch {
-    throw new KnownError(`--toolchain-options is not valid JSON: ${raw}`);
-  }
-
-  // FIXME: when encountering errors we should print info about where the full JSON schema can be found.
-  if (toolchainType === "GMRT") {
-    const result = gmrtToolchainOptionsSchemaPartial.strict().safeParse(json);
-    if (!result.success) {
-      throw new KnownError(
-        `Invalid --toolchain-options for GMRT:\n${result.error.issues.map((i) => `  - ${i.path.length ? `${i.path.join(".")}: ` : ""}${i.message}`).join("\n")}`,
-      );
-    }
-    return { GMRT: result.data };
-  }
-  const result = gms2ToolchainOptionsSchemaPartial.strict().safeParse(json);
-  if (!result.success) {
-    throw new KnownError(
-      `Invalid --toolchain-options for GMS2:\n${result.error.issues.map((i) => `  - ${i.path.length ? `${i.path.join(".")}: ` : ""}${i.message}`).join("\n")}`,
-    );
-  }
-  return { GMS2: result.data };
 }
 
 export async function runBuildPipeline(
@@ -118,6 +87,13 @@ export async function runBuildPipeline(
   }
 
   const toolchainType = flags.toolchain?.type === "GMRT" ? "GMRT" : "GMS2";
+
+  if (toolchainType === "GMRT" && !ctx.env.GAMEMAKER_CLI_UNSTABLE_FEATURES) {
+    throw new KnownError(
+      "To use GMRT, please set the env variable 'GAMEMAKER_CLI_UNSTABLE_FEATURES'",
+    );
+  }
+
   const toolchainOptions = flags.toolchainOptions
     ? parseToolchainOptions(flags.toolchainOptions, toolchainType)
     : {};
@@ -302,4 +278,37 @@ async function getLicense(
   }
 
   return cachedLicenseFile;
+}
+
+function parseToolchainOptions(
+  raw: string,
+  toolchainType: "GMS2" | "GMRT",
+): {
+  GMS2?: Gms2ToolchainOptionsPartial;
+  GMRT?: GmrtToolchainOptionsPartial;
+} {
+  let json: unknown;
+  try {
+    json = JSON.parse(raw);
+  } catch {
+    throw new KnownError(`--toolchain-options is not valid JSON: ${raw}`);
+  }
+
+  // FIXME: when encountering errors we should print info about where the full JSON schema can be found.
+  if (toolchainType === "GMRT") {
+    const result = gmrtToolchainOptionsSchemaPartial.strict().safeParse(json);
+    if (!result.success) {
+      throw new KnownError(
+        `Invalid --toolchain-options for GMRT:\n${result.error.issues.map((i) => `  - ${i.path.length ? `${i.path.join(".")}: ` : ""}${i.message}`).join("\n")}`,
+      );
+    }
+    return { GMRT: result.data };
+  }
+  const result = gms2ToolchainOptionsSchemaPartial.strict().safeParse(json);
+  if (!result.success) {
+    throw new KnownError(
+      `Invalid --toolchain-options for GMS2:\n${result.error.issues.map((i) => `  - ${i.path.length ? `${i.path.join(".")}: ` : ""}${i.message}`).join("\n")}`,
+    );
+  }
+  return { GMS2: result.data };
 }
