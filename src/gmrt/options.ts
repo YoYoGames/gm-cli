@@ -14,28 +14,14 @@
  * limitations under the License.
  */
 
-import { z } from "zod";
 import type { Context } from "~/context";
 import type { GmrtTarget } from "~/target";
 
-export const gmrtToolchainOptionsSchema = z.object({
-  buildGraph: z.string(),
-  job: z.string(),
-  scriptBuildType: z.enum(["Release", "Debug"]),
-  // TODO later: target-preferences
-  // TODO later: gmrt-preferences
-  // TODO later: target-options
-  // TODO later: buildType: "Release" | "Debug"; // Maybe not needed to expose since we only ship release builds...
-});
-
-export const gmrtToolchainOptionsSchemaPartial =
-  gmrtToolchainOptionsSchema.partial();
-
-export type GmrtToolchainOptions = z.infer<typeof gmrtToolchainOptionsSchema>;
-
-export type GmrtToolchainOptionsPartial = z.infer<
-  typeof gmrtToolchainOptionsSchemaPartial
->;
+export interface GmrtToolchainOptions {
+  buildGraph: string;
+  job: string;
+  scriptBuildType: "Release" | "Debug";
+}
 
 export function defaultBuildGraph(ctx: Context, runtimeDir: string): string {
   const targetsDir = ctx.path.join(

@@ -25,7 +25,6 @@ import {
   defaultBuildGraph,
   defaultJob,
   type GmrtToolchainOptions,
-  type GmrtToolchainOptionsPartial,
 } from "./options";
 
 export async function useGmrt(
@@ -46,7 +45,7 @@ export async function useGmrt(
     licenseFile: string;
     verbose: boolean;
     version?: GmrtVersionRange;
-    toolchainOptions: GmrtToolchainOptionsPartial;
+    toolchainOptions: Partial<GmrtToolchainOptions>;
   },
   tools: {
     gmpmExecutablePath: string;
