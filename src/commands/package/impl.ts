@@ -17,10 +17,11 @@
 import type { Context } from "~/context";
 import type { ProjectPath } from "~/project";
 import { runBuildPipeline, type CommonCliBuildFlags } from "~/build-pipeline";
+import type { BaseFlags } from "../base/base-params";
 
 export default async function (
   this: Context,
-  flags: CommonCliBuildFlags & { output?: string },
+  flags: CommonCliBuildFlags & { output?: string } & BaseFlags,
   project?: ProjectPath,
 ): Promise<void> {
   await runBuildPipeline(this, flags, project, {

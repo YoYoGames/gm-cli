@@ -17,8 +17,10 @@ import { buildCommand, buildRouteMap } from "@stricli/core";
 import { Cache, type CacheType } from "~/cache";
 import type { Context } from "~/context";
 import { findProjectFile, parseProjectPath } from "~/project";
+import { BASE_PARAMS } from "../base/base-params";
 
 export const FLAGS = {
+  ...BASE_PARAMS.flags,
   project: {
     kind: "parsed",
     parse: parseProjectPath,

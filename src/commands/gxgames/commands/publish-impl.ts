@@ -22,17 +22,19 @@ import type { ProjectPath } from "~/project";
 import { apiUserErrorMessage, LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
 import { getApiClient } from "../api";
+import type { BaseFlags } from "~/commands/base/base-params";
+import { makeTaskLogger } from "~/commands/base/make-task-logger";
 
 export default async function (
   this: Context,
-  _flags: Record<never, never>,
+  flags: BaseFlags,
   project?: ProjectPath,
 ): Promise<void> {
   const projectDir = project ? this.path.dirname(project) : undefined;
   const link = await new LinkStorage(this, projectDir).read();
-  const api = getApiClient(this, createAuthManager(this, projectDir));
+  const api = getApiClient(this, createAuthManager(this, flags, projectDir));
 
-  const publishLog = this.makeTaskLogger("Publishing game");
+  const publishLog = makeTaskLogger(this, flags)("Publishing game");
   const res = await api.publishGame(link.gameId);
 
   if (!res.success) {

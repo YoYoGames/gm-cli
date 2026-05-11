@@ -27,6 +27,7 @@ import { validateProjectName, findTemplate } from "./validation";
 import type { ProjectConfig } from "./types";
 // @ts-expect-error — bundled as text by tsup/esbuild
 import claudeContents from "./claude-contents.txt";
+import type { BaseFlags } from "../base/base-params";
 
 interface InitCommandFlags {
   interactive: boolean;
@@ -39,7 +40,7 @@ interface InitCommandFlags {
 
 export default async function (
   this: Context,
-  flags: InitCommandFlags,
+  flags: InitCommandFlags & BaseFlags,
 ): Promise<void> {
   const templates = await getTemplates(this);
 

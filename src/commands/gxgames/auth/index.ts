@@ -25,6 +25,8 @@ import successHtml from "./success.html";
 import errorHtml from "./error.html";
 import type http from "node:http";
 import type open from "tiny-open";
+import type { BaseFlags } from "~/commands/base/base-params";
+import { makeTaskLogger } from "~/commands/base/make-task-logger";
 
 interface AuthConfig {
   fetch: typeof fetch;
@@ -185,12 +187,16 @@ class Auth {
   }
 }
 
-export function createAuthManager(ctx: Context, projectDir?: string) {
+export function createAuthManager(
+  ctx: Context,
+  flags: BaseFlags,
+  projectDir?: string,
+) {
   return new Auth({
     fetch: ctx.fetch,
     http: ctx.http,
     open: ctx.open,
-    makeTaskLogger: ctx.makeTaskLogger,
+    makeTaskLogger: makeTaskLogger(ctx, flags),
     storage: new AuthStorage(ctx, projectDir),
   });
 }

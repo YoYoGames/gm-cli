@@ -19,12 +19,14 @@ import type { Context } from "~/context";
 import { downloadIgor, fetchLicense } from "~/igor";
 import { KnownError } from "~/error";
 import { findProjectFile } from "~/project";
+import { makeTaskLogger } from "../base/make-task-logger";
+import type { BaseFlags } from "../base/base-params";
 
 export const LICENSE_FILENAME = "licence.plist";
 
 export default async function (
   this: Context,
-  flags: { print?: boolean; cacheDir?: string },
+  flags: { print?: boolean; cacheDir?: string } & BaseFlags,
   accessKey: string,
 ): Promise<void> {
   const cwd = this.process.cwd();
@@ -45,7 +47,7 @@ export default async function (
     );
   }
 
-  const igorLog = this.makeTaskLogger("Downloading Igor");
+  const igorLog = makeTaskLogger(this, flags)("Downloading Igor");
   let igorPath: string;
   try {
     igorPath = await downloadIgor(this, igorLog, cache);
@@ -65,7 +67,7 @@ export default async function (
         LICENSE_FILENAME,
       );
 
-  const fetchLog = this.makeTaskLogger("Fetching license");
+  const fetchLog = makeTaskLogger(this, flags)("Fetching license");
   try {
     await fetchLicense(this, igorLog, {
       igorPath,

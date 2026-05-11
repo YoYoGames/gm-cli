@@ -18,12 +18,13 @@ import type { ManualLanguage } from "./command";
 import { searchManual } from "./search-manual";
 import { KnownError } from "~/error";
 import chalk from "chalk";
+import type { BaseFlags } from "../base/base-params";
 
 export default async function (
   this: Context,
   flags: {
     language?: ManualLanguage;
-  },
+  } & BaseFlags,
   query: string,
 ): Promise<void> {
   const result = await searchManual(this, query, flags.language ?? "en");

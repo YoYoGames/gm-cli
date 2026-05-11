@@ -13,16 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import type { Context } from "~/context";
-import type { ProjectPath } from "~/project";
-import { runBuildPipeline, type CommonCliBuildFlags } from "~/build-pipeline";
-import type { BaseFlags } from "../base/base-params";
+import type { BaseFlags } from "./base-params";
+import {
+  fancyTaskLogger,
+  noopLog,
+  plainTaskLogger,
+  type TaskLogger,
+} from "~/log";
 
-export default async function (
-  this: Context,
-  flags: CommonCliBuildFlags & BaseFlags,
-  project?: ProjectPath,
-): Promise<void> {
-  await runBuildPipeline(this, flags, project, { type: "run" });
-}
+export const makeTaskLogger = (ctx: Context, flags: BaseFlags): TaskLogger => {
+  if (flags.logLevel === "errors") {
+    return () => noopLog;
+  }
+  if (flags.logType === "fancy") {
+    return fancyTaskLogger();
+  }
+  if (flags.logType === "plain") {
+    return plainTaskLogger();
+  }
+  if (ctx.env.NO_COLOR) {
+    return plainTaskLogger();
+  }
+  return fancyTaskLogger();
+};

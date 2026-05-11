@@ -26,6 +26,8 @@ import type {
   GameDevUpdateGameRequestAgeRatingEnum,
   GameDevUpdateGameRequestPlatformsEnum,
 } from "../api/generated/data-contracts";
+import type { BaseFlags } from "~/commands/base/base-params";
+import { makeTaskLogger } from "~/commands/base/make-task-logger";
 
 interface MetaFlags {
   title?: string;
@@ -38,12 +40,12 @@ interface MetaFlags {
 
 export default async function (
   this: Context,
-  flags: MetaFlags,
+  flags: MetaFlags & BaseFlags,
   project?: ProjectPath,
 ): Promise<void> {
   const projectDir = project ? this.path.dirname(project) : undefined;
   const link = await new LinkStorage(this, projectDir).read();
-  const api = getApiClient(this, createAuthManager(this, projectDir));
+  const api = getApiClient(this, createAuthManager(this, flags, projectDir));
 
   const gameRes = await api.getGameDetails(link.gameId);
   if (!gameRes.success) {
@@ -54,7 +56,7 @@ export default async function (
   // --- Metadata ---
   // Per field: flag overrides server value; otherwise keep server value as-is.
 
-  const updateLog = this.makeTaskLogger("Updating metadata");
+  const updateLog = makeTaskLogger(this, flags)("Updating metadata");
   const updateData: GameDevUpdateGameRequest = {
     title: flags.title ?? game.title,
     shortDescription: flags.description ?? game.shortDescription,
@@ -84,7 +86,7 @@ export default async function (
   // --- Cover ---
 
   if (flags.cover) {
-    const coverLog = this.makeTaskLogger("Uploading cover");
+    const coverLog = makeTaskLogger(this, flags)("Uploading cover");
     const fileBuffer = await this.fs.readFile(flags.cover);
     const coverRes = await api.uploadCover(
       link.gameId,
@@ -101,7 +103,7 @@ export default async function (
   // --- Graphic ---
 
   if (flags.graphic) {
-    const graphicLog = this.makeTaskLogger("Uploading graphic");
+    const graphicLog = makeTaskLogger(this, flags)("Uploading graphic");
     const fileBuffer = await this.fs.readFile(flags.graphic);
     const graphicRes = await api.uploadGraphic(link.gameId, {
       file: new File([fileBuffer], this.path.basename(flags.graphic)),

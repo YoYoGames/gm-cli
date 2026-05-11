@@ -21,6 +21,7 @@ import { searchManual } from "./search-manual";
 import chalk from "chalk";
 import { KnownError } from "~/error";
 import supportsHyperlinks from "supports-hyperlinks";
+import type { BaseFlags } from "../base/base-params";
 
 const formatLink = chalk.blue.underline;
 
@@ -57,7 +58,7 @@ export default async function (
   this: Context,
   flags: {
     language?: ManualLanguage;
-  },
+  } & BaseFlags,
   query: string,
 ): Promise<void> {
   const language = flags.language ?? "en";

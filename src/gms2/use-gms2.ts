@@ -28,10 +28,13 @@ import {
   type Gms2ToolchainOptions,
   type Gms2ToolchainOptionsPartial,
 } from "./options";
+import { makeTaskLogger } from "~/commands/base/make-task-logger";
+import type { BaseFlags } from "~/commands/base/base-params";
 
 export async function useGms2(
   ctx: Context,
   cache: Cache,
+  flags: BaseFlags,
   command:
     | { type: "run" }
     | { type: "compile" }
@@ -67,7 +70,7 @@ export async function useGms2(
 
   const runtime = options.runtime === "native" ? "YYC" : "VM";
 
-  const runtimeLog = ctx.makeTaskLogger("Installing runtime");
+  const runtimeLog = makeTaskLogger(ctx, flags)("Installing runtime");
   const runtimeLocation = await installRuntimeIfNeeded(ctx, runtimeLog, {
     licenseFile: options.licenseFile,
     igorPath: tools.igorPath,
@@ -125,7 +128,7 @@ export async function useGms2(
     successMessage = `Package created: ${targetFile}`;
   }
 
-  const actionLog = ctx.makeTaskLogger(label, {
+  const actionLog = makeTaskLogger(ctx, flags)(label, {
     // To try avoid the scrollback buffer looking really strange when outputting a lot of content, we don't
     // collapse the main output when running/compiling a project.
     noCollapse: true,

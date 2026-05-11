@@ -18,6 +18,7 @@ import { buildCommand } from "@stricli/core";
 import { TARGETS, TargetSchema } from "~/target";
 import { parseProjectPath } from "~/project";
 import { parseToolchainVersion } from "~/toolchain";
+import { BASE_PARAMS } from "../base/base-params";
 
 export const compileProjectCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -34,6 +35,7 @@ export const compileProjectCommand = buildCommand({
       ],
     },
     flags: {
+      ...BASE_PARAMS.flags,
       target: {
         kind: "parsed",
         parse: (s) => {
@@ -64,11 +66,6 @@ export const compileProjectCommand = buildCommand({
       verbose: {
         kind: "boolean",
         brief: "Verbose output",
-        optional: true,
-      },
-      errorsOnly: {
-        kind: "boolean",
-        brief: "Suppress all output except errors",
         optional: true,
       },
       license: {

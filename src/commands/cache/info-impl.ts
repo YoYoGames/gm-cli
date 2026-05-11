@@ -16,6 +16,7 @@
 import chalk from "chalk";
 import type { Context } from "~/context";
 import { setupCache, validateFlags, type CacheFlags } from "./command";
+import type { BaseFlags } from "../base/base-params";
 
 async function listSubdirs(ctx: Context, dir: string): Promise<string[]> {
   const entries = await ctx.fs.readdir(dir, { withFileTypes: true });
@@ -27,7 +28,7 @@ async function listSubdirs(ctx: Context, dir: string): Promise<string[]> {
 
 export default async function (
   this: Context,
-  flags: CacheFlags,
+  flags: CacheFlags & BaseFlags,
 ): Promise<void> {
   validateFlags(flags);
   const cache = await setupCache(this, flags);

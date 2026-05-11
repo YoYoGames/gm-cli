@@ -15,6 +15,7 @@
  */
 
 import { buildCommand } from "@stricli/core";
+import { BASE_PARAMS } from "../base/base-params";
 
 export const initCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -24,6 +25,7 @@ export const initCommand = buildCommand({
       parameters: [],
     },
     flags: {
+      ...BASE_PARAMS.flags,
       interactive: {
         kind: "boolean",
         brief: "Run interactive wizard",

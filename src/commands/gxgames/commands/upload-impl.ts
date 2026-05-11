@@ -23,6 +23,8 @@ import { KnownError } from "~/error";
 import type { ProjectPath } from "~/project";
 
 import { LinkStorage } from "../api";
+import { makeTaskLogger } from "~/commands/base/make-task-logger";
+import type { BaseFlags } from "~/commands/base/base-params";
 
 const VERSION_RE = /^\d+\.\d+\.\d+\.\d+$/;
 const validateVersion = (v: string | undefined): string | undefined =>
@@ -32,13 +34,13 @@ const validateVersion = (v: string | undefined): string | undefined =>
 
 export default async function (
   this: Context,
-  flags: { file: string; version?: string },
+  flags: { file: string; version?: string } & BaseFlags,
   project?: ProjectPath,
 ): Promise<void> {
   const projectDir = project ? this.path.dirname(project) : undefined;
   const link = await new LinkStorage(this, projectDir).read();
 
-  const api = getApiClient(this, createAuthManager(this, projectDir));
+  const api = getApiClient(this, createAuthManager(this, flags, projectDir));
 
   const gamesRes = await api.getUserGames({
     studioId: [link.studioId],
@@ -73,7 +75,7 @@ export default async function (
     version = v;
   }
 
-  const uploadLog = this.makeTaskLogger("Uploading bundle");
+  const uploadLog = makeTaskLogger(this, flags)("Uploading bundle");
   const fileBuffer = await this.fs.readFile(flags.file);
   const res = await api.uploadGameBundle(
     link.gameId,

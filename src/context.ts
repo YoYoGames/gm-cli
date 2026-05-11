@@ -19,8 +19,6 @@ import child_process from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { TaskLogger } from "./log";
-import { fancyTaskLogger, plainTaskLogger } from "./log";
 import open from "tiny-open";
 import http from "node:http";
 import { getParsedEnv, type ParsedEnv } from "./parse-env";
@@ -34,7 +32,6 @@ export interface Context extends CommandContext {
   readonly fetch: typeof globalThis.fetch;
   readonly open: typeof open;
   readonly http: typeof http;
-  readonly makeTaskLogger: TaskLogger;
   readonly env: ParsedEnv;
 }
 
@@ -62,7 +59,5 @@ export function buildContext(process: NodeJS.Process): Context {
     fs,
     path,
     fetch,
-    makeTaskLogger:
-      env.NO_COLOR === true ? plainTaskLogger() : fancyTaskLogger(),
   };
 }

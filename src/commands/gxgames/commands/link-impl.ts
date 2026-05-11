@@ -17,15 +17,17 @@
 import * as p from "@clack/prompts";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import type { ProjectPath } from "~/project";
 
 import { createAuthManager } from "../auth";
 import { apiUserErrorMessage, getApiClient } from "../api";
 import { LinkStorage } from "../api";
+import type { BaseFlags } from "~/commands/base/base-params";
+import { makeTaskLogger } from "~/commands/base/make-task-logger";
+import type { ProjectPath } from "~/project";
 
 export default async function (
   this: Context,
-  flags: { studioid?: string; gameid?: string },
+  flags: { studioid?: string; gameid?: string } & BaseFlags,
   project?: ProjectPath,
 ): Promise<void> {
   let studioId = flags.studioid;
@@ -33,7 +35,7 @@ export default async function (
   const projectDir = project ? this.path.dirname(project) : undefined;
 
   if (!studioId || !gameId) {
-    const api = getApiClient(this, createAuthManager(this, projectDir));
+    const api = getApiClient(this, createAuthManager(this, flags, projectDir));
 
     if (!studioId) {
       const studiosRes = await api.getUserStudios({ pageSize: 999 });
@@ -83,7 +85,7 @@ export default async function (
         if (p.isCancel(gameName)) {
           return process.exit(0);
         }
-        const createLog = this.makeTaskLogger("Creating game");
+        const createLog = makeTaskLogger(this, flags)("Creating game");
         const res = await api.createGame({
           name: gameName,
           studioId,

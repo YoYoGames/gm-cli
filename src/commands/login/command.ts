@@ -15,6 +15,7 @@
  */
 
 import { buildCommand } from "@stricli/core";
+import { BASE_PARAMS } from "../base/base-params";
 
 export const loginCommand = buildCommand({
   loader: async () => import("./impl"),
@@ -30,6 +31,7 @@ export const loginCommand = buildCommand({
       ],
     },
     flags: {
+      ...BASE_PARAMS.flags,
       print: {
         kind: "boolean",
         brief: "Print the license to stdout instead of saving to a file",

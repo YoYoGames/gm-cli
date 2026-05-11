@@ -27,10 +27,13 @@ import {
   type GmrtToolchainOptions,
   type GmrtToolchainOptionsPartial,
 } from "./options";
+import { makeTaskLogger } from "~/commands/base/make-task-logger";
+import type { BaseFlags } from "~/commands/base/base-params";
 
 export async function useGmrt(
   ctx: Context,
   cache: Cache,
+  flags: BaseFlags,
   command:
     | { type: "run" }
     | { type: "compile" }
@@ -53,7 +56,7 @@ export async function useGmrt(
     projectToolPath: string;
   },
 ) {
-  const gmrtDownloadLog = ctx.makeTaskLogger("Downloading GMRT");
+  const gmrtDownloadLog = makeTaskLogger(ctx, flags)("Downloading GMRT");
 
   const { runtimeDir, gmrtPath } = await installGmrtIfNeeded(
     ctx,
@@ -88,7 +91,7 @@ export async function useGmrt(
     scriptBuildType: options.toolchainOptions.scriptBuildType ?? "Debug",
   };
 
-  const gmrtInvokeLog = ctx.makeTaskLogger(`GMRT ${command.type}`, {
+  const gmrtInvokeLog = makeTaskLogger(ctx, flags)(`GMRT ${command.type}`, {
     noCollapse: true,
   });
 

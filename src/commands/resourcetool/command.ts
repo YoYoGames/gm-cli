@@ -18,6 +18,7 @@ import { buildCommand, buildRouteMap } from "@stricli/core";
 import { parseProjectPath, type ProjectPath } from "~/project";
 import type { Context } from "~/context";
 import type { CommonFlags } from "./impl";
+import { BASE_PARAMS, type BaseFlags } from "../base/base-params";
 
 const commonFlags = {
   cacheDir: {
@@ -43,7 +44,7 @@ export const resourcetoolCommand = buildRouteMap({
         return {
           default: async function (
             this: Context,
-            flags: CommonFlags,
+            flags: CommonFlags & BaseFlags,
             project?: ProjectPath,
           ) {
             return run(this, flags, project, { mode: "mcp" });
@@ -52,7 +53,7 @@ export const resourcetoolCommand = buildRouteMap({
       },
       parameters: {
         positional: { kind: "tuple", parameters: [projectParam] },
-        flags: commonFlags,
+        flags: { ...BASE_PARAMS.flags, ...commonFlags },
       },
       docs: { brief: "Run as Model Context Protocol server" },
     }),
@@ -92,7 +93,7 @@ export const resourcetoolCommand = buildRouteMap({
         return {
           default: async function (
             this: Context,
-            flags: CommonFlags,
+            flags: CommonFlags & BaseFlags,
             project?: ProjectPath,
           ) {
             return run(this, flags, project, { mode: "cli" });
@@ -101,7 +102,7 @@ export const resourcetoolCommand = buildRouteMap({
       },
       parameters: {
         positional: { kind: "tuple", parameters: [projectParam] },
-        flags: commonFlags,
+        flags: { ...BASE_PARAMS.flags, ...commonFlags },
       },
       docs: { brief: "Interactive Read-Evalute-Print-Loop (REPL) session" },
     }),
@@ -111,7 +112,7 @@ export const resourcetoolCommand = buildRouteMap({
         return {
           default: async function (
             this: Context,
-            flags: CommonFlags,
+            flags: CommonFlags & BaseFlags,
             file: string,
             project?: ProjectPath,
           ) {
@@ -134,7 +135,7 @@ export const resourcetoolCommand = buildRouteMap({
             projectParam,
           ],
         },
-        flags: commonFlags,
+        flags: { ...BASE_PARAMS.flags, ...commonFlags },
       },
       docs: { brief: "Run a script file" },
     }),

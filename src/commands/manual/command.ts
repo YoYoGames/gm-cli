@@ -15,6 +15,7 @@
  */
 import { buildCommand, buildRouteMap } from "@stricli/core";
 import { getParsedEnv } from "~/parse-env";
+import { BASE_PARAMS } from "../base/base-params";
 
 const MANUAL_LANGUAGES = [
   "en",
@@ -33,6 +34,7 @@ const MANUAL_LANGUAGES = [
 export type ManualLanguage = (typeof MANUAL_LANGUAGES)[number];
 
 const FLAGS = {
+  ...BASE_PARAMS.flags,
   language: {
     kind: "enum",
     values: MANUAL_LANGUAGES,

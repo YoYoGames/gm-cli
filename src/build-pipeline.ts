@@ -33,12 +33,14 @@ import {
 import { LICENSE_FILENAME } from "./commands/login/impl";
 import { findProjectFile, type ProjectPath } from "./project";
 import { Cache } from "./cache";
-import { noopLog, type Log } from "./log";
+import { type Log } from "./log";
 import type { ToolchainVersion } from "./toolchain";
 import { restorePrefabs } from "./restore-prefabs";
 import { supportedInGmrt, targetForPlatform, type Target } from "./target";
 import { useGmrt } from "./gmrt/use-gmrt";
 import { useGms2 } from "./gms2/use-gms2";
+import { makeTaskLogger } from "./commands/base/make-task-logger";
+import type { BaseFlags } from "./commands/base/base-params";
 
 /**
  * Command flags exposed in package/run/compile
@@ -50,7 +52,6 @@ export interface CommonCliBuildFlags {
   license?: string;
   cacheDir?: string;
   runtime?: "native" | "vm";
-  errorsOnly?: boolean;
   // See gms2/options.ts or gmrt/options.ts,
   // this is the main place for options that are seldom set manually or toolchain/target specific.
   toolchainOptions?: string;
@@ -58,17 +59,13 @@ export interface CommonCliBuildFlags {
 
 export async function runBuildPipeline(
   ctx: Context,
-  flags: CommonCliBuildFlags,
+  flags: CommonCliBuildFlags & BaseFlags,
   project: ProjectPath | undefined,
   command:
     | { type: "compile" }
     | { type: "run" }
     | { type: "package"; outputPath?: string },
 ) {
-  if (flags.errorsOnly) {
-    ctx = { ...ctx, makeTaskLogger: () => noopLog };
-  }
-
   const runtime = flags.runtime ?? "vm";
   const verbose = flags.verbose ?? false;
 
@@ -105,7 +102,7 @@ export async function runBuildPipeline(
       : { type: "infer", projectDir: ctx.path.dirname(projectPath) },
   );
 
-  const gmToolLog = ctx.makeTaskLogger("Downloading tools");
+  const gmToolLog = makeTaskLogger(ctx, flags)("Downloading tools");
   let projectToolPath: string;
   let gmpmDllPath: string;
   let gmpmExecutablePath: string;
@@ -128,7 +125,7 @@ export async function runBuildPipeline(
   }
   gmToolLog.success("Tools downloaded");
 
-  const igorLog = ctx.makeTaskLogger("Downloading Igor");
+  const igorLog = makeTaskLogger(ctx, flags)("Downloading Igor");
   let igorPath: string;
   try {
     igorPath = await downloadIgor(ctx, igorLog, cache);
@@ -138,11 +135,11 @@ export async function runBuildPipeline(
   }
   igorLog.success("Igor downloaded");
 
-  const licenseLog = ctx.makeTaskLogger("Fetching license");
+  const licenseLog = makeTaskLogger(ctx, flags)("Fetching license");
   const licenseFile = await getLicense(ctx, flags, cache, igorPath, licenseLog);
   licenseLog.success("License fetched");
 
-  const prefabsLog = ctx.makeTaskLogger("Restoring prefabs");
+  const prefabsLog = makeTaskLogger(ctx, flags)("Restoring prefabs");
   let prefabsDir: string;
   try {
     prefabsDir = await restorePrefabs(ctx, cache, prefabsLog, {
@@ -165,6 +162,7 @@ export async function runBuildPipeline(
     await useGmrt(
       ctx,
       cache,
+      flags,
       command,
       {
         prefabsDir,
@@ -189,6 +187,7 @@ export async function runBuildPipeline(
   await useGms2(
     ctx,
     cache,
+    flags,
     command,
     {
       prefabsDir,
