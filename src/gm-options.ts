@@ -24,7 +24,6 @@ import {
 } from "./toolchain";
 import { KnownError } from "./error";
 import type { Cache } from "./cache";
-import chalk from "chalk";
 import { version } from "package.json";
 import type { GmrtToolchainOptions } from "./gmrt/options";
 
