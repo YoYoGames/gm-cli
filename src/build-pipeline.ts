@@ -101,12 +101,6 @@ export async function runBuildPipeline(
 
   const toolchain = flags.toolchain ?? gmOptions?.toolchain ?? { type: "GMS2" };
 
-  if (toolchain.type === "GMRT" && !ctx.env.GAMEMAKER_CLI_UNSTABLE_FEATURES) {
-    throw new KnownError(
-      "To use GMRT, please set the env variable 'GAMEMAKER_CLI_UNSTABLE_FEATURES'",
-    );
-  }
-
   const toolchainOptionsParsed = flags.toolchainOptions
     ? parseToolchainOptions(flags.toolchainOptions, toolchain.type)
     : {};
