@@ -1,8 +1,13 @@
+# 1.2.1
+
+- Correction to changelog.
+
 # 1.2.0
 
 - New feature: Basic support for GMRT toolchain. This is should still be considered experiemental and you may encounter issues.
 - New feature: `gm-options.json` file as a convenient way to configure toolchain options and lock what version of the runtime is used.
 - New feature: `--toolchain-options` flag for configuring toolchain and target specific options.
+- New feature: `gm-cli manual read <query>` can be used to read the GameMaker Manual directly in your terminal.
 
 # 1.1.0
 
