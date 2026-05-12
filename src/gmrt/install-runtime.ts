@@ -78,7 +78,9 @@ export async function installGmrtIfNeeded(
   gmrtPath: string;
   runtimeDir: string;
 }> {
-  const runtimesDir = await cache.getSubDirPath(ctx, "runtimes-gmrt");
+  const runtimesDir = await cache.getSubDirPath(ctx, "runtimes-gmrt", {
+    preferShared: true,
+  });
 
   const existingRuntime = await findMatchingRuntime(ctx, runtimesDir, version);
   if (existingRuntime) {
