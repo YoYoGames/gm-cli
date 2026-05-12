@@ -19,6 +19,7 @@ import type { Cache } from "~/cache";
 import { type Context } from "~/context";
 import type { Log } from "~/log";
 import { npmGetLatestVersion, getPlatformSuffix } from "~/npm";
+import { spawnProcess } from "~/spawn";
 import semver from "semver";
 import {
   type GmrtVersionRange,
@@ -70,10 +71,10 @@ export async function installGmrtIfNeeded(
   cache: Cache,
   log: Log,
   {
-    verbose,
     version,
     gmpmPath,
-  }: { verbose: boolean; version?: GmrtVersionRange; gmpmPath: string },
+    verbose,
+  }: { version?: GmrtVersionRange; gmpmPath: string; verbose?: boolean },
 ): Promise<{
   gmrtPath: string;
   runtimeDir: string;
@@ -126,7 +127,7 @@ async function gmpmInstall(
     packageName: string;
     packageVersion: string;
     outputDir: string;
-    verbose: boolean;
+    verbose?: boolean;
   },
 ): Promise<void> {
   await ctx.fs.mkdir(outputDir, { recursive: true });
@@ -145,37 +146,17 @@ async function gmpmInstall(
     "-i",
     "-of",
     outputSubDir,
+    ...(verbose ? ["--verbose"] : []),
     "--reg",
     GMRT_REGISTRY,
     packageJsonPath,
   ];
 
-  return new Promise<void>((resolve, reject) => {
-    const child = ctx.child_process.spawn(gmpmPath, args, {
-      stdio: ["inherit", "pipe", "pipe"],
-    });
-
-    const onData = (data: Buffer) => {
-      if (!verbose) {
-        return;
-      }
-      for (const line of data.toString().split("\n")) {
-        if (line) {
-          log.message(line);
-        }
-      }
-    };
-    child.stdout.on("data", onData);
-    child.stderr.on("data", onData);
-
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`gmpm install failed with exit code ${String(code)}`));
-      }
-    });
+  return spawnProcess(ctx, log, {
+    cmd: gmpmPath,
+    args,
+    verbose,
+    errorLabel: "gmpm install",
   });
 }
 

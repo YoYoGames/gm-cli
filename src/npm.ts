@@ -17,6 +17,7 @@
 import { promisify } from "node:util";
 import type { Context } from "./context";
 import type { Log } from "./log";
+import { spawnProcess } from "./spawn";
 
 export interface PlatformSuffixes {
   win32: { x64: string; arm64: string };
@@ -167,36 +168,11 @@ export function npmInstall(
     packageName,
   ];
 
-  return new Promise<void>((resolve, reject) => {
-    const [npmCmd, npmArgs] = cmd(ctx, "npm", args);
-    const child = ctx.child_process.spawn(npmCmd, npmArgs, {
-      stdio: ["inherit", "pipe", "pipe"],
-    });
-
-    const onData = (data: Buffer) => {
-      for (const line of data.toString().split("\n")) {
-        if (line) {
-          log.message(line);
-        }
-      }
-    };
-    child.stdout.on("data", onData);
-    child.stderr.on("data", onData);
-
-    child.on("error", (err) => {
-      reject(err);
-    });
-
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(
-          new Error(
-            `npm install ${packageName} exited with code ${String(code)}`,
-          ),
-        );
-      }
-    });
+  const [npmCmd, npmArgs] = cmd(ctx, "npm", args);
+  return spawnProcess(ctx, log, {
+    cmd: npmCmd,
+    args: npmArgs,
+    verbose,
+    errorLabel: `npm install ${packageName}`,
   });
 }

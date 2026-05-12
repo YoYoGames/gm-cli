@@ -20,7 +20,6 @@ import { installGmrtIfNeeded } from "~/gmrt/install-runtime";
 import type { GmrtTarget } from "~/target";
 import type { GmrtVersionRange } from "~/toolchain";
 import type { ProjectPath } from "~/project";
-import { stopProcesses } from "~/kill-process";
 import {
   defaultBuildGraph,
   defaultJob,
@@ -59,9 +58,9 @@ export async function useGmrt(
     cache,
     gmrtDownloadLog,
     {
-      verbose: options.verbose,
       version: options.version,
       gmpmPath: tools.gmpmExecutablePath,
+      verbose: options.verbose,
     },
   );
   gmrtDownloadLog.success("GMRT downloaded");
@@ -93,9 +92,7 @@ export async function useGmrt(
 
   await spawnGmrt(ctx, gmrtInvokeLog, {
     gmrtPath,
-    onSignal: () => {
-      stopProcesses(ctx);
-    },
+    verbose: options.verbose,
     args: [
       options.projectPath,
       "-o",
