@@ -103,13 +103,8 @@ The flow:
 > Note: The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
 
 **Many features are planned to soon be added to `gm-cli`. These include:**
-### GMRT and more targets
-GameMaker CLI will have full support to manage more targets for the GMS2 runtime as well as the new GMRT toolchain. 
-
-### Faster & smarter caching and manifest files
-**Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
-
-Currently every project using `gm-cli` has its own local `.gmcache` directory. This means it takes a long time to install a copy of the runtime for every project. This will be much improved with shared caches and manifest file format (similar to `pyprojects.toml` and `package.json`).
+## More targets
+GameMaker CLI will have support to manage more targets.
 
 ### A library to make your own tools
 `gm-cli` will expose its internals as a TypeScript library that you can use to more easily make your own editor tools. 
