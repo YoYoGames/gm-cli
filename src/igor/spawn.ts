@@ -59,17 +59,19 @@ function unescapeIgorString(s: string): string {
 }
 
 function parseIgorErrors(stderr: string): ErrorFromIgor[] | undefined {
-  try {
-    const parsed = ErrorsFromIgorSchema.parse(JSON.parse(stderr));
-    return parsed.errors
-      .filter((error) => error.message)
-      .map((error) => ({
-        ...error,
-        message: unescapeIgorString(error.message),
-      }));
-  } catch {
-    return undefined;
-  }
+  const errors = stderr
+    .split("\n")
+    .flatMap((line) => {
+      try {
+        return ErrorsFromIgorSchema.parse(JSON.parse(line)).errors;
+      } catch {
+        return [];
+      }
+    })
+    .filter((error) => error.message)
+    .map((error) => ({ ...error, message: unescapeIgorString(error.message) }));
+
+  return errors.length > 0 ? errors : undefined;
 }
 
 export function spawnIgor(
