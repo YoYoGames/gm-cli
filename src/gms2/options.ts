@@ -17,8 +17,8 @@
 export interface Gms2ToolchainOptions {
   operagx: {
     packageType?: "zip" | "wallpaper" | "gamestrip";
+    emscriptenSdk?: string;
   };
-  // TODO: extend with more options to configure YYC etc.
 }
 
 export function defaultGms2ToolchainOptions(): Gms2ToolchainOptions {

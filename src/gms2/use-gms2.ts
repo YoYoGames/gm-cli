@@ -53,18 +53,27 @@ export async function useGms2(
     projectToolPath: string;
   },
 ) {
-  // FIXME: Add full support for configuring YYC, currently the underlying tooling in Gms2ToolchainOptions
-  // For example, here it expects to be given a user directory with a local_settings.json file. (At least on windows/operagx)
-  if (
-    options.runtime === "native" &&
-    (options.target === "windows" || options.target === "operagx")
-  ) {
+  const runtime = options.runtime === "native" ? "YYC" : "VM";
+  const defaults = defaultGms2ToolchainOptions();
+  const toolchainOptions: Gms2ToolchainOptions = {
+    operagx: options.toolchainOptions.operagx ?? defaults.operagx,
+  };
+
+  if (runtime === "YYC" && options.target === "windows") {
     throw new KnownError(
       "Support for the native runtime (YYC) is coming soon to GameMaker CLI.",
     );
   }
 
-  const runtime = options.runtime === "native" ? "YYC" : "VM";
+  if (
+    runtime === "YYC" &&
+    options.target === "operagx" &&
+    !toolchainOptions.operagx.emscriptenSdk
+  ) {
+    throw new KnownError(
+      "Building for OperaGX with YYC requires setting a path to the Emscripten SDK.\nSet gms2.operagx.emscriptenSdk in gm-options.json. or --toolchain-options",
+    );
+  }
 
   const runtimeLog = ctx.makeTaskLogger("Installing runtime");
   const runtimeLocation = await installRuntimeIfNeeded(ctx, runtimeLog, {
@@ -80,10 +89,7 @@ export async function useGms2(
     `build-gms2-${options.target}-${runtime}`,
   );
 
-  const defaults = defaultGms2ToolchainOptions();
-  const toolchainOptions: Gms2ToolchainOptions = {
-    operagx: options.toolchainOptions.operagx ?? defaults.operagx,
-  };
+  const userDir = await createLocalSettings(ctx, cache, toolchainOptions);
 
   let label: string;
   let igorAction: string;
@@ -147,6 +153,7 @@ export async function useGms2(
           projectToolPath: tools.projectToolPath,
           verbose: options.verbose,
           runtime,
+          userDir,
         },
         igorAction,
         extraArgs,
@@ -205,6 +212,30 @@ function packageExtension(target: Target): string | undefined {
   }
 }
 
+async function createLocalSettings(
+  ctx: Context,
+  cache: Cache,
+  toolchainOptions: Gms2ToolchainOptions,
+): Promise<string | undefined> {
+  const localSettings: Record<string, string> = {};
+  if (toolchainOptions.operagx.emscriptenSdk) {
+    localSettings["machine.Platform Settings.operagx.sdk_dir"] =
+      toolchainOptions.operagx.emscriptenSdk;
+  }
+  // add more options here...
+
+  if (Object.keys(localSettings).length === 0) {
+    return undefined;
+  }
+
+  const userDir = await cache.getSubDirPath(ctx, "gms2-local-settings");
+  await ctx.fs.writeFile(
+    ctx.path.join(userDir, "local_settings.json"),
+    JSON.stringify(localSettings, null, 2) + "\n",
+  );
+  return userDir;
+}
+
 export interface CommonIgorBuildArgs {
   igorPath: string;
   licenseFile: string;
@@ -216,6 +247,7 @@ export interface CommonIgorBuildArgs {
   projectToolPath: string;
   verbose: boolean;
   runtime: "YYC" | "VM";
+  userDir?: string;
 }
 
 export function constructIgorBuildArgs(
@@ -253,6 +285,7 @@ export function constructIgorBuildArgs(
     "-projectool",
     commonArgs.projectToolPath,
     "-jsonErrors",
+    ...(commonArgs.userDir ? ["-uf", commonArgs.userDir] : []),
     ...extraArgs,
     "--",
     commonArgs.target,

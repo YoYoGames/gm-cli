@@ -72,6 +72,9 @@ export const gms2Schema = z
     operagx: z
       .object({
         packageType: z.enum(["zip", "wallpaper", "gamestrip"]),
+        emscriptenSdk: z
+          .string()
+          .describe("Path to the Emscripten SDK used when building with YYC"),
       })
       .partial(),
   })
