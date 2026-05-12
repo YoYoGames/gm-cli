@@ -17,7 +17,7 @@
 import { promisify } from "node:util";
 import type { Cache } from "~/cache";
 import { type Context } from "~/context";
-import type { Log } from "~/log";
+import { type Log, noopLog } from "~/log";
 import { npmGetLatestVersion, getPlatformSuffix } from "~/npm";
 import { spawnProcess } from "~/spawn";
 import semver from "semver";
@@ -152,7 +152,7 @@ async function gmpmInstall(
     packageJsonPath,
   ];
 
-  return spawnProcess(ctx, log, {
+  return spawnProcess(ctx, verbose ? log : noopLog, {
     cmd: gmpmPath,
     args,
     verbose,
