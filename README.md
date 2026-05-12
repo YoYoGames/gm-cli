@@ -60,6 +60,10 @@ npx @gamemaker/gm-cli@latest login <my key>
 ```sh
 gm-cli manual open "sprites" --language=es
 ```
+The `read` subcommand displays an article directly in your terminal, 
+```sh
+gm-cli manual read "data structures"
+```
 
 ### Publish to GX.Games
 Use `gm-cli gxgames` to publish a game to [gx.games](https://gx.games). Run `gm-cli gxgames --help` for the full list of subcommands.
@@ -106,14 +110,6 @@ GameMaker CLI will have full support to manage more targets for the GMS2 runtime
 **Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
 
 Currently every project using `gm-cli` has its own local `.gmcache` directory. This means it takes a long time to install a copy of the runtime for every project. This will be much improved with shared caches and manifest file format (similar to `pyprojects.toml` and `package.json`).
-
-### Read the GameMaker Manual inside the terminal
-**Test today by setting environment variable `GAMEMAKER_CLI_UNSTABLE_FEATURES=1`**
-
-The `ask` subcommand displays an article directly in your terminal, 
-```sh
-gm-cli manual ask "data structures"
-```
 
 ### A library to make your own tools
 `gm-cli` will expose its internals as a TypeScript library that you can use to more easily make your own editor tools. 
