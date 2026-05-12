@@ -133,6 +133,7 @@ export async function useGms2(
   try {
     await spawnIgor(ctx, actionLog, {
       igorPath: tools.igorPath,
+      verbose: options.verbose,
       args: constructIgorBuildArgs(
         ctx,
         {

@@ -19,6 +19,7 @@ import type { Context } from "~/context";
 import type { Log } from "~/log";
 import type { Gms2Version } from "~/toolchain";
 import { KnownError } from "~/error";
+import { spawnProcess } from "~/spawn";
 import type { Module } from "./module";
 
 const RunnerErrorSchema = z.object({
@@ -79,69 +80,26 @@ export function spawnIgor(
     args,
     label,
     onSignal,
+    verbose,
   }: {
     igorPath: string;
     args: string[];
     label: string;
     onSignal?: () => void;
+    verbose?: boolean;
   },
 ): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const child = ctx.child_process.spawn(igorPath, args, {
-      stdio: ["inherit", "pipe", "pipe"],
-      env:
-        ctx.process.platform === "darwin"
-          ? { ...ctx.process.env, COMPlus_ZapDisable: "1" }
-          : undefined,
-    });
-
-    child.stdout.on("data", (data: Buffer) => {
-      for (const line of data.toString().split("\n")) {
-        if (line) {
-          log.message(line);
-        }
-      }
-    });
-    // Stderr is assumed to only contain a JSON object and nothing else,
-    // so we collect the output and parse it on close.
-    const stderrChunks: Buffer[] = [];
-    child.stderr.on("data", (data: Buffer) => {
-      stderrChunks.push(Buffer.from(data));
-    });
-
-    if (onSignal) {
-      ctx.process.on("SIGINT", onSignal);
-      ctx.process.on("SIGTERM", onSignal);
-    }
-
-    child.on("error", (err) => {
-      if (onSignal) {
-        ctx.process.removeListener("SIGINT", onSignal);
-        ctx.process.removeListener("SIGTERM", onSignal);
-      }
-      reject(err);
-    });
-
-    child.on("close", (code) => {
-      if (onSignal) {
-        ctx.process.removeListener("SIGINT", onSignal);
-        ctx.process.removeListener("SIGTERM", onSignal);
-      }
-
-      const stderrOutput = Buffer.concat(stderrChunks).toString().trim();
-      const errors = parseIgorErrors(stderrOutput) ?? [];
-
-      if (errors.length === 0 && (code === 0 || code === null)) {
-        resolve();
-      } else {
-        const errorMessages = errors.map((e) => e.message).join("\n");
-        reject(
-          new KnownError(
-            errorMessages || `${label} exited with code ${String(code)}`,
-          ),
-        );
-      }
-    });
+  return spawnProcess(ctx, log, {
+    cmd: igorPath,
+    args,
+    onSignal,
+    verbose,
+    errorLabel: label,
+    parseStderr: (stderr) => {
+      const errors = parseIgorErrors(stderr) ?? [];
+      const errorMessage = errors.map((e) => e.message).join("\n");
+      return { errorMessage, shouldThrow: errors.length > 0 };
+    },
   });
 }
 

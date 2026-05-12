@@ -16,9 +16,9 @@
 
 import type { Cache } from "./cache";
 import type { Context } from "./context";
-import { KnownError } from "./error";
 import type { Log } from "./log";
 import type { ProjectPath } from "./project";
+import { spawnProcess } from "./spawn";
 
 export async function restorePrefabs(
   ctx: Context,
@@ -39,51 +39,21 @@ export async function restorePrefabs(
   },
 ): Promise<string> {
   const prefabsDir = await cache.getSubDirPath(ctx, "prefabs");
-  return new Promise<string>((resolve, reject) => {
-    // TODO LATER: add options to pick registry etc.
-    const args = [
-      "PREFABS",
-      "RESTORE",
-      `SOURCE=${projectPath}`,
-      `PACKAGETOOL=${packageToolPath}`,
-      `GMPM_DLL=${gmpmDllPath}`,
-      `PACKAGETOOLVERBOSE=${verbose ? "TRUE" : "FALSE"}`,
-      `PREFABSFOLDER=${prefabsDir}`,
-    ];
-    const child = ctx.child_process.spawn(projectToolPath, args, {
-      stdio: ["inherit", "pipe", "pipe"],
-      env:
-        ctx.process.platform === "darwin"
-          ? { ...ctx.process.env, COMPlus_ZapDisable: "1" }
-          : undefined,
-    });
-
-    child.stdout.on("data", (data: Buffer) => {
-      for (const line of data.toString().split("\n")) {
-        if (line) {
-          log.message(line);
-        }
-      }
-    });
-    child.stderr.on("data", (data: Buffer) => {
-      for (const line of data.toString().split("\n")) {
-        if (line) {
-          log.message(line);
-        }
-      }
-    });
-
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0 || code === null) {
-        resolve(prefabsDir);
-      } else {
-        reject(
-          new KnownError(
-            `Failed to restore project. "ProjectTool PREFABS RESTORE" exited with code ${String(code)}`,
-          ),
-        );
-      }
-    });
+  // TODO LATER: add options to pick registry etc.
+  const args = [
+    "PREFABS",
+    "RESTORE",
+    `SOURCE=${projectPath}`,
+    `PACKAGETOOL=${packageToolPath}`,
+    `GMPM_DLL=${gmpmDllPath}`,
+    `PACKAGETOOLVERBOSE=${verbose ? "TRUE" : "FALSE"}`,
+    `PREFABSFOLDER=${prefabsDir}`,
+  ];
+  await spawnProcess(ctx, log, {
+    cmd: projectToolPath,
+    args,
+    verbose,
+    errorLabel: 'Failed to restore project. "ProjectTool PREFABS RESTORE"',
   });
+  return prefabsDir;
 }
