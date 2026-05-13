@@ -109,7 +109,7 @@ export default async function (
         ignoreStdio: true,
         run: {
           mode: "command",
-          command: `resource project create name="${config.projectName}" path="${projectDir}"`,
+          command: `project create name="${config.projectName}" path="${projectDir}"`,
         },
       });
     } else {
