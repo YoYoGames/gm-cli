@@ -1,3 +1,9 @@
+# 1.3.0
+
+- Fix: Create blank games with latest ResourceTool release
+- Fix: Improvements to verbose logging output.
+- New feature: Expose OperaGX EmscriptenSDK option. Used when building OperaGX target with YYC.
+
 # 1.2.1
 
 - Correction to changelog.
