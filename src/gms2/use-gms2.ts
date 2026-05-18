@@ -57,6 +57,9 @@ export async function useGms2(
   const defaults = defaultGms2ToolchainOptions();
   const toolchainOptions: Gms2ToolchainOptions = {
     operagx: options.toolchainOptions.operagx ?? defaults.operagx,
+    windows: options.toolchainOptions.windows ?? defaults.windows,
+    mac: options.toolchainOptions.mac ?? defaults.mac,
+    linux: options.toolchainOptions.linux ?? defaults.linux,
   };
 
   if (runtime === "YYC" && options.target === "windows") {
@@ -106,27 +109,24 @@ export async function useGms2(
     successMessage = "Game exited";
   } else {
     label = `Packaging for ${options.target}`;
-    let targetFile: string;
-    if (command.outputPath === undefined) {
-      const ext = packageExtension(options.target);
-      const projectDir = ctx.path.dirname(options.projectPath);
-      const projectName = getProjectName(ctx, options.projectPath);
-      targetFile = ctx.path.join(projectDir, `${projectName}${ext ?? ""}`);
-    } else {
-      const projectDir = ctx.path.dirname(options.projectPath);
-      targetFile = ctx.path.resolve(projectDir, command.outputPath);
-    }
-    igorAction = getPackageAction(options.target);
-    extraArgs = [
-      "-tf",
+    const projectDir = ctx.path.dirname(options.projectPath);
+    const projectName = getProjectName(ctx, options.projectPath);
+    const resolvedOutputPath =
+      command.outputPath !== undefined
+        ? ctx.path.resolve(projectDir, command.outputPath)
+        : undefined;
+    const {
+      action,
       targetFile,
-      ...(options.target === "operagx"
-        ? [
-            "-packagetype",
-            gxPackageTypeArg(toolchainOptions.operagx.packageType),
-          ]
-        : []),
-    ];
+      extraArgs: packageArgs,
+    } = getPackageAction(
+      options.target,
+      toolchainOptions,
+      resolvedOutputPath,
+      ctx.path.join(projectDir, projectName),
+    );
+    igorAction = action;
+    extraArgs = ["-tf", targetFile, ...packageArgs];
     successMessage = `Package created: ${targetFile}`;
   }
 
@@ -171,44 +171,76 @@ export async function useGms2(
   actionLog.success(successMessage);
 }
 
-function gxPackageTypeArg(
-  packageType: Gms2ToolchainOptions["operagx"]["packageType"],
-): string {
-  switch (packageType) {
-    case undefined:
-    case "zip":
-      return "OperaGXPackage_Zip";
-    case "gamestrip":
-      return "OperaGXPackage_Gamestrip";
-    case "wallpaper":
-      return "OperaGXPackage_Wallpaper";
-    default:
-      packageType satisfies never;
-      throw new Error("Unreachable");
-  }
-}
-
-function getPackageAction(target: Target): string {
+function getPackageAction(
+  target: Target,
+  options: Gms2ToolchainOptions,
+  outputPath: string | undefined,
+  defaultBasePath: string,
+): {
+  action: string;
+  targetFile: string;
+  extraArgs: string[];
+} {
   switch (target) {
-    case "windows":
-    case "mac":
-    case "linux":
-      return "PackageZip";
+    case "windows": {
+      const nsis = options.windows.packageType === "nsis";
+      return {
+        action: nsis ? "PackageNsis" : "PackageZip",
+        targetFile: outputPath ?? `${defaultBasePath}${nsis ? ".exe" : ".zip"}`,
+        extraArgs: [],
+      };
+    }
+    case "mac": {
+      const dmg = options.mac.packageType === "dmg";
+      return {
+        action: dmg ? "PackageDMG" : "PackageZip",
+        targetFile: outputPath ?? `${defaultBasePath}${dmg ? ".dmg" : ".zip"}`,
+        extraArgs: [],
+      };
+    }
+    case "operagx": {
+      let packageTypeArg: string;
+      switch (options.operagx.packageType) {
+        case undefined:
+        case "zip":
+          packageTypeArg = "OperaGXPackage_Zip";
+          break;
+        case "gamestrip":
+          packageTypeArg = "OperaGXPackage_Gamestrip";
+          break;
+        case "wallpaper":
+          packageTypeArg = "OperaGXPackage_Wallpaper";
+          break;
+        default:
+          options.operagx.packageType satisfies never;
+          throw new Error("Unreachable");
+      }
+      return {
+        action: "Package",
+        targetFile: outputPath ?? `${defaultBasePath}.zip`,
+        extraArgs: ["-packagetype", packageTypeArg],
+      };
+    }
+    case "linux": {
+      const appimage = options.linux.packageType === "appimage";
+      if (
+        appimage &&
+        outputPath !== undefined &&
+        !outputPath.endsWith(".AppImage")
+      ) {
+        throw new KnownError(
+          "When packaging for Linux with AppImage format, the output filename must end in .AppImage.",
+        );
+      }
+      return {
+        action: "Package",
+        targetFile:
+          outputPath ?? `${defaultBasePath}${appimage ? ".AppImage" : ".zip"}`,
+        extraArgs: [],
+      };
+    }
     default:
-      return "Package";
-    // FIXME: exhaustiveness checking and fix for platforms like xbox: PackageSubmissionXboxOne", PackageSubmissionXboxSeriesXS
-  }
-}
-
-function packageExtension(target: Target): string | undefined {
-  switch (target) {
-    case "windows":
-    case "linux":
-    case "mac":
-    case "operagx":
-      return ".zip";
-    default:
-      return undefined;
+      throw new KnownError("Target not supported in GM-CLI yet.");
   }
 }
 

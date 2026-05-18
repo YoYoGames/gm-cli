@@ -19,11 +19,29 @@ export interface Gms2ToolchainOptions {
     packageType?: "zip" | "wallpaper" | "gamestrip";
     emscriptenSdk?: string;
   };
+  windows: {
+    packageType?: "zip" | "nsis";
+  };
+  mac: {
+    packageType?: "zip" | "dmg";
+  };
+  linux: {
+    packageType?: "zip" | "appimage";
+  };
 }
 
 export function defaultGms2ToolchainOptions(): Gms2ToolchainOptions {
   return {
     operagx: {
+      packageType: "zip",
+    },
+    windows: {
+      packageType: "zip",
+    },
+    mac: {
+      packageType: "zip",
+    },
+    linux: {
       packageType: "zip",
     },
   };
