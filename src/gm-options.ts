@@ -77,6 +77,21 @@ export const gms2Schema = z
           .describe("Path to the Emscripten SDK used when building with YYC"),
       })
       .partial(),
+    windows: z
+      .object({
+        packageType: z.enum(["zip", "nsis"]),
+      })
+      .partial(),
+    mac: z
+      .object({
+        packageType: z.enum(["zip", "dmg"]),
+      })
+      .partial(),
+    linux: z
+      .object({
+        packageType: z.enum(["zip", "appimage"]),
+      })
+      .partial(),
   })
   .partial();
 
