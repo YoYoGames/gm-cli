@@ -1,3 +1,8 @@
+# 1.4.0
+
+- Fix: `gm-cli package` now works correctly on Linux.
+- New feature: Configurable package format for Windows (`zip` or `nsis`), macOS (`zip` or `dmg`), and Linux (`zip` or `appimage`) via `gm-options.json` or `--toolchain-options`. Example: `--toolchain-options '{"windows": {"packageType": "nsis"}}'`.
+
 # 1.3.0
 
 - Fix: Create blank games with latest ResourceTool release
