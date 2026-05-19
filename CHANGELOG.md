@@ -1,3 +1,7 @@
+# 1.4.1
+
+- Fix: Relative project paths are now handled correctly (e.g. `gm-cli ./some/project.yyp` works as intended)
+
 # 1.4.0
 
 - Fix: `gm-cli package` now works correctly on Linux.
