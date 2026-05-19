@@ -1,6 +1,6 @@
 # 1.4.1
 
-- Fix: Relative project paths are now handled correctly (e.g. `gm-cli ./some/project.yyp` works as intended)
+- Fix: Relative project paths are now handled correctly (e.g. `gm-cli run ./some/project.yyp` works as intended)
 
 # 1.4.0
 
