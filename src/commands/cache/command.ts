@@ -21,7 +21,7 @@ import { findProjectFile, parseProjectPath } from "~/project";
 export const FLAGS = {
   project: {
     kind: "parsed",
-    parse: parseProjectPath,
+    parse: String,
     brief: "Path to the project .yyp file",
     optional: true,
   },
@@ -79,7 +79,8 @@ export async function setupCache(
   if (flags.cacheDir) {
     cacheType = { type: "absolute", path: flags.cacheDir };
   } else if (flags.project) {
-    cacheType = { type: "infer", projectDir: ctx.path.dirname(flags.project) };
+    const projectPath = parseProjectPath(ctx, flags.project);
+    cacheType = { type: "infer", projectDir: ctx.path.dirname(projectPath) };
   } else {
     // Try inferring from cwd.
     const projectPath = await findProjectFile(ctx, ctx.process.cwd());

@@ -16,7 +16,7 @@
 
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import type { ProjectPath } from "~/project";
+import { parseProjectPath } from "~/project";
 
 import { apiUserErrorMessage, LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
@@ -39,9 +39,10 @@ interface MetaFlags {
 export default async function (
   this: Context,
   flags: MetaFlags,
-  project?: ProjectPath,
+  project?: string,
 ): Promise<void> {
-  const projectDir = project ? this.path.dirname(project) : undefined;
+  const projectPath = project ? parseProjectPath(this, project) : undefined;
+  const projectDir = projectPath ? this.path.dirname(projectPath) : undefined;
   const link = await new LinkStorage(this, projectDir).read();
   const api = getApiClient(this, createAuthManager(this, projectDir));
 

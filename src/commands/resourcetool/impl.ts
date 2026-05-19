@@ -16,7 +16,7 @@
 
 import { Cache } from "~/cache";
 import { type Context } from "~/context";
-import { findProjectFile, type ProjectPath } from "~/project";
+import { findProjectFile, parseProjectPath } from "~/project";
 import {
   downloadGmpm,
   downloadPackageTool,
@@ -34,11 +34,13 @@ export interface CommonFlags {
 export async function run(
   ctx: Context,
   flags: CommonFlags,
-  project: ProjectPath | undefined,
+  project: string | undefined,
   mode: ResourceToolMode,
 ): Promise<void> {
   const cwd = ctx.process.cwd();
-  const projectPath = project ?? (await findProjectFile(ctx, cwd));
+  const projectPath = project
+    ? parseProjectPath(ctx, project)
+    : await findProjectFile(ctx, cwd);
 
   if (projectPath === undefined && mode.mode === "mcp") {
     // Since we hide the "project load" tool in mcp mode

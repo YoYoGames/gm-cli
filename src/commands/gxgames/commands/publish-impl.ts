@@ -17,7 +17,7 @@
 import type { Context } from "~/context";
 import chalk from "chalk";
 import { KnownError } from "~/error";
-import type { ProjectPath } from "~/project";
+import { parseProjectPath } from "~/project";
 
 import { apiUserErrorMessage, LinkStorage } from "../api";
 import { createAuthManager } from "../auth";
@@ -26,9 +26,10 @@ import { getApiClient } from "../api";
 export default async function (
   this: Context,
   _flags: Record<never, never>,
-  project?: ProjectPath,
+  project?: string,
 ): Promise<void> {
-  const projectDir = project ? this.path.dirname(project) : undefined;
+  const projectPath = project ? parseProjectPath(this, project) : undefined;
+  const projectDir = projectPath ? this.path.dirname(projectPath) : undefined;
   const link = await new LinkStorage(this, projectDir).read();
   const api = getApiClient(this, createAuthManager(this, projectDir));
 

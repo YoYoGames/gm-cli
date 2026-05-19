@@ -16,7 +16,6 @@
 
 import { buildCommand } from "@stricli/core";
 import { TARGETS, TargetSchema } from "~/target";
-import { parseProjectPath } from "~/project";
 import { parseToolchainVersion } from "~/toolchain";
 
 export const packageCommand = buildCommand({
@@ -28,7 +27,7 @@ export const packageCommand = buildCommand({
         {
           brief: "Path to the project .yyp file",
           placeholder: "project",
-          parse: parseProjectPath,
+          parse: String,
           optional: true,
         },
       ],

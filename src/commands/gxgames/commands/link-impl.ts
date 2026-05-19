@@ -17,7 +17,7 @@
 import * as p from "@clack/prompts";
 import type { Context } from "~/context";
 import { KnownError } from "~/error";
-import type { ProjectPath } from "~/project";
+import { parseProjectPath } from "~/project";
 
 import { createAuthManager } from "../auth";
 import { apiUserErrorMessage, getApiClient } from "../api";
@@ -26,11 +26,12 @@ import { LinkStorage } from "../api";
 export default async function (
   this: Context,
   flags: { studioid?: string; gameid?: string },
-  project?: ProjectPath,
+  project?: string,
 ): Promise<void> {
   let studioId = flags.studioid;
   let gameId = flags.gameid;
-  const projectDir = project ? this.path.dirname(project) : undefined;
+  const projectPath = project ? parseProjectPath(this, project) : undefined;
+  const projectDir = projectPath ? this.path.dirname(projectPath) : undefined;
 
   if (!studioId || !gameId) {
     const api = getApiClient(this, createAuthManager(this, projectDir));
