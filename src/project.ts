@@ -19,11 +19,11 @@ import { KnownError } from "./error";
 
 export type ProjectPath = string & { readonly __brand: unique symbol };
 
-export function parseProjectPath(s: string): ProjectPath {
+export function parseProjectPath(ctx: Context, s: string): ProjectPath {
   if (!s.endsWith(".yyp")) {
     throw new KnownError(`Expected a file with the .yyp extension.`);
   }
-  return s as ProjectPath;
+  return ctx.path.resolve(s) as ProjectPath;
 }
 
 export async function findProjectFile(
@@ -35,7 +35,7 @@ export async function findProjectFile(
   if (!yypFile) {
     return undefined;
   }
-  return ctx.path.join(dir, yypFile) as ProjectPath;
+  return ctx.path.resolve(ctx.path.join(dir, yypFile)) as ProjectPath;
 }
 
 export function getProjectName(ctx: Context, projectPath: ProjectPath) {

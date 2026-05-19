@@ -15,7 +15,6 @@
  */
 
 import { buildCommand, buildRouteMap } from "@stricli/core";
-import { parseProjectPath, type ProjectPath } from "~/project";
 import type { Context } from "~/context";
 import type { CommonFlags } from "./impl";
 
@@ -31,7 +30,7 @@ const commonFlags = {
 const projectParam = {
   brief: "Path to the project .yyp file",
   placeholder: "project",
-  parse: parseProjectPath,
+  parse: String,
   optional: true as const,
 };
 
@@ -44,7 +43,7 @@ export const resourcetoolCommand = buildRouteMap({
           default: async function (
             this: Context,
             flags: CommonFlags,
-            project?: ProjectPath,
+            project?: string,
           ) {
             return run(this, flags, project, { mode: "mcp" });
           },
@@ -64,7 +63,7 @@ export const resourcetoolCommand = buildRouteMap({
             this: Context,
             flags: CommonFlags,
             command: string,
-            project?: ProjectPath,
+            project?: string,
           ) {
             return run(this, flags, project, { mode: "command", command });
           },
@@ -93,7 +92,7 @@ export const resourcetoolCommand = buildRouteMap({
           default: async function (
             this: Context,
             flags: CommonFlags,
-            project?: ProjectPath,
+            project?: string,
           ) {
             return run(this, flags, project, { mode: "cli" });
           },
@@ -113,7 +112,7 @@ export const resourcetoolCommand = buildRouteMap({
             this: Context,
             flags: CommonFlags,
             file: string,
-            project?: ProjectPath,
+            project?: string,
           ) {
             return run(this, flags, project, {
               mode: "script",

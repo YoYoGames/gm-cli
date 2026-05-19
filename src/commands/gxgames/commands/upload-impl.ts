@@ -20,7 +20,7 @@ import chalk from "chalk";
 import { apiUserErrorMessage, getApiClient } from "../api";
 import { createAuthManager } from "../auth";
 import { KnownError } from "~/error";
-import type { ProjectPath } from "~/project";
+import { parseProjectPath } from "~/project";
 
 import { LinkStorage } from "../api";
 
@@ -33,9 +33,10 @@ const validateVersion = (v: string | undefined): string | undefined =>
 export default async function (
   this: Context,
   flags: { file: string; version?: string },
-  project?: ProjectPath,
+  project?: string,
 ): Promise<void> {
-  const projectDir = project ? this.path.dirname(project) : undefined;
+  const projectPath = project ? parseProjectPath(this, project) : undefined;
+  const projectDir = projectPath ? this.path.dirname(projectPath) : undefined;
   const link = await new LinkStorage(this, projectDir).read();
 
   const api = getApiClient(this, createAuthManager(this, projectDir));

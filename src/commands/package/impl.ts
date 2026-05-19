@@ -15,16 +15,21 @@
  */
 
 import type { Context } from "~/context";
-import type { ProjectPath } from "~/project";
+import { parseProjectPath } from "~/project";
 import { runBuildPipeline, type CommonCliBuildFlags } from "~/build-pipeline";
 
 export default async function (
   this: Context,
   flags: CommonCliBuildFlags & { output?: string },
-  project?: ProjectPath,
+  project?: string,
 ): Promise<void> {
-  await runBuildPipeline(this, flags, project, {
-    type: "package",
-    outputPath: flags.output,
-  });
+  await runBuildPipeline(
+    this,
+    flags,
+    project ? parseProjectPath(this, project) : undefined,
+    {
+      type: "package",
+      outputPath: flags.output,
+    },
+  );
 }

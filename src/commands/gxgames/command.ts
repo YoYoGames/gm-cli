@@ -15,12 +15,11 @@
  */
 
 import { buildCommand, buildRouteMap } from "@stricli/core";
-import { parseProjectPath } from "~/project";
 
 const projectParam = {
   brief: "Path to the project .yyp file (defaults to current directory)",
   placeholder: "project",
-  parse: parseProjectPath,
+  parse: String,
   optional: true as const,
 };
 
