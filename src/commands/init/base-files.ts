@@ -125,11 +125,11 @@ jobs:
           key: \${{ runner.os }}-gmcache
 
       # ffmpeg is needed for linux: https://github.com/YoYoGames/GameMaker-Bugs/issues/4977
-      - name: Set up ffmpeg
+      - name: Install ffmpeg via apt
         if: \${{ runner.os == 'Linux' }}
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: "6.1.0"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       # You can create an access token at https://gamemaker.io/en/account/access-keys
       # Then, in github, set a Repository Secret named GAMEMAKER_PAT with that value
@@ -187,11 +187,11 @@ jobs:
           key: \${{ runner.os }}-gmcache-\${{ matrix.target }}
 
       # ffmpeg is needed for linux: https://github.com/YoYoGames/GameMaker-Bugs/issues/4977
-      - name: Set up ffmpeg
+      - name: Install ffmpeg via apt
         if: \${{ runner.os == 'Linux' }}
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: "6.1.0"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       # You can create an access token at https://gamemaker.io/en/account/access-keys
       # Then, in github, set a Repository Secret named GAMEMAKER_PAT with that value
