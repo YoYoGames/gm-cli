@@ -1,3 +1,7 @@
+# 2.0.0
+
+- Breaking: a new release of Igor is required to support LTS 2026, a major version release purges all outdated GM-CLI caches.
+
 # 1.4.1
 
 - Fix: Relative project paths are now handled correctly (e.g. `gm-cli run ./some/project.yyp` works as intended)
