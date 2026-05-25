@@ -125,11 +125,37 @@ jobs:
           key: \${{ runner.os }}-gmcache
 
       # ffmpeg is needed for linux: https://github.com/YoYoGames/GameMaker-Bugs/issues/4977
-      - name: Set up ffmpeg
+      - name: Load cached FFmpeg
         if: \${{ runner.os == 'Linux' }}
-        uses: FedericoCarboni/setup-ffmpeg@v3
+        id: cache-ffmpeg
+        uses: actions/cache@v5
         with:
-          ffmpeg-version: "6.1.0"
+          path: ~/.local/share/ffmpeg-bin
+          key: \${{ runner.os }}-ffmpeg-6.0.1
+
+      - name: Install FFmpeg if not cached
+        if: \${{ runner.os == 'Linux' && steps.cache-ffmpeg.outputs.cache-hit != 'true' }}
+        run: |
+          VERSION=6.0.1
+          RELEASE_NAME=ffmpeg-\${VERSION}-amd64-static
+          
+          # Create a dedicated directory that doesn't require sudo
+          mkdir -p ~/.local/share/ffmpeg-bin
+          
+          # Download and extract
+          wget --timeout=8 --tries=10 https://www.johnvansickle.com/ffmpeg/old-releases/\${RELEASE_NAME}.tar.xz
+          tar -xf \${RELEASE_NAME}.tar.xz
+          
+          # Move binaries to our custom directory
+          mv \${RELEASE_NAME}/ffmpeg \${RELEASE_NAME}/ffprobe ~/.local/share/ffmpeg-bin/
+          
+          # Cleanup
+          rm -rf \${RELEASE_NAME} \${RELEASE_NAME}.tar.xz
+
+      # Crucial Step: Make sure the cached binaries are available to subsequent steps
+      - name: Add FFmpeg to PATH
+        if: \${{ runner.os == 'Linux' }}
+        run: echo "$HOME/.local/share/ffmpeg-bin" >> $GITHUB_PATH
 
       # You can create an access token at https://gamemaker.io/en/account/access-keys
       # Then, in github, set a Repository Secret named GAMEMAKER_PAT with that value
@@ -187,11 +213,25 @@ jobs:
           key: \${{ runner.os }}-gmcache-\${{ matrix.target }}
 
       # ffmpeg is needed for linux: https://github.com/YoYoGames/GameMaker-Bugs/issues/4977
-      - name: Set up ffmpeg
+      - name: Load cached FFmpeg
         if: \${{ runner.os == 'Linux' }}
-        uses: FedericoCarboni/setup-ffmpeg@v3
+        id: cache-ffmpeg
+        uses: actions/cache@v5
         with:
-          ffmpeg-version: "6.1.0"
+          path: |
+            /usr/local/bin/ffmpeg
+            /usr/local/bin/ffprobe
+          key: \${{ runner.os }}-ffmpeg-6.0.1
+
+      - name: Install FFmpeg if not cached
+        if: \${{ runner.os == 'Linux' && steps.cache-ffmpeg.outputs.cache-hit != 'true' }}
+        run: |
+          VERSION=6.0.1
+          RELEASE_NAME=ffmpeg-\${VERSION}-amd64-static
+          wget --timeout=8 --tries=10 https://www.johnvansickle.com/ffmpeg/old-releases/\${RELEASE_NAME}.tar.xz
+          tar -xf \${RELEASE_NAME}.tar.xz
+          mv \${RELEASE_NAME}/ffmpeg \${RELEASE_NAME}/ffprobe /usr/local/bin/
+          rm -rf \${RELEASE_NAME}
 
       # You can create an access token at https://gamemaker.io/en/account/access-keys
       # Then, in github, set a Repository Secret named GAMEMAKER_PAT with that value
