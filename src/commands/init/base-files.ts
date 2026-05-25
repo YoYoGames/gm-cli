@@ -138,21 +138,13 @@ jobs:
         run: |
           VERSION=6.0.1
           RELEASE_NAME=ffmpeg-\${VERSION}-amd64-static
-          
-          # Create a dedicated directory that doesn't require sudo
           mkdir -p ~/.local/share/ffmpeg-bin
-          
-          # Download and extract
           wget --timeout=8 --tries=10 https://www.johnvansickle.com/ffmpeg/old-releases/\${RELEASE_NAME}.tar.xz
           tar -xf \${RELEASE_NAME}.tar.xz
-          
-          # Move binaries to our custom directory
           mv \${RELEASE_NAME}/ffmpeg \${RELEASE_NAME}/ffprobe ~/.local/share/ffmpeg-bin/
-          
-          # Cleanup
           rm -rf \${RELEASE_NAME} \${RELEASE_NAME}.tar.xz
 
-      # Crucial Step: Make sure the cached binaries are available to subsequent steps
+      # Make sure the cached binaries are available to subsequent steps
       - name: Add FFmpeg to PATH
         if: \${{ runner.os == 'Linux' }}
         run: echo "$HOME/.local/share/ffmpeg-bin" >> $GITHUB_PATH
@@ -218,9 +210,8 @@ jobs:
         id: cache-ffmpeg
         uses: actions/cache@v5
         with:
-          path: |
-            /usr/local/bin/ffmpeg
-            /usr/local/bin/ffprobe
+          path: ~/.local/share/ffmpeg-bin
+          # Using the exact same key allows compile and package workflows to share the cache
           key: \${{ runner.os }}-ffmpeg-6.0.1
 
       - name: Install FFmpeg if not cached
@@ -228,10 +219,16 @@ jobs:
         run: |
           VERSION=6.0.1
           RELEASE_NAME=ffmpeg-\${VERSION}-amd64-static
+          mkdir -p ~/.local/share/ffmpeg-bin
           wget --timeout=8 --tries=10 https://www.johnvansickle.com/ffmpeg/old-releases/\${RELEASE_NAME}.tar.xz
           tar -xf \${RELEASE_NAME}.tar.xz
-          mv \${RELEASE_NAME}/ffmpeg \${RELEASE_NAME}/ffprobe /usr/local/bin/
-          rm -rf \${RELEASE_NAME}
+          mv \${RELEASE_NAME}/ffmpeg \${RELEASE_NAME}/ffprobe ~/.local/share/ffmpeg-bin/
+          rm -rf \${RELEASE_NAME} \${RELEASE_NAME}.tar.xz
+
+      # Make sure the cached binaries are available to subsequent steps
+      - name: Add FFmpeg to PATH
+        if: \${{ runner.os == 'Linux' }}
+        run: echo "$HOME/.local/share/ffmpeg-bin" >> $GITHUB_PATH
 
       # You can create an access token at https://gamemaker.io/en/account/access-keys
       # Then, in github, set a Repository Secret named GAMEMAKER_PAT with that value
