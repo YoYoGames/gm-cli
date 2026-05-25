@@ -45,6 +45,7 @@ export async function useGmrt(
     verbose: boolean;
     version?: GmrtVersionRange;
     toolchainOptions: Partial<GmrtToolchainOptions>;
+    config?: string;
   },
   tools: {
     gmpmExecutablePath: string;
@@ -115,9 +116,8 @@ export async function useGmrt(
       // TODO: when should this be different?
       "--launch-type",
       "run",
-      // Always set like this for now
       "--user-config",
-      "Default",
+      options.config ?? "Default",
       "--build-type",
       "Release",
       ...(command.type === "package" && command.outputPath

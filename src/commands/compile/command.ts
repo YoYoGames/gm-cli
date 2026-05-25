@@ -82,6 +82,12 @@ export const compileProjectCommand = buildCommand({
         brief: "Cache directory",
         optional: true,
       },
+      config: {
+        kind: "parsed",
+        parse: String,
+        brief: "GameMaker project config to build with (default: 'Default')",
+        optional: true,
+      },
       toolchainOptions: {
         kind: "parsed",
         parse: String,

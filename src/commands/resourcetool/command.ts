@@ -25,6 +25,12 @@ const commonFlags = {
     brief: "Cache directory",
     optional: true as const,
   },
+  config: {
+    kind: "parsed" as const,
+    parse: String,
+    brief: "GameMaker project config to use (default: 'Default')",
+    optional: true as const,
+  },
 };
 
 const projectParam = {

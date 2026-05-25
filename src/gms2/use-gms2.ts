@@ -47,6 +47,7 @@ export async function useGms2(
     verbose: boolean;
     version?: Gms2VersionPartial;
     toolchainOptions: Partial<Gms2ToolchainOptions>;
+    config?: string;
   },
   tools: {
     igorPath: string;
@@ -154,6 +155,7 @@ export async function useGms2(
           verbose: options.verbose,
           runtime,
           userDir,
+          config: options.config,
         },
         igorAction,
         extraArgs,
@@ -280,6 +282,7 @@ export interface CommonIgorBuildArgs {
   verbose: boolean;
   runtime: "YYC" | "VM";
   userDir?: string;
+  config?: string;
 }
 
 export function constructIgorBuildArgs(
@@ -318,6 +321,7 @@ export function constructIgorBuildArgs(
     commonArgs.projectToolPath,
     "-jsonErrors",
     ...(commonArgs.userDir ? ["-uf", commonArgs.userDir] : []),
+    ...(commonArgs.config ? ["-config", commonArgs.config] : []),
     ...extraArgs,
     "--",
     commonArgs.target,
