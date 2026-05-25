@@ -17,6 +17,7 @@ export default defineConfig({
     options.loader = {
       ...options.loader,
       ".html": "text",
+      ".yml": "text",
     };
   },
 });
