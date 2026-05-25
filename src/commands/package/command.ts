@@ -88,6 +88,12 @@ export const packageCommand = buildCommand({
         brief: "Output file path",
         optional: true,
       },
+      config: {
+        kind: "parsed",
+        parse: String,
+        brief: "GameMaker project config to build with (default: 'Default')",
+        optional: true,
+      },
       toolchainOptions: {
         kind: "parsed",
         parse: String,

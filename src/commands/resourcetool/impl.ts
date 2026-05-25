@@ -29,6 +29,7 @@ import { KnownError } from "~/error";
 
 export interface CommonFlags {
   cacheDir?: string;
+  config?: string;
 }
 
 export async function run(
@@ -83,5 +84,6 @@ export async function run(
     projectPath,
     projectToolPath,
     prefabsFolder: await cache.getSubDirPath(ctx, "prefabs"),
+    config: flags.config,
   });
 }

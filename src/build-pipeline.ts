@@ -50,6 +50,7 @@ export interface CommonCliBuildFlags {
   cacheDir?: string;
   runtime?: "native" | "vm";
   errorsOnly?: boolean;
+  config?: string;
   // See gms2/options.ts or gmrt/options.ts,
   // this is the main place for options that are seldom set manually or toolchain/target specific.
   toolchainOptions?: string;
@@ -188,6 +189,7 @@ export async function runBuildPipeline(
         licenseFile,
         version: toolchain.type === "GMRT" ? toolchain.version : undefined,
         toolchainOptions,
+        config: flags.config,
       },
       {
         gmpmExecutablePath,
@@ -210,6 +212,7 @@ export async function runBuildPipeline(
       licenseFile,
       version: toolchain?.type === "GMS2" ? toolchain.version : undefined,
       toolchainOptions: toolchainOptionsParsed.GMS2 ?? gmOptions?.gms2 ?? {},
+      config: flags.config,
     },
     {
       igorPath,

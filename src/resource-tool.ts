@@ -30,6 +30,7 @@ export interface ResourceToolArgs {
   projectPath?: ProjectPath;
   projectToolPath?: string;
   prefabsFolder?: string;
+  config?: string;
   ignoreStdio?: boolean;
 }
 
@@ -77,6 +78,7 @@ export async function callResourceTool(
     projectPath,
     projectToolPath,
     prefabsFolder,
+    config,
     ignoreStdio,
   }: ResourceToolArgs,
 ): Promise<void> {
@@ -87,6 +89,7 @@ export async function callResourceTool(
     ...(projectPath ? [`projectpath=${projectPath}`] : []),
     ...(projectToolPath ? [`projecttool=${projectToolPath}`] : []),
     ...(prefabsFolder ? [`prefabsfolder=${prefabsFolder}`] : []),
+    ...(config ? [`config=${config}`] : []),
   ];
   const platformSuffix = getPlatformSuffix(ctx);
   const packageName = `@gm-tools/resource-tool-${platformSuffix}@latest`;
