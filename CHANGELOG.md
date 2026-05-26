@@ -1,3 +1,8 @@
+# 2.0.0
+
+- New feature: support for LTS 2026 and Beta feeds for the GMS2 toolchain.
+- This is a major release to ensure everyone without a pinned runtime version get's their cache cleared and downloads the new LTS release.
+
 # 1.4.1
 
 - Fix: Relative project paths are now handled correctly (e.g. `gm-cli run ./some/project.yyp` works as intended)
