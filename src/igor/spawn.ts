@@ -163,9 +163,13 @@ export function fetchLicense(
 // TODO: Alternatively, we could just read the RSS feed ourselves to avoid relying on Igor
 export async function listRuntimes(
   ctx: Context,
-  { igorPath }: { igorPath: string },
+  { igorPath, runtimeUrl }: { igorPath: string; runtimeUrl: string },
 ): Promise<Gms2Version[]> {
-  const output = await execIgor(ctx, igorPath, ["Runtime", "List"]);
+  const output = await execIgor(ctx, igorPath, [
+    "Runtime",
+    "List",
+    `-runtimeUrl=${runtimeUrl}`,
+  ]);
 
   const versions: Gms2Version[] = [];
   for (const match of output.matchAll(
@@ -191,12 +195,14 @@ export function installRuntime(
     runtimeDir,
     licenseFile,
     version,
+    runtimeUrl,
   }: {
     modules?: Module[];
     igorPath: string;
     runtimeDir: string;
     licenseFile: string;
     version?: Gms2Version;
+    runtimeUrl: string;
   },
 ): Promise<void> {
   return spawnIgor(ctx, log, {
@@ -208,6 +214,7 @@ export function installRuntime(
       licenseFile,
       "-rp",
       runtimeDir,
+      `-runtimeUrl=${runtimeUrl}`,
       ...(modules ? ["-m", modules.join(",")] : []),
       ...(version ? [version.join(".")] : []),
     ],

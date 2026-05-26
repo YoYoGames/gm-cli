@@ -150,6 +150,56 @@ async function findRuntimeLocation(
   return ctx.path.join(runtimeDir, candidates[0]!.name);
 }
 
+// Igor's RSS feeds for runtimes. We hard-code these rather than using Igor's
+// defaults because the default points at the discontinued monthlies feed.
+const RUNTIME_FEEDS = {
+  lts2026: {
+    url: "https://gms.yoyogames.com/Zeus-Runtime-LTS2026.rss",
+    label: "LTS 2026",
+  },
+  monthly: {
+    url: "https://gms.yoyogames.com/Zeus-Runtime.rss",
+    label: "Monthly",
+  },
+  beta: {
+    url: "https://gms.yoyogames.com/Zeus-Runtime-NuBeta.rss",
+    label: "Beta",
+  },
+} as const;
+
+// With no version constraint, always pull the latest from LTS2026. With a
+// constraint, try LTS2026 first and then monthly and then
+// fall back to beta.
+async function resolveRuntimeFeed(
+  ctx: Context,
+  { igorPath, version }: { igorPath: string; version?: Gms2VersionPartial },
+): Promise<{ runtimeUrl: string; completeVersion?: Gms2Version }> {
+  if (!version) {
+    return { runtimeUrl: RUNTIME_FEEDS.lts2026.url };
+  }
+
+  const seenVersions: { version: Gms2Version; label: string }[] = [];
+  for (const { url: runtimeUrl, label } of Object.values(RUNTIME_FEEDS)) {
+    const allVersions = await listRuntimes(ctx, { igorPath, runtimeUrl });
+    for (const v of allVersions) {
+      seenVersions.push({ version: v, label });
+    }
+    const completeVersion = allVersions
+      .filter((v) => gms2VersionSatisfies(v, version))
+      .sort((a, b) => gms2VersionCompare(b, a))[0];
+    if (completeVersion) {
+      return { runtimeUrl, completeVersion };
+    }
+  }
+
+  const fullList = seenVersions
+    .map(({ version: v, label }) => `${gms2VersionToString(v)} (${label})`)
+    .join("\n");
+  throw new KnownError(
+    `No runtime version '${gms2VersionToString(version)}' found. Available options:\n${fullList}`,
+  );
+}
+
 export async function installRuntimeIfNeeded(
   ctx: Context,
   log: Log,
@@ -183,27 +233,10 @@ export async function installRuntimeIfNeeded(
   }
 
   // Looks like we need to actually download the runtime!
-
-  // let us start by ensuring the version (if provided) actually exists in Igor's RSS feed
-  let completeVersion: Gms2Version | undefined;
-  if (version) {
-    const allVersions = await listRuntimes(ctx, { igorPath });
-    const suitableVersions = allVersions
-      .filter((availableVersion) =>
-        gms2VersionSatisfies(availableVersion, version),
-      )
-      // Most recent version first
-      .sort((a, b) => gms2VersionCompare(b, a));
-
-    if (suitableVersions.length === 0) {
-      const fullList = allVersions.map(gms2VersionToString).join("\n");
-      throw new KnownError(
-        `No runtime version '${gms2VersionToString(version)}' found. Available options:\n${fullList}`,
-      );
-    }
-
-    completeVersion = suitableVersions[0];
-  }
+  const { runtimeUrl, completeVersion } = await resolveRuntimeFeed(ctx, {
+    igorPath,
+    version,
+  });
 
   // Install into a temporary directory first, then merge into the real
   // runtime dir. This avoids overwriting modules that were already installed
@@ -219,6 +252,7 @@ export async function installRuntimeIfNeeded(
       modules: [target],
       licenseFile,
       version: completeVersion,
+      runtimeUrl,
     });
 
     const tempRuntimeLocation = await findRuntimeLocation(ctx, tempDir);
