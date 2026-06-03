@@ -1,3 +1,7 @@
+# 2.1.0
+
+- New feature: `--config` flag, used to set the project user config.
+
 # 2.0.0
 
 - New feature: support for LTS 2026 and Beta feeds for the GMS2 toolchain.
