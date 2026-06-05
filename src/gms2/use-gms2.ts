@@ -63,9 +63,13 @@ export async function useGms2(
     linux: options.toolchainOptions.linux ?? defaults.linux,
   };
 
-  if (runtime === "YYC" && options.target === "windows") {
+  if (
+    runtime === "YYC" &&
+    options.target === "windows" &&
+    !toolchainOptions.windows.visualStudioSdk
+  ) {
     throw new KnownError(
-      "Support for the native runtime (YYC) is coming soon to GameMaker CLI.",
+      "Building for Windows with YYC requires setting a path to the Visual Studio SDK.\nSet gms2.windows.visualStudioSdk in gm-options.json or --toolchain-options",
     );
   }
 
@@ -255,6 +259,10 @@ async function createLocalSettings(
   if (toolchainOptions.operagx.emscriptenSdk) {
     localSettings["machine.Platform Settings.operagx.sdk_dir"] =
       toolchainOptions.operagx.emscriptenSdk;
+  }
+  if (toolchainOptions.windows.visualStudioSdk) {
+    localSettings["machine.Platform Settings.Windows.visual_studio_path"] =
+      toolchainOptions.windows.visualStudioSdk;
   }
   // add more options here...
 
