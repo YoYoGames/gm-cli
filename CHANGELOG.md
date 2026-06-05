@@ -1,3 +1,7 @@
+# 2.2.0
+
+- New feature: support for building with YYC on Windows. You must specify the 'visualStudioSdk' via `gm-options.json` or `--toolchain-options`. For example in the `gm-options.json` file: `"gms2": { "windows": { "visualStudioSdk": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\Tools\\VsDevCmd.bat"}}`
+
 # 2.1.0
 
 - New feature: `--config` flag, used to set the project user config.
