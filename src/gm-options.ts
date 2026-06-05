@@ -80,6 +80,11 @@ export const gms2Schema = z
     windows: z
       .object({
         packageType: z.enum(["zip", "nsis"]),
+        visualStudioSdk: z
+          .string()
+          .describe(
+            "Path to VsDevCmd.bat, used when building with YYC. For example 'C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\Tools\\VsDevCmd.bat'.",
+          ),
       })
       .partial(),
     mac: z

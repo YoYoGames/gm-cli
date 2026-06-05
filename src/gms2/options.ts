@@ -21,6 +21,7 @@ export interface Gms2ToolchainOptions {
   };
   windows: {
     packageType?: "zip" | "nsis";
+    visualStudioSdk?: string;
   };
   mac: {
     packageType?: "zip" | "dmg";
