@@ -278,6 +278,21 @@ async function createLocalSettings(
   return userDir;
 }
 
+// GMAssetCompiler ignores some project options unless the matching feature flag is on.
+const ASSET_COMPILER_FEATURE_FLAGS = ["strip_unused_assets"];
+
+/**
+ * Igor obfuscates the flag list before passing it as `/ffe=`: the comma
+ * separated list as UTF-8, every byte shifted by 10, then base64.
+ */
+function encodeFeatureFlags(flags: string[]): string {
+  const bytes = Buffer.from(flags.join(","), "utf-8");
+  for (const [i, byte] of bytes.entries()) {
+    bytes[i] = byte + 10;
+  }
+  return bytes.toString("base64");
+}
+
 export interface CommonIgorBuildArgs {
   igorPath: string;
   licenseFile: string;
@@ -327,6 +342,8 @@ export function constructIgorBuildArgs(
     ...(commonArgs.verbose ? ["-v"] : []),
     "-projectool",
     commonArgs.projectToolPath,
+    "-ac",
+    `/ffe=${encodeFeatureFlags(ASSET_COMPILER_FEATURE_FLAGS)}`,
     "-jsonErrors",
     ...(commonArgs.userDir ? ["-uf", commonArgs.userDir] : []),
     ...(commonArgs.config ? ["-config", commonArgs.config] : []),
