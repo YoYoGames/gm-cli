@@ -34,7 +34,7 @@ const GMRT_PLATFORM_SUFFIX_OVERRIDES = {
   linux: { arm64: "linux-x64" as const },
 };
 
-const GMRT_REGISTRY = "http://registry-1328462787.us-west-2.elb.amazonaws.com/";
+const GMRT_REGISTRY = "https://gmrt-gmpm.gamemaker.io";
 
 async function resolveVersion(
   ctx: Context,
