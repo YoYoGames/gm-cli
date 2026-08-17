@@ -97,6 +97,22 @@ export const gms2Schema = z
         packageType: z.enum(["zip", "appimage"]),
       })
       .partial(),
+    android: z
+      .object({
+        packageType: z.enum(["apk", "aab"]),
+        sdkPath: z.string().describe("Path to the Android SDK directory"),
+        ndkPath: z.string().describe("Path to the Android NDK directory"),
+        jdkPath: z.string().describe("Path to the JDK directory"),
+        keystoreFile: z
+          .string()
+          .describe("Path to the keystore file used for signing"),
+        keystorePassword: z.string().describe("Password for the keystore"),
+        keystoreAlias: z.string().describe("Alias of the key in the keystore"),
+        keystoreAliasPassword: z
+          .string()
+          .describe("Password for the keystore alias"),
+      })
+      .partial(),
   })
   .partial();
 
