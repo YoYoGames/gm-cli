@@ -29,6 +29,16 @@ export interface Gms2ToolchainOptions {
   linux: {
     packageType?: "zip" | "appimage";
   };
+  android: {
+    packageType?: "apk" | "aab";
+    sdkPath?: string;
+    ndkPath?: string;
+    jdkPath?: string;
+    keystoreFile?: string;
+    keystorePassword?: string;
+    keystoreAlias?: string;
+    keystoreAliasPassword?: string;
+  };
 }
 
 export function defaultGms2ToolchainOptions(): Gms2ToolchainOptions {
@@ -44,6 +54,9 @@ export function defaultGms2ToolchainOptions(): Gms2ToolchainOptions {
     },
     linux: {
       packageType: "zip",
+    },
+    android: {
+      packageType: "apk",
     },
   };
 }
