@@ -1,3 +1,9 @@
+# 2.3.0
+
+- New feature: support for the Android target. Configure the Android SDK, NDK, JDK, and keystore via `gm-options.json` or `--toolchain-options`. Thanks @BenjaminHalko ([#235](https://github.com/YoYoGames/gm-cli/pull/235))
+- Fix: The "remove unused assets" setting is now respected. Thanks @BenjaminHalko ([#232](https://github.com/YoYoGames/gm-cli/pull/232))
+- Fix: updated the outdated GMRT registry URL. (However, note that there is currently a, temporary, unrelated issue with GMRT 0.21 on MacOS)
+
 # 2.2.0
 
 - New feature: support for building with YYC on Windows. You must specify the 'visualStudioSdk' via `gm-options.json` or `--toolchain-options`. For example in the `gm-options.json` file: `"gms2": { "windows": { "visualStudioSdk": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\Tools\\VsDevCmd.bat"}}`
