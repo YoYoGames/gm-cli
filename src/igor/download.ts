@@ -38,7 +38,7 @@ const IGOR_ZIPS: Record<string, Record<string, string>> = {
   },
 };
 
-const IGOR_PLATFORM_DIRS: Record<string, string> = {
+export const IGOR_PLATFORM_DIRS: Record<string, string> = {
   win32: "windows",
   linux: "linux",
   darwin: "osx",

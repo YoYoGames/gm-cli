@@ -22,7 +22,7 @@ import { stopProcesses } from "~/kill-process";
 import { getProjectName, type ProjectPath } from "~/project";
 import type { Target } from "~/target";
 import type { Gms2VersionPartial } from "~/toolchain";
-import { installRuntimeIfNeeded } from "./install-runtime";
+import { findRuntimeIgor, installRuntimeIfNeeded } from "./install-runtime";
 import {
   defaultGms2ToolchainOptions,
   type Gms2ToolchainOptions,
@@ -93,6 +93,12 @@ export async function useGms2(
     target: options.target,
   });
 
+  // Prefer the Igor that shipped with this runtime over the standalone one we
+  // downloaded to bootstrap: only that pairing is guaranteed to agree on where
+  // the build output belongs. See findRuntimeIgor().
+  const igorPath =
+    (await findRuntimeIgor(ctx, runtimeLocation)) ?? tools.igorPath;
+
   const buildCacheDir = await cache.getSubDirPath(
     ctx,
     `build-gms2-${options.target}-${runtime}`,
@@ -149,12 +155,11 @@ export async function useGms2(
 
   try {
     await spawnIgor(ctx, actionLog, {
-      igorPath: tools.igorPath,
+      igorPath,
       verbose: options.verbose,
       args: constructIgorBuildArgs(
         ctx,
         {
-          igorPath: tools.igorPath,
           licenseFile: options.licenseFile,
           prefabsDir: options.prefabsDir,
           runtimeDir: runtimeLocation,
@@ -369,7 +374,6 @@ function encodeFeatureFlags(flags: string[]): string {
 }
 
 export interface CommonIgorBuildArgs {
-  igorPath: string;
   licenseFile: string;
   prefabsDir: string;
   runtimeDir: string;
