@@ -1,3 +1,8 @@
+# 2.4.0
+
+- Fix: The Igor that comes bundled with a runtime is preferred over GM-CLI's own Igor.
+- New feature: Prefabs downloaded by the GameMaker IDE will be detected.
+
 # 2.3.0
 
 - New feature: support for the Android target. Configure the Android SDK, NDK, JDK, and keystore via `gm-options.json` or `--toolchain-options`. Thanks @BenjaminHalko ([#235](https://github.com/YoYoGames/gm-cli/pull/235))
