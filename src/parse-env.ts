@@ -24,6 +24,7 @@ export interface ParsedEnv {
   NO_COLOR: boolean | undefined;
   CI: boolean | undefined;
   LOCALAPPDATA: string | undefined;
+  PROGRAMDATA: string | undefined;
   XDG_CACHE_HOME: string | undefined;
 }
 
@@ -75,6 +76,7 @@ function parseEnv(rawEnv: NodeJS.ProcessEnv): ParsedEnv {
     NO_COLOR: parse("NO_COLOR", booleanEnvVar),
     CI: parse("CI", booleanEnvVar),
     LOCALAPPDATA: parse("LOCALAPPDATA", z.string()),
+    PROGRAMDATA: parse("PROGRAMDATA", z.string()),
     XDG_CACHE_HOME: parse("XDG_CACHE_HOME", z.string()),
   };
 

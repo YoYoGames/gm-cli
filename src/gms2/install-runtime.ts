@@ -21,6 +21,7 @@ import type { Log } from "~/log";
 import { KnownError } from "~/error";
 import type { Target } from "~/target";
 import {
+  IGOR_PLATFORM_DIRS,
   installRuntime,
   listRuntimes,
   ModuleSchema,
@@ -304,7 +305,10 @@ export async function installRuntimeIfNeeded(
   }
   log.success("Runtime installed");
 
-  runtimeLocation = await findRuntimeLocation(ctx, runtimeDir);
+  // Keep honouring the requested version: without it we'd hand back whatever
+  // runtime in the cache happens to be newest, which is rarely the one we just
+  // installed.
+  runtimeLocation = await findRuntimeLocation(ctx, runtimeDir, version);
   if (!runtimeLocation) {
     throw new Error("Invariant broken: no runtime found after installation");
   }
@@ -324,4 +328,78 @@ export async function getInstalledRuntimeModules(
     .map((key) => ModuleSchema.safeParse(key))
     .filter((result) => result.success)
     .map((result) => result.data);
+}
+
+const MIN_RUNTIME_WITH_USABLE_IGOR: Gms2Version = [2026, 0, 0, 0];
+
+/**
+ * Every runtime ships the Igor that was built alongside it, at
+ * `bin/igor/<platform>/<arch>/Igor`. That copy is the one that agrees with the
+ * runner about where files belong on disk, so it's what we build with.
+ *
+ * The standalone Igor we download to bootstrap (fetch a license, list and
+ * install runtimes) is versioned separately from the runtimes and lags behind
+ * them, which silently breaks targets where Igor does the packaging. For
+ * example on OperaGX, external assets such as `.yytex` texture pages moved into
+ * an `assets` subfolder of the package, and a runner from a runtime newer than
+ * the bootstrap Igor 404s on every one of them.
+ * See https://github.com/YoYoGames/GameMaker-Bugs/issues/15930
+ *
+ * Returns undefined when the runtime has no usable Igor, in which case the
+ * caller should stick with the bootstrap one.
+ */
+export async function findRuntimeIgor(
+  ctx: Context,
+  runtimeLocation: string,
+): Promise<string | undefined> {
+  const runtimeVersion = parseRuntimeVersionFromDirName(
+    ctx.path.basename(runtimeLocation),
+  );
+  // Older runtimes predate the Igor flags we build with (-projectool, -prefabs,
+  // -jsonErrors), so for those the bootstrap Igor really is the better choice.
+  if (
+    runtimeVersion === undefined ||
+    gms2VersionCompare(runtimeVersion, MIN_RUNTIME_WITH_USABLE_IGOR) < 0
+  ) {
+    return undefined;
+  }
+
+  const platform = ctx.process.platform;
+  const platformDir = IGOR_PLATFORM_DIRS[platform] ?? platform;
+  // We use x64 builds on ARM Windows, and fall back to the x64 build under
+  // Rosetta on Apple Silicon, matching downloadIgor().
+  const archDirs =
+    platform === "win32"
+      ? ["x64"]
+      : platform === "darwin"
+        ? [ctx.process.arch, "x64"]
+        : [ctx.process.arch];
+
+  for (const archDir of archDirs) {
+    const igorPath = ctx.path.join(
+      runtimeLocation,
+      "bin",
+      "igor",
+      platformDir,
+      archDir,
+      platform === "win32" ? "Igor.exe" : "Igor",
+    );
+    if (!(await exists(ctx, igorPath))) {
+      continue;
+    }
+    if (platform !== "win32") {
+      // installationFixup() already does this for runtimes we installed
+      // ourselves, but be safe about runtimes left behind by other tools.
+      try {
+        await ctx.fs.chmod(igorPath, 0o755);
+      } catch {
+        // Read-only cache, or someone else owns the file: if it's already
+        // executable the spawn below still works, and if it isn't we'd rather
+        // report the spawn failure than this one.
+      }
+    }
+    return igorPath;
+  }
+
+  return undefined;
 }
