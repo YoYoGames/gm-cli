@@ -99,15 +99,5 @@ The flow:
    npx @gamemaker/gm-cli@latest gxgames publish
    ```
 
-## Near future
-> Note: The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
-
-**Many features are planned to soon be added to `gm-cli`. These include:**
-## More targets
-GameMaker CLI will have support to manage more targets.
-
-### A library to make your own tools
-`gm-cli` will expose its internals as a TypeScript library that you can use to more easily make your own editor tools. 
-
-### Editor integration
-`gm-cli` will support opening projects in the IDE (or your preferred editor) and likely also help you download the IDE itself.
+## Contributing
+The GameMaker CLI is made for the community and we welcome your feedback! Please suggest features or tell us about any issues you are having.
