@@ -243,10 +243,19 @@ export async function installRuntimeIfNeeded(
     return runtimeLocation;
   }
 
+  // If a runtime is already cached but just missing this module, install the
+  // module for that exact cached version. Otherwise we could resolve to a
+  // different "latest" version (e.g. from a different feed) and install the
+  // module there instead, leaving the runtime we actually picked still
+  // missing it.
+  const installVersion: Gms2VersionPartial | undefined = runtimeLocation
+    ? parseRuntimeVersionFromDirName(ctx.path.basename(runtimeLocation))
+    : version;
+
   // Looks like we need to actually download the runtime!
   const { runtimeUrl, completeVersion } = await resolveRuntimeFeed(ctx, {
     igorPath,
-    version,
+    version: installVersion,
   });
 
   // Install into a temporary directory first, then merge into the real
