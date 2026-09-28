@@ -1,3 +1,7 @@
+# 2.4.1
+
+- Fix: When a cached runtime is missing a module, the module is now installed for that exact runtime version instead of resolving to the latest version from the feed. ([#243](https://github.com/YoYoGames/gm-cli/issues/243))
+
 # 2.4.0
 
 - Fix: The Igor that comes bundled with a runtime is preferred over GM-CLI's own Igor.
