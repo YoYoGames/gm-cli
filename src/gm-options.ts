@@ -217,7 +217,7 @@ export async function readGmOptions(
     gmOptions = parseResults.options;
   } else {
     throw new KnownError(
-      "Failed to parse 'gm-options.json file. Errors:\n{parseResults.error}",
+      `Failed to parse 'gm-options.json file. Errors:\n${parseResults.error}`,
     );
   }
 
