@@ -17,4 +17,7 @@
 import { run } from "@stricli/core";
 import { buildContext } from "~/context";
 import { app } from "~/app";
-await run(app, process.argv.slice(2), buildContext(process));
+const plainOutput = process.argv.includes("--plain-output");
+const inputs = process.argv.slice(2).filter((arg) => arg !== "--plain-output");
+
+await run(app, inputs, buildContext(process, plainOutput));

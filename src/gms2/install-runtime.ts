@@ -233,10 +233,22 @@ export async function installRuntimeIfNeeded(
   });
   let runtimeLocation = await findRuntimeLocation(ctx, runtimeDir, version);
 
-  // FIXME: if this fails, we should delete the runtime dir and try again
-  const installedModules = runtimeLocation
-    ? await getInstalledRuntimeModules(ctx, runtimeLocation)
-    : [];
+  // A runtime directory can be left behind by an interrupted or failed
+  // installation. In that case receipt.json may be missing or corrupt.
+  // Treat the cached runtime as invalid and reinstall it instead of failing
+  // every subsequent build.
+  let installedModules: Module[] = [];
+  if (runtimeLocation) {
+    try {
+      installedModules = await getInstalledRuntimeModules(ctx, runtimeLocation);
+    } catch {
+      log.message(
+        `Cached runtime at '${runtimeLocation}' is invalid; reinstalling...`,
+      );
+      await ctx.fs.rm(runtimeLocation, { recursive: true, force: true });
+      runtimeLocation = undefined;
+    }
+  }
 
   if (runtimeLocation && installedModules.includes(target)) {
     log.success("Runtime found");

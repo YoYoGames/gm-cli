@@ -34,7 +34,7 @@ export interface Context extends CommandContext {
   readonly fetch: typeof globalThis.fetch;
   readonly open: typeof open;
   readonly http: typeof http;
-  readonly makeTaskLogger: TaskLogger;
+  makeTaskLogger: TaskLogger;
   readonly env: ParsedEnv;
 }
 
@@ -50,7 +50,10 @@ export async function exists(
   }
 }
 
-export function buildContext(process: NodeJS.Process): Context {
+export function buildContext(
+  process: NodeJS.Process,
+  plainOutput = false,
+): Context {
   const env = getParsedEnv();
   return {
     process,
@@ -63,6 +66,8 @@ export function buildContext(process: NodeJS.Process): Context {
     path,
     fetch,
     makeTaskLogger:
-      env.NO_COLOR === true ? plainTaskLogger() : fancyTaskLogger(),
+      plainOutput || env.NO_COLOR === true
+        ? plainTaskLogger()
+        : fancyTaskLogger(),
   };
 }
