@@ -17,7 +17,7 @@
     "gm-cli": "dist/cli.js"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "prebuild": "tsc -p tsconfig.json",
