@@ -33,9 +33,18 @@ const commonFlags = {
   },
   resourceToolVersion: {
     kind: "parsed" as const,
-    parse: String,
+    // Exact versions and dist-tags only: on Windows npx runs through cmd.exe, where ranges like
+    // ">=2026.0.17" or "^2026.0" are mangled (">" redirects, "^" escapes).
+    parse: (value: string) => {
+      if (!/^[A-Za-z0-9._-]+$/.test(value)) {
+        throw new Error(
+          `Expected an exact version or dist-tag (e.g. 2026.0.17 or latest), got '${value}'`,
+        );
+      }
+      return value;
+    },
     brief:
-      "ResourceTool version to use, e.g. 2026.0.17 (default: 'latest'). Pin it to match your IDE release",
+      "Exact ResourceTool version or dist-tag, e.g. 2026.0.17 (default: 'latest'). Pin it to match your IDE release",
     optional: true as const,
   },
 };
