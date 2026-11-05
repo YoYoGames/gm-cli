@@ -49,6 +49,8 @@ Use `gm-cli resourcetool` to programmatically make changes to your project files
 gm-cli resourcetool eval "resource list"
 ```
 There are many ways of using ResourceTool, the most convenient is with an AI agent using the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) `gm-cli resourcetool mcp`. But you can also use it yourself in interactive session `gm-cli resourcetool repl` or as a script. 
+
+ResourceTool saves the project with its own resource record versions. If a newer ResourceTool upgrades files your IDE can no longer open, pin a version that matches your IDE with `--resource-tool-version`, for example `gm-cli resourcetool mcp --resource-tool-version=2026.0.17`.
 ### Signing-in
 GameMaker CLI automatically gives you a guest license, so there is no need to sign in. But if you prefer to use your own access key from https://gamemaker.io/en/account/access-keys. You may run:
 ```

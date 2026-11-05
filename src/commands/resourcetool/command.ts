@@ -31,6 +31,13 @@ const commonFlags = {
     brief: "GameMaker project config to use (default: 'Default')",
     optional: true as const,
   },
+  resourceToolVersion: {
+    kind: "parsed" as const,
+    parse: String,
+    brief:
+      "ResourceTool version to use, e.g. 2026.0.17 (default: 'latest'). Pin it to match your IDE release",
+    optional: true as const,
+  },
 };
 
 const projectParam = {
