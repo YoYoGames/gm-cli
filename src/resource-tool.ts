@@ -32,6 +32,8 @@ export interface ResourceToolArgs {
   prefabsFolder?: string;
   config?: string;
   ignoreStdio?: boolean;
+  /** npm version or dist-tag of the ResourceTool package (default: "latest") */
+  version?: string;
 }
 
 function splitCommand(input: string): string[] {
@@ -80,6 +82,7 @@ export async function callResourceTool(
     prefabsFolder,
     config,
     ignoreStdio,
+    version = "latest",
   }: ResourceToolArgs,
 ): Promise<void> {
   const command = modeToArgs(run);
@@ -92,7 +95,7 @@ export async function callResourceTool(
     ...(config ? [`config=${config}`] : []),
   ];
   const platformSuffix = getPlatformSuffix(ctx);
-  const packageName = `@gm-tools/resource-tool-${platformSuffix}@latest`;
+  const packageName = `@gm-tools/resource-tool-${platformSuffix}@${version}`;
   try {
     await npmExec(ctx, {
       packageName,

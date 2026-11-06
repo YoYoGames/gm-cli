@@ -31,6 +31,22 @@ const commonFlags = {
     brief: "GameMaker project config to use (default: 'Default')",
     optional: true as const,
   },
+  resourceToolVersion: {
+    kind: "parsed" as const,
+    // Exact versions and dist-tags only: on Windows npx runs through cmd.exe, where ranges like
+    // ">=2026.0.17" or "^2026.0" are mangled (">" redirects, "^" escapes).
+    parse: (value: string) => {
+      if (!/^[A-Za-z0-9._-]+$/.test(value)) {
+        throw new Error(
+          `Expected an exact version or dist-tag (e.g. 2026.0.17 or latest), got '${value}'`,
+        );
+      }
+      return value;
+    },
+    brief:
+      "Exact ResourceTool version or dist-tag, e.g. 2026.0.17 (default: 'latest'). Pin it to match your IDE release",
+    optional: true as const,
+  },
 };
 
 const projectParam = {
