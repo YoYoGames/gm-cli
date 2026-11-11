@@ -144,6 +144,16 @@ export async function useGms2(
     );
     igorAction = action;
     extraArgs = ["-tf", targetFile, ...packageArgs];
+
+    // Igor uses the build cache output directory for intermediate package files.
+    // Clear those intermediates before every package operation so a previous
+    // package with a different output name cannot leave a file that Igor tries
+    // to move again. See https://github.com/YoYoGames/gm-cli/issues/243.
+    await ctx.fs.rm(ctx.path.join(buildCacheDir, "output"), {
+      recursive: true,
+      force: true,
+    });
+
     successMessage = `Package created: ${targetFile}`;
   }
 
