@@ -1,3 +1,7 @@
+# Unreleased
+
+- Change: The minimum supported Node.js version is now 22.13.0 (previously 24). ([#222](https://github.com/YoYoGames/gm-cli/issues/222))
+
 # 2.4.1
 
 - Fix: When a cached runtime is missing a module, the module is now installed for that exact runtime version instead of resolving to the latest version from the feed. ([#243](https://github.com/YoYoGames/gm-cli/issues/243))

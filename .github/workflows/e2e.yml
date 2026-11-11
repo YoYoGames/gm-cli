@@ -22,6 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        node-version: ["22.13.0", "24"]
+        runner: [macos-latest, ubuntu-latest, windows-latest]
         include:
           - runner: macos-latest
             shell: bash
@@ -48,7 +50,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: ${{ matrix.node-version }}
           cache-dependency-path: "./pnpm-lock.yaml"
           cache: "pnpm"
 
