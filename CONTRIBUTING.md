@@ -6,6 +6,8 @@ pnpm build
 pnpm link
 ```
 
+GM-CLI supports Node.js 22.13.0 and later. Note that `pnpm gen:ggbe-api` runs a TypeScript file directly, which requires Node.js 22.18.0+ (or `--experimental-strip-types` on older 22.x releases).
+
 ## Versioning policy
 
 GM-CLI uses [semantic versioning](https://semver.org), i.e. `MAJOR.MINOR.PATCH`. The public API surface consists of,
